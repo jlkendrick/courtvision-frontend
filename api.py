@@ -23,6 +23,7 @@ class PlayerModelResponse(BaseModel):
     avg_points: float
     team: str
     injury_status: str
+    valid_positions: list[str]
 
 # Returns important data for players on a team
 @app.post("/get_roster_data/")
@@ -33,7 +34,8 @@ async def get_team_data(req: TeamDataRequest):
     return [PlayerModelResponse(name=player.name, 
                                 avg_points=player.avg_points,
                                 team=player.proTeam,
-                                injury_status=player.injuryStatus
+                                injury_status=player.injuryStatus,
+                                valid_positions=player.eligibleSlots
                                 ) for player in roster]
 
 # Returns important data for free agents in a league
@@ -45,7 +47,8 @@ async def get_free_agents(req: TeamDataRequest):
     return [PlayerModelResponse(name=player.name, 
                                 avg_points=player.avg_points,
                                 team=player.proTeam,
-                                injury_status=player.injuryStatus
+                                injury_status=player.injuryStatus,
+                                valid_positions=player.eligibleSlots
                                 ) for player in free_agents]
 
 # my_team = league.teams[0]
