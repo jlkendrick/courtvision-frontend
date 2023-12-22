@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"os"
 	"net/http"
 	"sync"
 )
@@ -33,9 +34,45 @@ type InnerPlayerMap struct {
 	ValidPositions  []string
 }
 
+// Structs for JSON schedule file that is used to get days a player is playing
+type GameDates struct {
+	Date []string `json:"date"`
+}
+
+type GameSchedule struct {
+	EndDate string                `json:"endDate"`
+	Games   map[string]GameDates  `json:"games"`
+}
+
+type ScheduleMap map[string]GameSchedule
 
 
 func main() {
+
+	json_scheule_path := "static/schedule.json"
+
+	// Load JSON schedule file
+	json_schedule, err := os.Open(json_scheule_path)
+	if err != nil {
+		fmt.Println("Error:", err)
+	}
+	defer json_schedule.Close()
+
+	// Map of matchup # to end date and game dates for each team
+	var schedule_map ScheduleMap
+
+	// Read the contents of the json_schedule file
+	jsonBytes, err := io.ReadAll(json_schedule)
+	if err != nil {
+		fmt.Println("Error:", err)
+	}
+
+	// Unmarshal the JSON data into schedule_map
+	err = json.Unmarshal(jsonBytes, &schedule_map)
+	if err != nil {
+		fmt.Println("Error:", err)
+	}
+
 
 	// List of URLs to send POST requests to
 	urls := []string{
