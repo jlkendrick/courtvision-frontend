@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"sync"
 )
 
 // Struct for how necessary variables are passed to API
@@ -35,13 +36,41 @@ type InnerPlayerMap struct {
 
 
 func main() {
-	roster := get_roster_data(424233486, "James's Scary Team", 2024)
-	roster_map := players_to_map(roster)
+
+	// List of URLs to send POST requests to
+	urls := []string{
+		"http://127.0.0.1:8000/get_roster_data/",
+		"http://127.0.0.1:8000/get_free_agents/",
+	}
+
+	// Response channel to receive responses from goroutines
+	response_chan := make(chan []Player, len(urls))
+
+	// WaitGroup to wait for all goroutines to finish
+	var wg sync.WaitGroup
+
+	// Launch goroutine for each URL
+	for _, url := range urls {
+		wg.Add(1)
+		go get_roster_data(url, 424233486, "James's Scary Team", 2024, response_chan, &wg)
+	}
+
+	// Wait for all goroutines to finish
+	wg.Wait()
+
+	// Close response channel
+	close(response_chan)
+
+	roster_map := players_to_map(<-response_chan)
+	free_agent_map := players_to_map(<-response_chan)
+	
 	fmt.Println(roster_map["Anfernee Simons"].AvgPoints)
+	fmt.Println(free_agent_map["Jalen Green"].AvgPoints)
 }
 
 // Function to get roster data (list of Players) from API
-func get_roster_data(league_id int, team_name string, year int) []Player {
+func get_roster_data(api_url string, league_id int, team_name string, year int, ch chan<-[]Player, wg *sync.WaitGroup) {
+	defer wg.Done()
 
 	// Create roster_meta struct
 	roster_meta := RosterMeta{LeagueId: league_id, TeamName: team_name, Year: year}
@@ -50,16 +79,12 @@ func get_roster_data(league_id int, team_name string, year int) []Player {
 	json_roster_meta, err := json.Marshal(roster_meta)
 	if err != nil {
 		fmt.Println("Error", err)
-		return nil
 	}
-
-	api_url := "http://127.0.0.1:8000/get_roster_data/"
 
 	// Send POST request to API
 	response, err := http.Post(api_url, "application/json", bytes.NewBuffer(json_roster_meta))
 	if err != nil {
 		fmt.Println("Error", err)
-		return nil
 	}
 	defer response.Body.Close()
 
@@ -70,20 +95,17 @@ func get_roster_data(league_id int, team_name string, year int) []Player {
 		body, err := io.ReadAll(response.Body)
 		if err != nil {
 			fmt.Println("Error:", err)
-			return nil
 		}
 
 		err = json.Unmarshal(body, &players)
 		if err != nil {
 			fmt.Println("Error decoding JSON:", err)
-			return nil
 		}
 	} else {
 		fmt.Println("Error: Unexpected status code", response.StatusCode)
-		return nil
 	}
 
-	return players
+	ch <- players
 }
 
 // Function to convert players slice to map
