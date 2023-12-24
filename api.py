@@ -39,7 +39,7 @@ async def get_team_data(req: TeamDataRequest):
                                 ) for player in roster]
 
 # Returns important data for free agents in a league
-@app.post("/get_free_agents/")
+@app.post("/get_freeagent_data/")
 async def get_free_agents(req: TeamDataRequest):
     league = League(req.league_id, req.year)
     free_agents = league.free_agents()
