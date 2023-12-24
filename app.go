@@ -1,24 +1,26 @@
 package main
 
 import (
-	"encoding/json"
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"io"
-	"os"
 	"net/http"
+	"os"
 	"sync"
 )
 
 // Struct to keep track of the order of the responses
 type Response struct {
-	Index int
+	Index   int
 	Players []Player
 }
 
 // Struct for how necessary variables are passed to API
 type RosterMeta struct {
 	LeagueId int    `json:"league_id"`
+	EspnS2   string `json:"espn_s2"`
+	Swid     string `json:"swid"`
 	TeamName string `json:"team_name"`
 	Year     int    `json:"year"`
 }
@@ -49,7 +51,8 @@ type GameSchedule struct {
 
 func main() {
 
-	speed_test()
+	// Run speed test
+	// speed_test()
 
 	json_scheule_path := "static/schedule.json"
 
@@ -89,9 +92,16 @@ func main() {
 	var wg sync.WaitGroup
 
 	// Launch goroutine for each URL
+	// espn_s2 := "AECHx26irdFs2JD7wAboBU4MVaRiPftjipvFFGqN5TGOn7bI7hJysWd42Wm7kndmWu0wV99ZAVXNQNz5TS8%2FEZqvgdGEkanYbHAFMvBmSaxclakoBO7N5dLmMfOl3r%2FbwHRsAwfOlCTl8uUiDcD33j%2Fi%2BwkU1o03iit9gvdS44u4sgzFABVfEyhlVzc2J0wKS7qwYD%2BeIUXow5PboT6azWpfUKEcnhdfAzPfx1JuHmcjULsbf4385ZEUVBackpHFskc4CXoJL3PapPaiqRYOXvzJKMEalCSvn9UsHLsCQgb5VYVxCAsDGh3eAqFRKRVECIbX0PR9V%2BlG6iLskrcHcnnB"
+	// swid := "{BC1331CC-B20C-45FD-80F9-D5A0572D04EF}"
+	espn_s2 := ""
+	swid := ""
+	league_id := 424233486
+	team_name := "James's Scary Team"
+	year := 2024
 	for i, url := range urls {
 		wg.Add(1)
-		go get_data(i, url, 424233486, "James's Scary Team", 2024, response_chan, &wg)
+		go get_data(i, url, league_id, espn_s2, swid, team_name, year, response_chan, &wg)
 	}
 
 	// Wait for all goroutines to finish then close the response channel
@@ -111,17 +121,21 @@ func main() {
 	// Create roster_map and free_agent_map from responses
 	roster_map := players_to_map(responses[0])
 	free_agent_map := players_to_map(responses[1])
-	
-	fmt.Println(roster_map["Anfernee Simons"].AvgPoints)
-	fmt.Println(free_agent_map["Markelle Fultz"].AvgPoints)
+
+	fmt.Println(roster_map)
+	fmt.Println(free_agent_map)
 }
 
 // Function to get team/league data (list of Players) from API
-func get_data(index int, api_url string, league_id int, team_name string, year int, ch chan<-Response, wg *sync.WaitGroup) {
+func get_data(index int, api_url string, league_id int, espn_s2 string, swid string, team_name string, year int, ch chan<-Response, wg *sync.WaitGroup) {
 	defer wg.Done()
 
 	// Create roster_meta struct
-	roster_meta := RosterMeta{LeagueId: league_id, TeamName: team_name, Year: year}
+	roster_meta := RosterMeta{LeagueId: league_id, 
+							  EspnS2: espn_s2,
+							  Swid: swid,
+							  TeamName: team_name, 
+							  Year: year}
 
 	// Convert roster_meta to JSON
 	json_roster_meta, err := json.Marshal(roster_meta)
@@ -150,7 +164,7 @@ func get_data(index int, api_url string, league_id int, team_name string, year i
 			fmt.Println("Error decoding json response into player list:", err)
 		}
 	} else {
-		fmt.Println("Error: Unexpected status code", response.StatusCode)
+		fmt.Println("Error:", response.StatusCode)
 	}
 
 	ch <- Response{Index: index, Players: players}
@@ -176,3 +190,5 @@ func players_to_map(players []Player) map[string]InnerPlayerMap {
 
 	return player_map
 }
+
+// Function to 

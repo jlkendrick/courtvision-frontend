@@ -14,6 +14,8 @@ app = FastAPI()
 # Defines the request body
 class TeamDataRequest(BaseModel):
     league_id: int
+    espn_s2: str | None
+    swid: str | None
     team_name: str
     year: int
 
@@ -28,7 +30,10 @@ class PlayerModelResponse(BaseModel):
 # Returns important data for players on a team
 @app.post("/get_roster_data/")
 async def get_team_data(req: TeamDataRequest):
-    league = League(req.league_id, req.year)
+    league = League(req.league_id, 
+                    req.year, 
+                    espn_s2=req.espn_s2 if req.espn_s2 else None, 
+                    swid=req.swid if req.swid else None)
     team = find_team(req.team_name, league.teams)
     roster = team.roster
     return [PlayerModelResponse(name=player.name, 
@@ -41,28 +46,14 @@ async def get_team_data(req: TeamDataRequest):
 # Returns important data for free agents in a league
 @app.post("/get_freeagent_data/")
 async def get_free_agents(req: TeamDataRequest):
-    league = League(req.league_id, req.year)
+    league = League(req.league_id, 
+                    req.year, 
+                    espn_s2=req.espn_s2 if req.espn_s2 else None, 
+                    swid=req.swid if req.swid else None)
     free_agents = league.free_agents()
-# TODO: Filter out players below a certain threshold on avg_points basis
     return [PlayerModelResponse(name=player.name, 
                                 avg_points=player.avg_points,
                                 team=player.proTeam,
                                 injury_status=player.injuryStatus,
                                 valid_positions=player.eligibleSlots
-                                ) for player in free_agents]
-
-# my_team = league.teams[0]
-# my_roster = my_team.roster
-# my_player = my_roster[1]
-
-# print(my_player.name)
-# print(my_player.proTeam)
-# print(my_player.avg_points)
-# print(my_player.injuryStatus)
-# print(my_player.eligibleSlots)
-
-# free_agents = league.free_agents()
-
-# for player in free_agents[:5]:
-#     stats = player.stats
-#     print(player.avg_points)
+                                ) for player in free_agents if player.avg_points > 15.0]
