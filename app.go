@@ -1,13 +1,13 @@
 package main
 
 import (
-	"bytes"
-	"encoding/json"
-	"fmt"
-	"io"
-	"net/http"
 	"os"
+	"io"
+	"fmt"
 	"sync"
+	"bytes"
+	"net/http"
+	"encoding/json"
 )
 
 // Struct to keep track of the order of the responses
@@ -40,13 +40,18 @@ type InnerPlayerMap struct {
 	Team 	  	    string
 	InjuryStatus	string
 	ValidPositions  []string
+	Schedule 	    []int
 }
 
 // Struct for JSON schedule file that is used to get days a player is playing
 type GameSchedule struct {
+	StartDate string              `json:"startDate"`
 	EndDate string                `json:"endDate"`
-	Games   map[string][]string   `json:"games"`
+	Games   map[string][]int      `json:"games"`
 }
+
+// Global variable to keep track of the schedule
+var schedule_map map[string]GameSchedule
 
 
 func main() {
@@ -62,9 +67,6 @@ func main() {
 		fmt.Println("Error opening json schedule:", err)
 	}
 	defer json_schedule.Close()
-
-	// Map of matchup # to end date and game dates for each team
-	var schedule_map map[string]GameSchedule
 
 	// Read the contents of the json_schedule file
 	jsonBytes, err := io.ReadAll(json_schedule)
@@ -119,12 +121,13 @@ func main() {
 	}
 
 	// Create roster_map and free_agent_map from responses
-	roster_map := players_to_map(responses[0])
-	free_agent_map := players_to_map(responses[1])
+	roster_map := players_to_map(responses[0], "9")
+	free_agent_map := players_to_map(responses[1], "9")
 
-	fmt.Println(roster_map)
-	fmt.Println(free_agent_map)
+	fmt.Println(roster_map["Chet Holmgren"].Schedule)
+	fmt.Println(free_agent_map["Jakob Poeltl"].Schedule)
 }
+
 
 // Function to get team/league data (list of Players) from API
 func get_data(index int, api_url string, league_id int, espn_s2 string, swid string, team_name string, year int, ch chan<-Response, wg *sync.WaitGroup) {
@@ -170,25 +173,32 @@ func get_data(index int, api_url string, league_id int, espn_s2 string, swid str
 	ch <- Response{Index: index, Players: players}
 }
 
+
 // Function to convert players slice to map
-func players_to_map(players []Player) map[string]InnerPlayerMap {
+func players_to_map(players []Player, week string) map[string]InnerPlayerMap {
 
 	player_map := make(map[string]InnerPlayerMap)
+
+	game_cache := make(map[string][]int)
 
 	// Convert players slice to map
 	for _, player := range players {
 
-		innerPlayer := InnerPlayerMap{
+		// Check if team is already in the map, if not get the schedule
+		_, in_cache := player_map[player.Name]
+		if !in_cache {
+			game_cache[player.Team] = schedule_map[week].Games[player.Team]
+		}
+
+		// Add player to map
+		player_map[player.Name] = InnerPlayerMap{
 			AvgPoints:       player.AvgPoints,
 			Team: 		     player.Team,
 			InjuryStatus:    player.InjuryStatus,
 			ValidPositions:  player.ValidPositions,
+			Schedule:        game_cache[player.Team],
 		}
-
-		player_map[player.Name] = innerPlayer
 	}
 
 	return player_map
 }
-
-// Function to 
