@@ -36,11 +36,12 @@ async def get_team_data(req: TeamDataRequest):
                     swid=req.swid if req.swid else None)
     team = find_team(req.team_name, league.teams)
     roster = team.roster
-    return [PlayerModelResponse(name=player.name, 
+    values_to_keep = {"PG", "SG", "SF", "PF", "C", "G", "F", "UT", "BE"}
+    return [PlayerModelResponse(name=player.name,
                                 avg_points=player.avg_points,
                                 team=player.proTeam,
                                 injury_status=player.injuryStatus,
-                                valid_positions=player.eligibleSlots
+                                valid_positions=([pos for pos in player.eligibleSlots if pos in values_to_keep] + ["IR"]) if player.injuryStatus == "OUT" else [pos for pos in player.eligibleSlots if pos in values_to_keep]
                                 ) for player in roster]
 
 # Returns important data for free agents in a league
@@ -51,9 +52,10 @@ async def get_free_agents(req: TeamDataRequest):
                     espn_s2=req.espn_s2 if req.espn_s2 else None, 
                     swid=req.swid if req.swid else None)
     free_agents = league.free_agents()
-    return [PlayerModelResponse(name=player.name, 
+    values_to_keep = {"PG", "SG", "SF", "PF", "C", "G", "F", "UT", "BE"}
+    return [PlayerModelResponse(name=player.name,
                                 avg_points=player.avg_points,
                                 team=player.proTeam,
                                 injury_status=player.injuryStatus,
-                                valid_positions=player.eligibleSlots
+                                valid_positions=([pos for pos in player.eligibleSlots if pos in values_to_keep] + ["IR"]) if player.injuryStatus == "OUT" else [pos for pos in player.eligibleSlots if pos in values_to_keep]
                                 ) for player in free_agents if player.avg_points > 15.0]

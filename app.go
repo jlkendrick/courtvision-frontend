@@ -124,8 +124,8 @@ func main() {
 	roster_map := players_to_map(responses[0], "9")
 	free_agent_map := players_to_map(responses[1], "9")
 
-	fmt.Println(roster_map["Chet Holmgren"].Schedule)
-	fmt.Println(free_agent_map["Jakob Poeltl"].Schedule)
+	fmt.Println(roster_map["Darius Garland"].ValidPositions)
+	fmt.Println(free_agent_map["Jalen Green"].ValidPositions)
 }
 
 
