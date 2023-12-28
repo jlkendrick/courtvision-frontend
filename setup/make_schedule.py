@@ -20,19 +20,23 @@ for week in weeks[:-1]:
         passed = True
         continue
     if passed:
-        orig_start_date = datetime.strptime(week["startDate"], "%Y-%m-%dT%H:%M:%SZ")
+        orig_start_date = datetime.strptime("2024-02-12T00:00:00Z", "%Y-%m-%dT%H:%M:%SZ") if cur_week == 18 else datetime.strptime(week["startDate"], "%Y-%m-%dT%H:%M:%SZ")
         new_start_date = orig_start_date.strftime("%m/%d/%Y")
         orig_end_date = datetime.strptime(week["endDate"], "%Y-%m-%dT%H:%M:%SZ")
         new_end_date = orig_end_date.strftime("%m/%d/%Y")
+        game_span = (orig_end_date - orig_start_date).days
         schedule[cur_week - 1] = {"startDate": new_start_date,
-                                  "endDate": new_end_date}
+                                  "endDate": new_end_date,
+                                  "gameSpan": game_span}
     else:
         orig_start_date = datetime.strptime(week["startDate"], "%Y-%m-%dT%H:%M:%SZ")
         new_start_date = orig_start_date.strftime("%m/%d/%Y")
         orig_end_date = datetime.strptime(week["endDate"], "%Y-%m-%dT%H:%M:%SZ")
         new_end_date = orig_end_date.strftime("%m/%d/%Y")
+        game_span = (orig_end_date - orig_start_date).days
         schedule[cur_week] = {"startDate": new_start_date,
-                              "endDate": new_end_date}
+                              "endDate": new_end_date,
+                              "gameSpan": game_span}
 
 
 season_start = datetime.strptime("10/24/2023", "%m/%d/%Y")

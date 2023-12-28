@@ -39,7 +39,7 @@ async def get_team_data(req: TeamDataRequest):
     values_to_keep = {"PG", "SG", "SF", "PF", "C", "G", "F", "UT", "BE"}
     return [PlayerModelResponse(name=player.name,
                                 avg_points=player.avg_points,
-                                team=player.proTeam,
+                                team=player.proTeam if player.proTeam != "PHL" else "PHI",
                                 injury_status=player.injuryStatus,
                                 valid_positions=([pos for pos in player.eligibleSlots if pos in values_to_keep] + ["IR"]) if player.injuryStatus == "OUT" else [pos for pos in player.eligibleSlots if pos in values_to_keep]
                                 ) for player in roster]
