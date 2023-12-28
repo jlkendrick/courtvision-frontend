@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"sort"
 	"sync"
+	"time"
 	"bytes"
 	"reflect"
 	"net/http"
@@ -109,7 +110,7 @@ func main() {
 	espn_s2 := ""
 	swid := ""
 	league_id := 424233486
-	team_name := "James's Scary Team"
+	team_name := "Flyjoe2k"
 	year := 2024
 	for i, url := range urls {
 		wg.Add(1)
@@ -208,7 +209,7 @@ func find_available_slots_and_players(roster_map map[string]Player, week string)
 	var sorted_good_players []Player
 	var streamable_players []Player
 	for _, player := range roster_map {
-		if player.AvgPoints > 30 {
+		if player.AvgPoints > 25 {
 			sorted_good_players = append(sorted_good_players, player)
 		} else {
 			streamable_players = append(streamable_players, player)
@@ -220,13 +221,26 @@ func find_available_slots_and_players(roster_map map[string]Player, week string)
 		return sorted_good_players[1].AvgPoints > sorted_good_players[j].AvgPoints
 	})
 
+	var ir_spot Player
+
+	// Abstract out IR spot
+	for i, player := range sorted_good_players {
+		if player.InjuryStatus == "OUT" {
+			ir_spot = player
+			// Remove player from sorted_good_players
+			sorted_good_players = append(sorted_good_players[:i], sorted_good_players[i+1:]...)
+			break
+		}
+	}
+
 	return_table := make(map[int][1]map[string]string)
 
 	// Fill return table
 	// for i := 0; i <= schedule_map[week].GameSpan; i++ {
-	fmt.Println("Sorted good players:", sorted_good_players)
 	return_table[4] = get_available_slots(sorted_good_players, 4, week)
-	
+	// }
+	// TODO: Do something with IR spot
+	fmt.Println("IR spot:", ir_spot)
 
 	return return_table
 }
@@ -234,9 +248,9 @@ func find_available_slots_and_players(roster_map map[string]Player, week string)
 // Function to get available slots for a given day
 func get_available_slots(players []Player, day int, week string) [1]map[string]string {
 
-	// Priority order of most restrictive positions
-	position_order := []string{"IR", "PG", "SG", "SF", "PF", "C", "G", "F", "UT", "UT", "UT", "BE", "BE", "BE"}
-	// reversed_position_order := []string{"IR", "BE", "F", "G", "C", "PF", "SF", "SG", "PG", "UTIL"}
+	// Priority order of most restrictive positions to funnel streamers into flexible positions
+	position_order := []string{"PG", "SG", "SF", "PF", "C", "G", "F", "UT1", "UT2", "UT3", "BE1", "BE2", "BE3"}
+	// inverse_position_order := []string{"BE1", "BE2", "BE3", "C", "PF", "SF", "SG", "PG", "G", "F", "UT1", "UT2", "UT3"}
 	
 	var playing []Player
 	var not_playing []Player
@@ -254,12 +268,8 @@ func get_available_slots(players []Player, day int, week string) [1]map[string]s
 		}
 	}
 
-	// fmt.Println("-------")
-	// fmt.Println("Playing:", playing)
-	// fmt.Println("Not playing:", not_playing)
-
 	// Response channel to receive responses from goroutines
-	response_chan := make(chan PositionsResponse, 2)
+	response_chan := make(chan PositionsResponse, 1)
 
 	// WaitGroup to wait for all goroutines to finish
 	var wg sync.WaitGroup
@@ -281,9 +291,14 @@ func get_available_slots(players []Player, day int, week string) [1]map[string]s
 			MaxScore: max_score, 
 			EarlyExit: false,
 		}
+
+		start := time.Now()
 		
 		// Recursive function call
 		fit_players(playing, true, make(map[string]string), position_order, context, 0)
+
+		elapsed := time.Since(start)
+		fmt.Println("Time elapsed:", elapsed)
 
 		response_chan <- PositionsResponse{0, context.BestLineup}
 
@@ -323,15 +338,21 @@ func get_available_slots(players []Player, day int, week string) [1]map[string]s
 
 // Recursive backtracking function to find most restrictive positions for players
 func fit_players(players []Player, playing bool, cur_lineup map[string]string, position_order []string, ctx *FitPlayersContext, index int) {
+	fmt.Println("Remaining players:", players)
+	fmt.Println()
+	fmt.Println("Current lineup:", cur_lineup)
+	fmt.Println()
 
 	// If we have found a lineup that has the max score, we can send returns to all other recursive calls
 	if ctx.EarlyExit {
 		return
 	}
 	
-	// If we have given all players positions, check if the current lineup is better than the best lineup
+	// If all players have been given positions, check if the current lineup is better than the best lineup
 	if len(players) == 0 {
 		score := score_roster(cur_lineup, playing)
+		fmt.Println("Score:", score)
+		fmt.Println("Max score:", ctx.MaxScore)
 		if score > ctx.TopScore {
 			ctx.TopScore = score
 			ctx.BestLineup = make(map[string]string)
@@ -347,6 +368,8 @@ func fit_players(players []Player, playing bool, cur_lineup map[string]string, p
 
 	// If we have not gone through all players, try to fit the rest of the players in the lineup
 	position := position_order[index]
+	fmt.Println("Position:", position)
+	fmt.Println("--------------------")
 	found_player := false
 	for _, player := range players {
 		if contains(player.ValidPositions, position) {
@@ -378,16 +401,17 @@ func fit_players(players []Player, playing bool, cur_lineup map[string]string, p
 func score_roster(roster map[string]string, playing bool) int {
 
 	// Scoring system
-	scoring_groups := [][]string{{"PG", "SG", "SF", "PF", "C"}, {"G", "F"}, {"UTIL"}, {"BE"}, {"IR"}}
 	score_map := make(map[string]int)
 
 	if playing {
+		scoring_groups := [][]string{{"PG", "SG", "SF", "PF", "C"}, {"G", "F"}, {"UT1", "UT2", "UT3"}, {"BE1", "BE2", "BE3"}}
 		for score, group := range scoring_groups {
 			for _, position := range group {
-				score_map[position] = 5 - score
+				score_map[position] = 4 - score
 			}
 		}
 	} else {
+		scoring_groups := [][]string{{"BE1", "BE2", "BE3"}, {"PG", "SG", "SF", "PF", "C"}, {"G", "F"}, {"UT1", "UT2", "UT3"}}
 		for score, group := range scoring_groups {
 			for _, position := range group {
 				score_map[position] = 1 + score
@@ -406,7 +430,28 @@ func score_roster(roster map[string]string, playing bool) int {
 
 // Function to calculate the max restrictiveness score for a given set of players
 func calculate_max_score(players []Player, playing bool) int {
-	return 0
+
+	size := len(players)
+
+	// Max score calulation corresponding with scoring_groups in score_roster
+	if playing { switch {
+					case size <= 5:
+						return size * 4
+					case size <= 7:
+						return 20 + ((size - 5) * 3)
+					case size <= 10:
+						return 26 + ((size - 7) * 2)
+					default:
+						return 32 + (size - 10)}
+	} else { switch {
+				case size <= 3:
+					return size * 4
+				case size <= 8:
+					return 12 + ((size - 3) * 3)
+				case size <= 10:
+					return 27 + ((size - 8) * 2)
+				default:
+						return 31 + (size - 10)}}
 }
 
 // Function to check if a slice contains an int

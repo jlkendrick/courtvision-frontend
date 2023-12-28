@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from pydantic import BaseModel
+from pydantic import BaseModel, validator
 from espn_api.basketball import League
 
 # Find a team in a list of teams
@@ -27,6 +27,19 @@ class PlayerModelResponse(BaseModel):
     injury_status: str
     valid_positions: list[str]
 
+    @validator("team")
+    def correct_team_name(cls, v):
+        corretions = {
+            "PHL": "PHI",
+            "PHO": "PHX",
+        }
+        return corretions.get(v, v)
+
+    @validator("valid_positions", pre=True)
+    def keep_valid_positions(cls, v, values, **kwargs):
+        values_to_keep = {"PG", "SG", "SF", "PF", "C", "G", "F", "BE"}
+        return [pos for pos in v if pos in values_to_keep] + ["UT1", "UT2", "UT3"]
+
 # Returns important data for players on a team
 @app.post("/get_roster_data/")
 async def get_team_data(req: TeamDataRequest):
@@ -36,12 +49,11 @@ async def get_team_data(req: TeamDataRequest):
                     swid=req.swid if req.swid else None)
     team = find_team(req.team_name, league.teams)
     roster = team.roster
-    values_to_keep = {"PG", "SG", "SF", "PF", "C", "G", "F", "UT", "BE"}
     return [PlayerModelResponse(name=player.name,
                                 avg_points=player.avg_points,
-                                team=player.proTeam if player.proTeam != "PHL" else "PHI",
+                                team=player.proTeam,
                                 injury_status=player.injuryStatus,
-                                valid_positions=([pos for pos in player.eligibleSlots if pos in values_to_keep] + ["IR"]) if player.injuryStatus == "OUT" else [pos for pos in player.eligibleSlots if pos in values_to_keep]
+                                valid_positions=player.eligibleSlots
                                 ) for player in roster]
 
 # Returns important data for free agents in a league
