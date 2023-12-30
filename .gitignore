@@ -1,3 +1,5 @@
 venv
 __pycache__
-speedtest.go
+tests/speedtest.go
+tests/apispeedtest.py
+tests/api_st_client.py

@@ -63,7 +63,7 @@ type FitPlayersContext struct {
 var schedule_map map[string]GameSchedule
 
 // Start timer
-// var start1 = time.Now()
+var start = time.Now()
 
 func main() {
 
@@ -91,6 +91,8 @@ func main() {
 		fmt.Println("Error turning jsonBytes into map:", err)
 	}
 
+	fmt.Println("Time after loading schedule:", time.Since(start))
+
 
 	// List of URLs to send POST requests to
 	urls := []string{
@@ -110,7 +112,7 @@ func main() {
 	espn_s2 := ""
 	swid := ""
 	league_id := 424233486
-	team_name := "Flyjoe2k"
+	team_name := "Steve's Smart Team"
 	year := 2024
 	for i, url := range urls {
 		wg.Add(1)
@@ -132,13 +134,18 @@ func main() {
 	}
 
 	// Create roster_map and free_agent_map from responses
-	roster_map := players_to_map(responses[0], "9")
-	free_agent_map := players_to_map(responses[1], "9")
+	roster_map := players_to_map(responses[0])
+	free_agent_map := players_to_map(responses[1])
+
+	fmt.Println("Time after getting data:", time.Since(start))
 
 	fmt.Println(roster_map["Darius Garland"].ValidPositions)
 	fmt.Println(free_agent_map["Jalen Green"].ValidPositions)
 	optimized_slotting := find_available_slots_and_players(roster_map, "10")
-	fmt.Println(optimized_slotting)
+	fmt.Println()
+	fmt.Println(optimized_slotting[4][0])
+	fmt.Println()
+	fmt.Println(optimized_slotting[4][1])
 }
 
 
@@ -188,7 +195,7 @@ func get_data(index int, api_url string, league_id int, espn_s2 string, swid str
 
 
 // Function to convert players slice to map
-func players_to_map(players []Player, week string) map[string]Player {
+func players_to_map(players []Player) map[string]Player {
 
 	player_map := make(map[string]Player)
 
@@ -203,13 +210,13 @@ func players_to_map(players []Player, week string) map[string]Player {
 }
 
 // Finds available slots and players to experiment with on a roster when considering undroppable players and restrictive positions
-func find_available_slots_and_players(roster_map map[string]Player, week string) map[int][1]map[string]string{
+func find_available_slots_and_players(roster_map map[string]Player, week string) map[int][2]map[string]string{
 
 	// Convert roster_map to slices
 	var sorted_good_players []Player
 	var streamable_players []Player
 	for _, player := range roster_map {
-		if player.AvgPoints > 25 {
+		if player.AvgPoints > 32 {
 			sorted_good_players = append(sorted_good_players, player)
 		} else {
 			streamable_players = append(streamable_players, player)
@@ -218,12 +225,13 @@ func find_available_slots_and_players(roster_map map[string]Player, week string)
 
 	// Sort good players by average points
 	sort.Slice(sorted_good_players, func(i, j int) bool {
-		return sorted_good_players[1].AvgPoints > sorted_good_players[j].AvgPoints
+		return sorted_good_players[i].AvgPoints > sorted_good_players[j].AvgPoints
 	})
 
 	var ir_spot Player
 
 	// Abstract out IR spot
+	// TODO: Move this before filtering
 	for i, player := range sorted_good_players {
 		if player.InjuryStatus == "OUT" {
 			ir_spot = player
@@ -233,7 +241,9 @@ func find_available_slots_and_players(roster_map map[string]Player, week string)
 		}
 	}
 
-	return_table := make(map[int][1]map[string]string)
+	fmt.Println(sorted_good_players)
+
+	return_table := make(map[int][2]map[string]string)
 
 	// Fill return table
 	// for i := 0; i <= schedule_map[week].GameSpan; i++ {
@@ -246,11 +256,11 @@ func find_available_slots_and_players(roster_map map[string]Player, week string)
 }
 
 // Function to get available slots for a given day
-func get_available_slots(players []Player, day int, week string) [1]map[string]string {
+func get_available_slots(players []Player, day int, week string) [2]map[string]string {
 
 	// Priority order of most restrictive positions to funnel streamers into flexible positions
-	position_order := []string{"PG", "SG", "SF", "PF", "C", "G", "F", "UT1", "UT2", "UT3", "BE1", "BE2", "BE3"}
-	// inverse_position_order := []string{"BE1", "BE2", "BE3", "C", "PF", "SF", "SG", "PG", "G", "F", "UT1", "UT2", "UT3"}
+	position_order := []string{"PG", "SG", "SF", "PF", "G", "F", "C", "UT1", "UT2", "UT3", "BE1", "BE2", "BE3"}
+	inverse_position_order := []string{"BE1", "BE2", "BE3", "PF", "SF", "SG", "PG", "G", "F", "C", "UT1", "UT2", "UT3"}
 	
 	var playing []Player
 	var not_playing []Player
@@ -258,9 +268,7 @@ func get_available_slots(players []Player, day int, week string) [1]map[string]s
 	for _, player := range players {
 
 		// Checks if the player is playing on the given day
-		fmt.Println("Player name:", player.Name)
-		fmt.Println("Player team:", player.Team)
-		fmt.Println("Schedule map:", schedule_map[week].Games[player.Team])
+		// fmt.Println(player.Name, schedule_map[week].Games[player.Team])
 		if !contains(schedule_map[week].Games[player.Team], day) {
 			not_playing = append(not_playing, player)		
 		} else {
@@ -268,12 +276,15 @@ func get_available_slots(players []Player, day int, week string) [1]map[string]s
 		}
 	}
 
+	fmt.Println("Playing:", playing)
+	fmt.Println("Not playing:", not_playing)
+
 	// Response channel to receive responses from goroutines
 	response_chan := make(chan PositionsResponse, 1)
 
 	// WaitGroup to wait for all goroutines to finish
 	var wg sync.WaitGroup
-	wg.Add(1)
+	wg.Add(2)
 
 	// Launch goroutine to find most restrictive positions for players playing
 	go func (playing []Player, response_chan chan<-PositionsResponse, wg *sync.WaitGroup) {
@@ -285,39 +296,46 @@ func get_available_slots(players []Player, day int, week string) [1]map[string]s
 
 		// Create struct to keep track of state across recursive function calls
 		max_score := calculate_max_score(playing, true)
-		context := &FitPlayersContext{
+		fmt.Println("Max score:", max_score)
+		p_context := &FitPlayersContext{
+			BestLineup: make(map[string]string), 
+			TopScore: 0, 
+			MaxScore: max_score, 
+			EarlyExit: false,
+		}
+	
+		// Recursive function call
+		fit_players(playing, true, make(map[string]string), position_order, p_context, 0)
+
+		fmt.Println("Time after playing backtracking:", time.Since(start))
+
+		response_chan <- PositionsResponse{0, p_context.BestLineup}
+
+	}(playing, response_chan, &wg)
+
+
+	// Launch goroutine to find most restrictive positions for players not playing
+	go func (not_playing []Player, response_chan chan<-PositionsResponse, wg *sync.WaitGroup) {
+		defer wg.Done()
+
+		// Create struct to keep track of state across recursive function calls
+		max_score := calculate_max_score(not_playing, false)
+		fmt.Println("Max score:", max_score)
+		np_context := &FitPlayersContext{
 			BestLineup: make(map[string]string), 
 			TopScore: 0, 
 			MaxScore: max_score, 
 			EarlyExit: false,
 		}
 
-		start := time.Now()
-		
 		// Recursive function call
-		fit_players(playing, true, make(map[string]string), position_order, context, 0)
+		fit_players(not_playing, false, make(map[string]string), inverse_position_order, np_context, 0)
 
-		elapsed := time.Since(start)
-		fmt.Println("Time elapsed:", elapsed)
+		fmt.Println("Time after not playing backtracking:", time.Since(start))
 
-		response_chan <- PositionsResponse{0, context.BestLineup}
+		response_chan <- PositionsResponse{1, np_context.BestLineup}
 
-	}(playing, response_chan, &wg)
-
-	// // Launch goroutine to find most restrictive positions for players not playing
-	// go func (not_playing []Player, response_chan chan<-PositionsResponse, wg *sync.WaitGroup) {
-	// 	defer wg.Done()
-
-	// 	// Keep track of best lineup for players not playing and max optimization score
-	// 	best_lineup := make(map[string]string)
-	// 	max_np_score := 0
-
-	// 	// Recursive function call
-	// 	fit_players(not_playing, false, make(map[string]string), reversed_position_order, &best_lineup, &max_np_score, 0)
-
-	// 	response_chan <- PositionsResponse{1, best_lineup}
-
-	// }(not_playing, response_chan, &wg)
+	}(not_playing, response_chan, &wg)
 
 	// Wait for all goroutines to finish then close the response channel
 	go func() {
@@ -328,7 +346,7 @@ func get_available_slots(players []Player, day int, week string) [1]map[string]s
 	}()
 
 	// Collect and sort responses from channel
-	var responses [1]map[string]string
+	var responses [2]map[string]string
 	for response := range response_chan {
 		responses[response.Index] = response.RosterMap
 	}
@@ -338,10 +356,11 @@ func get_available_slots(players []Player, day int, week string) [1]map[string]s
 
 // Recursive backtracking function to find most restrictive positions for players
 func fit_players(players []Player, playing bool, cur_lineup map[string]string, position_order []string, ctx *FitPlayersContext, index int) {
-	fmt.Println("Remaining players:", players)
-	fmt.Println()
-	fmt.Println("Current lineup:", cur_lineup)
-	fmt.Println()
+	// fmt.Println("Remaining players:", players)
+	// fmt.Println()
+	// fmt.Println("Current lineup:", cur_lineup)
+	// fmt.Println()
+	fmt.Println("|")
 
 	// If we have found a lineup that has the max score, we can send returns to all other recursive calls
 	if ctx.EarlyExit {
@@ -351,8 +370,6 @@ func fit_players(players []Player, playing bool, cur_lineup map[string]string, p
 	// If all players have been given positions, check if the current lineup is better than the best lineup
 	if len(players) == 0 {
 		score := score_roster(cur_lineup, playing)
-		fmt.Println("Score:", score)
-		fmt.Println("Max score:", ctx.MaxScore)
 		if score > ctx.TopScore {
 			ctx.TopScore = score
 			ctx.BestLineup = make(map[string]string)
@@ -368,8 +385,9 @@ func fit_players(players []Player, playing bool, cur_lineup map[string]string, p
 
 	// If we have not gone through all players, try to fit the rest of the players in the lineup
 	position := position_order[index]
-	fmt.Println("Position:", position)
-	fmt.Println("--------------------")
+	// fmt.Println("Position:", position)
+	// fmt.Println()
+	// fmt.Println("--------------------")
 	found_player := false
 	for _, player := range players {
 		if contains(player.ValidPositions, position) {
@@ -414,7 +432,7 @@ func score_roster(roster map[string]string, playing bool) int {
 		scoring_groups := [][]string{{"BE1", "BE2", "BE3"}, {"PG", "SG", "SF", "PF", "C"}, {"G", "F"}, {"UT1", "UT2", "UT3"}}
 		for score, group := range scoring_groups {
 			for _, position := range group {
-				score_map[position] = 1 + score
+				score_map[position] = 4 - score
 			}
 		}
 	}

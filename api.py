@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, field_validator
 from espn_api.basketball import League
 
 # Find a team in a list of teams
@@ -27,7 +27,8 @@ class PlayerModelResponse(BaseModel):
     injury_status: str
     valid_positions: list[str]
 
-    @validator("team")
+    @field_validator("team")
+    @classmethod
     def correct_team_name(cls, v):
         corretions = {
             "PHL": "PHI",
@@ -35,10 +36,11 @@ class PlayerModelResponse(BaseModel):
         }
         return corretions.get(v, v)
 
-    @validator("valid_positions", pre=True)
+    @field_validator("valid_positions", mode="before")
+    @classmethod
     def keep_valid_positions(cls, v, values, **kwargs):
-        values_to_keep = {"PG", "SG", "SF", "PF", "C", "G", "F", "BE"}
-        return [pos for pos in v if pos in values_to_keep] + ["UT1", "UT2", "UT3"]
+        values_to_keep = {"PG", "SG", "SF", "PF", "C", "G", "F"}
+        return [pos for pos in v if pos in values_to_keep] + ["BE1", "BE2", "BE3", "UT1", "UT2", "UT3"]
 
 # Returns important data for players on a team
 @app.post("/get_roster_data/")
@@ -64,10 +66,13 @@ async def get_free_agents(req: TeamDataRequest):
                     espn_s2=req.espn_s2 if req.espn_s2 else None, 
                     swid=req.swid if req.swid else None)
     free_agents = league.free_agents()
-    values_to_keep = {"PG", "SG", "SF", "PF", "C", "G", "F", "UT", "BE"}
     return [PlayerModelResponse(name=player.name,
                                 avg_points=player.avg_points,
                                 team=player.proTeam,
                                 injury_status=player.injuryStatus,
-                                valid_positions=([pos for pos in player.eligibleSlots if pos in values_to_keep] + ["IR"]) if player.injuryStatus == "OUT" else [pos for pos in player.eligibleSlots if pos in values_to_keep]
-                                ) for player in free_agents if player.avg_points > 15.0]
+                                valid_positions=player.eligibleSlots
+                                ) for player in free_agents[:100]]
+
+@app.get("/test/")
+async def test():
+    return "Hello, world!"
