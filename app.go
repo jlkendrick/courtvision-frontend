@@ -142,10 +142,10 @@ func main() {
 	fmt.Println(roster_map["Darius Garland"].ValidPositions)
 	fmt.Println(free_agent_map["Jalen Green"].ValidPositions)
 	optimized_slotting := find_available_slots_and_players(roster_map, "10")
-	fmt.Println()
-	fmt.Println(optimized_slotting[4][0])
-	fmt.Println()
-	fmt.Println(optimized_slotting[4][1])
+	fmt.Println("2: ", optimized_slotting[2][0])
+	fmt.Println("2: ", optimized_slotting[2][1])
+	fmt.Println("5: ", optimized_slotting[5][0])
+	fmt.Println("5: ", optimized_slotting[5][1])
 }
 
 
@@ -210,12 +210,17 @@ func players_to_map(players []Player) map[string]Player {
 }
 
 // Finds available slots and players to experiment with on a roster when considering undroppable players and restrictive positions
-func find_available_slots_and_players(roster_map map[string]Player, week string) map[int][2]map[string]string{
+func find_available_slots_and_players(roster_map map[string]Player, week string) map[int][2]map[string]string {
 
-	// Convert roster_map to slices
+	// Convert roster_map to slices and abstract out IR spot
 	var sorted_good_players []Player
 	var streamable_players []Player
+	var ir_spot Player
 	for _, player := range roster_map {
+		if player.InjuryStatus == "OUT" && player.AvgPoints > ir_spot.AvgPoints {
+			ir_spot = player
+			continue
+		}
 		if player.AvgPoints > 32 {
 			sorted_good_players = append(sorted_good_players, player)
 		} else {
@@ -228,28 +233,13 @@ func find_available_slots_and_players(roster_map map[string]Player, week string)
 		return sorted_good_players[i].AvgPoints > sorted_good_players[j].AvgPoints
 	})
 
-	var ir_spot Player
-
-	// Abstract out IR spot
-	// TODO: Move this before filtering
-	for i, player := range sorted_good_players {
-		if player.InjuryStatus == "OUT" {
-			ir_spot = player
-			// Remove player from sorted_good_players
-			sorted_good_players = append(sorted_good_players[:i], sorted_good_players[i+1:]...)
-			break
-		}
-	}
-
-	fmt.Println(sorted_good_players)
-
 	return_table := make(map[int][2]map[string]string)
 
 	// Fill return table
-	// for i := 0; i <= schedule_map[week].GameSpan; i++ {
-	return_table[4] = get_available_slots(sorted_good_players, 4, week)
-	// }
-	// TODO: Do something with IR spot
+	for i := 0; i <= schedule_map[week].GameSpan; i++ {
+		return_table[i] = remove_dupes(get_available_slots(sorted_good_players, i, week))
+	}
+
 	fmt.Println("IR spot:", ir_spot)
 
 	return return_table
@@ -259,8 +249,8 @@ func find_available_slots_and_players(roster_map map[string]Player, week string)
 func get_available_slots(players []Player, day int, week string) [2]map[string]string {
 
 	// Priority order of most restrictive positions to funnel streamers into flexible positions
-	position_order := []string{"PG", "SG", "SF", "PF", "G", "F", "C", "UT1", "UT2", "UT3", "BE1", "BE2", "BE3"}
-	inverse_position_order := []string{"BE1", "BE2", "BE3", "PF", "SF", "SG", "PG", "G", "F", "C", "UT1", "UT2", "UT3"}
+	position_order := []string{"PG", "SG", "SF", "PF", "G", "F", "C", "UT1", "UT2", "UT3", "BE1", "BE2", "BE3"} // For players playing
+	inverse_position_order := []string{"BE1", "BE2", "BE3", "PF", "SF", "SG", "PG", "G", "F", "C", "UT1", "UT2", "UT3"} // For players not playing
 	
 	var playing []Player
 	var not_playing []Player
@@ -491,4 +481,52 @@ func contains(slice interface{}, value interface{}) bool {
 	}
 
 	return false
+}
+
+// Function to change positions of players not playing who were assigned to positions for players playing
+func remove_dupes(return_table [2]map[string]string) [2]map[string]string {
+
+	inverse_position_order := map[string]int{"BE1": 0, "BE2": 1, "BE3": 2, "PF": 3, "SF": 4, "SG": 5, "PG": 6, "G": 7, "F": 8, "C": 9, "UT1": 10, "UT2": 11, "UT3": 12} // For players not playing
+
+	taken := [13]bool{}
+
+	// Loop through players playing and mark their corresponding position-index as used
+	for position, index := range inverse_position_order {
+		if _, ok := return_table[0][position]; ok {
+			taken[index] = true
+		}
+	}
+
+	// Loop through players not playing and shift their position down the order if they are in used_by_playing
+	for position, player := range return_table[1] {
+
+		index_of_pos := inverse_position_order[position]
+
+		if taken[index_of_pos] {
+			for i := index_of_pos; i < 13; i++ {
+
+				if !taken[i] {
+					taken[i] = true
+					delete(return_table[1], position)
+					return_table[1][keyOf(i)] = player
+					break
+				}
+			}
+		}
+	}
+
+	return return_table
+}
+
+// Function to get key of a value in a map
+func keyOf(value int) string {
+	inverse_position_order := map[string]int{"BE1": 0, "BE2": 1, "BE3": 2, "PF": 3, "SF": 4, "SG": 5, "PG": 6, "G": 7, "F": 8, "C": 9, "UT1": 10, "UT2": 11, "UT3": 12} // For players not playing
+
+	for key, val := range inverse_position_order {
+		if val == value {
+			return key
+		}
+	}
+
+	return ""
 }
