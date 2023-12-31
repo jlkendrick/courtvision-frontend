@@ -19,7 +19,7 @@ func optimize_slotting(roster_map map[string]Player, week string) map[int]map[st
 			ir_spot = player
 			continue
 		}
-		if player.AvgPoints > 32 {
+		if player.AvgPoints > 29 {
 			sorted_good_players = append(sorted_good_players, player)
 		} else {
 			streamable_players = append(streamable_players, player)
@@ -70,7 +70,7 @@ func get_available_slots(players []Player, day int, week string) map[string]stri
 		})
 
 		// Create struct to keep track of state across recursive function calls
-		max_score := calculate_max_score(playing, true)
+		max_score := calculate_max_score(playing)
 		p_context := &FitPlayersContext{
 			BestLineup: make(map[string]string), 
 			TopScore: 0, 
@@ -79,12 +79,26 @@ func get_available_slots(players []Player, day int, week string) map[string]stri
 		}
 	
 		// Recursive function call
-		fit_players(playing, true, make(map[string]string), position_order, p_context, 0)
+		fit_players(playing, make(map[string]string), position_order, p_context, 0)
 
 		fmt.Println("Time after playing backtracking:", time.Since(start))
 	
-		return p_context.BestLineup
+		// Create response map and fill with best lineup or empty strings for unused positions except for bench spots
+		response := make(map[string]string)
+		filter := map[string]bool{"BE1": true, "BE2": true, "BE3": true}
+		for _, pos := range position_order {
 
+			if value, ok := p_context.BestLineup[pos]; ok {
+				response[pos] = value
+				continue
+			}
+			if _, ok := filter[pos]; !ok {
+				response[pos] = ""
+			}
+		}
+
+		return response
+	
 	}(playing)
 
 	return optimal_slotting
@@ -92,7 +106,7 @@ func get_available_slots(players []Player, day int, week string) map[string]stri
 }
 
 // Recursive backtracking function to find most restrictive positions for players
-func fit_players(players []Player, playing bool, cur_lineup map[string]string, position_order []string, ctx *FitPlayersContext, index int) {
+func fit_players(players []Player, cur_lineup map[string]string, position_order []string, ctx *FitPlayersContext, index int) {
 
 	// If we have found a lineup that has the max score, we can send returns to all other recursive calls
 	if ctx.EarlyExit {
@@ -101,7 +115,7 @@ func fit_players(players []Player, playing bool, cur_lineup map[string]string, p
 	
 	// If all players have been given positions, check if the current lineup is better than the best lineup
 	if len(players) == 0 {
-		score := score_roster(cur_lineup, playing)
+		score := score_roster(cur_lineup)
 		if score > ctx.TopScore {
 			ctx.TopScore = score
 			ctx.BestLineup = make(map[string]string)
@@ -132,7 +146,7 @@ func fit_players(players []Player, playing bool, cur_lineup map[string]string, p
 				}
 			}
 
-			fit_players(remaining_players, playing, cur_lineup, position_order, ctx, index + 1) // Recurse
+			fit_players(remaining_players, cur_lineup, position_order, ctx, index + 1) // Recurse
 
 			delete(cur_lineup, position) // Backtrack
 		}
@@ -140,29 +154,20 @@ func fit_players(players []Player, playing bool, cur_lineup map[string]string, p
 
 	// If we did not find a player for the position, advance to the next position
 	if !found_player {
-		fit_players(players, playing, cur_lineup, position_order, ctx, index + 1) // Recurse
+		fit_players(players, cur_lineup, position_order, ctx, index + 1) // Recurse
 	}
 }
 
 // Function to score a roster based on restricitveness of positions
-func score_roster(roster map[string]string, playing bool) int {
+func score_roster(roster map[string]string) int {
 
 	// Scoring system
 	score_map := make(map[string]int)
 
-	if playing {
-		scoring_groups := [][]string{{"PG", "SG", "SF", "PF", "C"}, {"G", "F"}, {"UT1", "UT2", "UT3"}, {"BE1", "BE2", "BE3"}}
-		for score, group := range scoring_groups {
-			for _, position := range group {
-				score_map[position] = 4 - score
-			}
-		}
-	} else {
-		scoring_groups := [][]string{{"BE1", "BE2", "BE3"}, {"PG", "SG", "SF", "PF", "C"}, {"G", "F"}, {"UT1", "UT2", "UT3"}}
-		for score, group := range scoring_groups {
-			for _, position := range group {
-				score_map[position] = 4 - score
-			}
+	scoring_groups := [][]string{{"PG", "SG", "SF", "PF", "C"}, {"G", "F"}, {"UT1", "UT2", "UT3"}, {"BE1", "BE2", "BE3"}}
+	for score, group := range scoring_groups {
+		for _, position := range group {
+			score_map[position] = 4 - score
 		}
 	}
 
@@ -176,29 +181,21 @@ func score_roster(roster map[string]string, playing bool) int {
 }
 
 // Function to calculate the max restrictiveness score for a given set of players
-func calculate_max_score(players []Player, playing bool) int {
+func calculate_max_score(players []Player) int {
 
 	size := len(players)
 
 	// Max score calulation corresponding with scoring_groups in score_roster
-	if playing { switch {
-					case size <= 5:
-						return size * 4
-					case size <= 7:
-						return 20 + ((size - 5) * 3)
-					case size <= 10:
-						return 26 + ((size - 7) * 2)
-					default:
-						return 32 + (size - 10)}
-	} else { switch {
-				case size <= 3:
-					return size * 4
-				case size <= 8:
-					return 12 + ((size - 3) * 3)
-				case size <= 10:
-					return 27 + ((size - 8) * 2)
-				default:
-						return 31 + (size - 10)}}
+	switch {
+		case size <= 5:
+			return size * 4
+		case size <= 7:
+			return 20 + ((size - 5) * 3)
+		case size <= 10:
+			return 26 + ((size - 7) * 2)
+		default:
+			return 32 + (size - 10)
+	}
 }
 
 // Function to check if a slice contains an int
@@ -220,59 +217,4 @@ func contains(slice interface{}, value interface{}) bool {
 	}
 
 	return false
-}
-
-// Function to change positions of players not playing who were assigned to positions for players playing
-func remove_dupes(return_table [2]map[string]string, roster_map map[string]Player) [2]map[string]string {
-
-	inverse_position_order := map[string]int{"BE1": 0, "BE2": 1, "BE3": 2, "PF": 3, "SF": 4, "SG": 5, "PG": 6, "G": 7, "F": 8, "C": 9, "UT1": 10, "UT2": 11, "UT3": 12} // For players not playing
-
-	taken := [13]bool{}
-
-	// Loop through players playing and mark their corresponding position-index as used
-	for position, index := range inverse_position_order {
-		if _, ok := return_table[0][position]; ok {
-			taken[index] = true
-		}
-	}
-
-	// Loop through players not playing and shift their position down to next eligible position if they are in used_by_playing
-	for position, player := range return_table[1] {
-
-		// Bool dict of positions the player is eligible for
-		eligible_positions := make(map[string]bool)
-
-		for _, pos := range roster_map[player].ValidPositions {
-			eligible_positions[pos] = true
-		}
-
-		index_of_pos := inverse_position_order[position]
-
-		if taken[index_of_pos] {
-			for i := index_of_pos; i < 13; i++ {
-
-				if !taken[i] && eligible_positions[keyOf(i)] {
-					taken[i] = true
-					delete(return_table[1], position)
-					return_table[1][keyOf(i)] = player
-					break
-				}
-			}
-		}
-	}
-
-	return return_table
-}
-
-// Function to get key of a value in a map
-func keyOf(value int) string {
-	inverse_position_order := map[string]int{"BE1": 0, "BE2": 1, "BE3": 2, "PF": 3, "SF": 4, "SG": 5, "PG": 6, "G": 7, "F": 8, "C": 9, "UT1": 10, "UT2": 11, "UT3": 12} // For players not playing
-
-	for key, val := range inverse_position_order {
-		if val == value {
-			return key
-		}
-	}
-
-	return ""
 }

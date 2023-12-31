@@ -92,29 +92,9 @@ func main() {
 
 	fmt.Println("Time after getting data:", time.Since(start))
 
-	fmt.Println(roster_map["Darius Garland"].ValidPositions)
-	fmt.Println(free_agent_map["Jalen Green"].ValidPositions)
 	optimized_slotting := optimize_slotting(roster_map, "11")
-	fmt.Println("0: ", optimized_slotting[0][0])
-	fmt.Println("0: ", optimized_slotting[0][1])
-	fmt.Println()
-	fmt.Println("1: ", optimized_slotting[1][0])
-	fmt.Println("1: ", optimized_slotting[1][1])
-	fmt.Println()
-	fmt.Println("2: ", optimized_slotting[2][0])
-	fmt.Println("2: ", optimized_slotting[2][1])
-	fmt.Println()
-	fmt.Println("3: ", optimized_slotting[3][0])
-	fmt.Println("3: ", optimized_slotting[3][1])
-	fmt.Println()
-	fmt.Println("4: ", optimized_slotting[4][0])
-	fmt.Println("4: ", optimized_slotting[4][1])
-	fmt.Println()
-	fmt.Println("5: ", optimized_slotting[5][0])
-	fmt.Println("5: ", optimized_slotting[5][1])
-	fmt.Println()
-	fmt.Println("6: ", optimized_slotting[6][0])
-	fmt.Println("6: ", optimized_slotting[6][1])
+	free_positions := get_unused_positions(optimized_slotting)
+	optimize_streaming(free_agent_map, free_positions, "11")
 }
 
 
@@ -176,4 +156,32 @@ func players_to_map(players []Player) map[string]Player {
 	}
 
 	return player_map
+}
+
+// Function to get the unused positions from the optimal slotting for good players playing for the week
+func get_unused_positions(optimal_slotting map[int]map[string]string) map[int]map[string]bool {
+
+	// Create map to keep track of unused positions
+	unused_positions := make(map[int]map[string]bool)
+
+	// Loop through each optimal slotting and add unused positions to map
+	for day, schedule := range optimal_slotting {
+		
+		for position, player := range schedule {
+
+			if player == "" {
+				unused_positions[day][position] = true
+			}
+		}
+	}
+
+	return unused_positions
+}
+
+// Function to optimize streaming moves for the week
+func optimize_streaming(free_agent_map map[string]Player, free_positions map[int]map[string]bool, week string) map[string]string {
+
+	optimal_streaming := make(map[string]string)
+
+	return optimal_streaming
 }
