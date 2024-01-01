@@ -12,17 +12,14 @@ func optimize_slotting(roster_map map[string]Player, week string) map[int]map[st
 
 	// Convert roster_map to slices and abstract out IR spot
 	var sorted_good_players []Player
-	var streamable_players []Player
-	var ir_spot Player
+	var ir []Player
 	for _, player := range roster_map {
-		if player.InjuryStatus == "OUT" && player.AvgPoints > ir_spot.AvgPoints {
-			ir_spot = player
+		if player.InjuryStatus == "OUT" {
+			ir = append(ir, player)
 			continue
 		}
 		if player.AvgPoints > 29 {
 			sorted_good_players = append(sorted_good_players, player)
-		} else {
-			streamable_players = append(streamable_players, player)
 		}
 	}
 
@@ -33,12 +30,12 @@ func optimize_slotting(roster_map map[string]Player, week string) map[int]map[st
 
 	return_table := make(map[int]map[string]string)
 
-	// Fill return table
+	// Fill return table and put extra IR players on bench
 	for i := 0; i <= schedule_map[week].GameSpan; i++ {
 		return_table[i] = get_available_slots(sorted_good_players, i, week)
 	}
 
-	fmt.Println("IR spot:", ir_spot)
+	fmt.Println("IR/Bench:", ir)
 
 	return return_table
 }
@@ -50,14 +47,11 @@ func get_available_slots(players []Player, day int, week string) map[string]stri
 	position_order := []string{"PG", "SG", "SF", "PF", "G", "F", "C", "UT1", "UT2", "UT3", "BE1", "BE2", "BE3"} // For players playing
 	
 	var playing []Player
-	var not_playing []Player
 
 	for _, player := range players {
 
 		// Checks if the player is playing on the given day
-		if !contains(schedule_map[week].Games[player.Team], day) {
-			not_playing = append(not_playing, player)		
-		} else {
+		if contains(schedule_map[week].Games[player.Team], day) {
 			playing = append(playing, player)
 		}
 	}
@@ -116,6 +110,7 @@ func fit_players(players []Player, cur_lineup map[string]string, position_order 
 	// If all players have been given positions, check if the current lineup is better than the best lineup
 	if len(players) == 0 {
 		score := score_roster(cur_lineup)
+		fmt.Println("Score:", score, "Max score:", ctx.MaxScore)
 		if score > ctx.TopScore {
 			ctx.TopScore = score
 			ctx.BestLineup = make(map[string]string)
@@ -164,10 +159,10 @@ func score_roster(roster map[string]string) int {
 	// Scoring system
 	score_map := make(map[string]int)
 
-	scoring_groups := [][]string{{"PG", "SG", "SF", "PF", "C"}, {"G", "F"}, {"UT1", "UT2", "UT3"}, {"BE1", "BE2", "BE3"}}
+	scoring_groups := [][]string{{"PG", "SG", "SF", "PF"}, {"G", "F"}, {"C"}, {"UT1", "UT2", "UT3"}, {"BE1", "BE2", "BE3"}}
 	for score, group := range scoring_groups {
 		for _, position := range group {
-			score_map[position] = 4 - score
+			score_map[position] = 5 - score
 		}
 	}
 
@@ -187,14 +182,16 @@ func calculate_max_score(players []Player) int {
 
 	// Max score calulation corresponding with scoring_groups in score_roster
 	switch {
-		case size <= 5:
-			return size * 4
+		case size <= 4:
+			return size * 5
+		case size <= 6:
+			return 20 + ((size - 4) * 4)
 		case size <= 7:
-			return 20 + ((size - 5) * 3)
+			return 28 + ((size - 6) * 3)
 		case size <= 10:
-			return 26 + ((size - 7) * 2)
+			return 31 + ((size - 7) * 2)
 		default:
-			return 32 + (size - 10)
+			return 37 + (size - 10)
 	}
 }
 

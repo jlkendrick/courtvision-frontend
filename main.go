@@ -93,6 +93,8 @@ func main() {
 	fmt.Println("Time after getting data:", time.Since(start))
 
 	optimized_slotting := optimize_slotting(roster_map, "11")
+	fmt.Println(optimized_slotting[0]["SG"])
+	fmt.Println(optimized_slotting[0])
 	free_positions := get_unused_positions(optimized_slotting)
 	optimize_streaming(free_agent_map, free_positions, "11")
 }
@@ -166,6 +168,11 @@ func get_unused_positions(optimal_slotting map[int]map[string]string) map[int]ma
 
 	// Loop through each optimal slotting and add unused positions to map
 	for day, schedule := range optimal_slotting {
+
+		// Initialize map for day if it doesn't exist
+		if unused_positions[day] == nil {
+			unused_positions[day] = make(map[string]bool)
+		}
 		
 		for position, player := range schedule {
 
@@ -176,12 +183,4 @@ func get_unused_positions(optimal_slotting map[int]map[string]string) map[int]ma
 	}
 
 	return unused_positions
-}
-
-// Function to optimize streaming moves for the week
-func optimize_streaming(free_agent_map map[string]Player, free_positions map[int]map[string]bool, week string) map[string]string {
-
-	optimal_streaming := make(map[string]string)
-
-	return optimal_streaming
 }
