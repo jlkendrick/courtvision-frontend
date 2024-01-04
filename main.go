@@ -93,7 +93,6 @@ func main() {
 	fmt.Println("Time after getting data:", time.Since(start))
 
 	optimized_slotting := optimize_slotting(roster_map, "11")
-	fmt.Println(optimized_slotting[0]["SG"])
 	free_positions := get_unused_positions(optimized_slotting)
 	optimize_streaming(free_agents, free_positions, "11")
 }

@@ -1,9 +1,7 @@
 package main
 
 import (
-	"fmt"
 	"sort"
-	"time"
 	"reflect"
 )
 
@@ -72,8 +70,6 @@ func get_available_slots(players []Player, day int, week string) map[string]stri
 	
 		// Recursive function call
 		fit_players(playing, make(map[string]string), position_order, p_context, 0)
-
-		fmt.Println("Time after playing backtracking:", time.Since(start))
 	
 		// Create response map and fill with best lineup or empty strings for unused positions except for bench spots
 		response := make(map[string]string)
