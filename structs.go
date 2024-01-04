@@ -21,9 +21,9 @@ type RosterMeta struct {
 
 // Struct for how to contruct Players using the returned player data
 type Player struct {
-	Name 	       string   `json:"name"`
+	Name           string   `json:"name"`
 	AvgPoints      float64  `json:"avg_points"`
-	Team 	  	   string   `json:"team"`
+	Team           string   `json:"team"`
 	InjuryStatus   string   `json:"injury_status"`
 	ValidPositions []string `json:"valid_positions"`
 }
@@ -42,4 +42,23 @@ type FitPlayersContext struct {
 	TopScore   int
 	MaxScore   int
 	EarlyExit  bool
+}
+
+// Struct for chromosome for genetic algorithm
+type Chromosome struct {
+	Genes []Gene
+	Score int
+}
+
+// Struct for gene for genetic algorithm
+type Gene struct {
+	Players 	 map[string]Player
+	Day     	 int
+	Acquisitions int
+}
+
+// Struct to keep track of dropped players during the genetic algorithm
+type DroppedPlayer struct {
+	Player 	  Player
+	Countdown int
 }

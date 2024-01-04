@@ -35,8 +35,6 @@ func optimize_slotting(roster_map map[string]Player, week string) map[int]map[st
 		return_table[i] = get_available_slots(sorted_good_players, i, week)
 	}
 
-	fmt.Println("IR/Bench:", ir)
-
 	return return_table
 }
 
@@ -110,7 +108,7 @@ func fit_players(players []Player, cur_lineup map[string]string, position_order 
 	// If all players have been given positions, check if the current lineup is better than the best lineup
 	if len(players) == 0 {
 		score := score_roster(cur_lineup)
-		fmt.Println("Score:", score, "Max score:", ctx.MaxScore)
+		// fmt.Println("Score:", score, "Max score:", ctx.MaxScore)
 		if score > ctx.TopScore {
 			ctx.TopScore = score
 			ctx.BestLineup = make(map[string]string)

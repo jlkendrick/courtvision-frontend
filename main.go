@@ -88,15 +88,14 @@ func main() {
 
 	// Create roster_map and free_agent_map from responses
 	roster_map := players_to_map(responses[0])
-	free_agent_map := players_to_map(responses[1])
+	free_agents := responses[1]
 
 	fmt.Println("Time after getting data:", time.Since(start))
 
 	optimized_slotting := optimize_slotting(roster_map, "11")
 	fmt.Println(optimized_slotting[0]["SG"])
-	fmt.Println(optimized_slotting[0])
 	free_positions := get_unused_positions(optimized_slotting)
-	optimize_streaming(free_agent_map, free_positions, "11")
+	optimize_streaming(free_agents, free_positions, "11")
 }
 
 
@@ -161,23 +160,23 @@ func players_to_map(players []Player) map[string]Player {
 }
 
 // Function to get the unused positions from the optimal slotting for good players playing for the week
-func get_unused_positions(optimal_slotting map[int]map[string]string) map[int]map[string]bool {
+func get_unused_positions(optimal_slotting map[int]map[string]string) map[int]map[string]string {
 
 	// Create map to keep track of unused positions
-	unused_positions := make(map[int]map[string]bool)
+	unused_positions := make(map[int]map[string]string)
 
 	// Loop through each optimal slotting and add unused positions to map
 	for day, schedule := range optimal_slotting {
 
 		// Initialize map for day if it doesn't exist
 		if unused_positions[day] == nil {
-			unused_positions[day] = make(map[string]bool)
+			unused_positions[day] = make(map[string]string)
 		}
 		
 		for position, player := range schedule {
 
 			if player == "" {
-				unused_positions[day][position] = true
+				unused_positions[day][position] = ""
 			}
 		}
 	}
