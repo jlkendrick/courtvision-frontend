@@ -46,8 +46,8 @@ type FitPlayersContext struct {
 
 // Struct for chromosome for genetic algorithm
 type Chromosome struct {
-	Genes []Gene
-	Score int
+	Genes 	     []Gene
+	FitnessScore int
 }
 
 // Struct for gene for genetic algorithm

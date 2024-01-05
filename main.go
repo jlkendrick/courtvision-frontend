@@ -159,26 +159,32 @@ func players_to_map(players []Player) map[string]Player {
 }
 
 // Function to get the unused positions from the optimal slotting for good players playing for the week
-func get_unused_positions(optimal_slotting map[int]map[string]string) map[int]map[string]string {
+func get_unused_positions(optimal_slotting map[int]map[string]string) map[int][]string {
+
+	// Order that the slice should be in
+	order := []string{"PG", "SG", "SF", "PF", "C", "G", "F", "UT1", "UT2", "UT3"}
 
 	// Create map to keep track of unused positions
-	unused_positions := make(map[int]map[string]string)
+	unused_positions := make(map[int][]string)
 
 	// Loop through each optimal slotting and add unused positions to map
 	for day, schedule := range optimal_slotting {
 
 		// Initialize map for day if it doesn't exist
 		if unused_positions[day] == nil {
-			unused_positions[day] = make(map[string]string)
+			unused_positions[day] = []string{}
 		}
 		
-		for position, player := range schedule {
-
-			if player == "" {
-				unused_positions[day][position] = ""
+		for _, pos := range order {
+			
+			// If the position is empty, add it to the unused positions
+			if schedule[pos] == "" {
+				unused_positions[day] = append(unused_positions[day], pos)
 			}
 		}
 	}
+
+	fmt.Println("Unused positions:", unused_positions)
 
 	return unused_positions
 }
