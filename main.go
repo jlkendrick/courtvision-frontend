@@ -92,9 +92,9 @@ func main() {
 
 	fmt.Println("Time after getting data:", time.Since(start))
 
-	optimized_slotting := optimize_slotting(roster_map, "11")
+	optimized_slotting := optimize_slotting(roster_map, "12")
 	free_positions := get_unused_positions(optimized_slotting)
-	optimize_streaming(free_agents, free_positions, "11")
+	optimize_streaming(free_agents, free_positions, "12")
 }
 
 
@@ -183,8 +183,6 @@ func get_unused_positions(optimal_slotting map[int]map[string]string) map[int][]
 			}
 		}
 	}
-
-	fmt.Println("Unused positions:", unused_positions)
-
+	
 	return unused_positions
 }
