@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 	"math"
+	"sort"
 	"math/rand"
 )
 
@@ -17,20 +18,25 @@ func optimize_streaming(free_agent_map []Player, free_positions map[int][]string
 	for i := range population {
 		get_acquisitions(&population[i])
 		score_fitness(&population[i], week)
-		}
+	}
+
+	// Sort population by decreasing fitness score
+	sort.Slice(population, func(i, j int) bool {
+		return population[i].FitnessScore > population[j].FitnessScore
+	})
+
+	// Evolve population
+	for i := 0; i < 1; i++ {
+		population = evolve_population(population, free_agent_map, free_positions, week)
+	}
 
 	fmt.Println(population[0].TotalAquisitions)
 	fmt.Println(population[0].FitnessScore)
+	fmt.Println(population[0].CumProbTracker)
 	fmt.Println()
-	fmt.Println(population[1].TotalAquisitions)
-	fmt.Println(population[1].FitnessScore)
-
-	// print_population(population)
-
-	// Evolve population
-	// for i := 0; i < 100; i++ {
-	// 	population = evolve_population(population, free_agent_map, free_positions, week)
-	// }
+	fmt.Println(population[49].TotalAquisitions)
+	fmt.Println(population[49].FitnessScore)
+	fmt.Println(population[49].CumProbTracker)
 }
 
 // Function to create initial population
@@ -40,12 +46,12 @@ func create_initial_population(fas []Player, free_positions map[int][]string, we
 	src := rand.NewSource(time.Now().UnixNano())
 	rng := rand.New(src)
 
-	chromosomes := make([]Chromosome, 100)
+	chromosomes := make([]Chromosome, 50)
 
 	// Keep track of dropped players
 	dropped_players := make(map[string]DroppedPlayer)
 
-	// Create 100 chromosomes
+	// Create 50 chromosomes
 	for i := 0; i < 2; i++ {
 
 		// Create copy of free agents
@@ -54,7 +60,7 @@ func create_initial_population(fas []Player, free_positions map[int][]string, we
 
 		days_in_week := schedule_map[week].GameSpan
 
-		chromosome := Chromosome{Genes: make([]Gene, days_in_week+1), FitnessScore: 0, TotalAquisitions: 0}
+		chromosome := Chromosome{Genes: make([]Gene, days_in_week+1), FitnessScore: 0, TotalAquisitions: 0, CumProbTracker: 0.0}
 
 		// Initialize a gene for all days
 		for j := 0; j <= days_in_week; j++ {
@@ -279,4 +285,100 @@ func print_population(population []Chromosome) {
 			fmt.Println(pos, gene.Players[pos].Name)
 		}
 	}
+}
+
+// Function to evolve a population
+func evolve_population(population []Chromosome, fas []Player, free_positions map[int][]string, week string) []Chromosome {
+
+	// Fill cumulative probabilities tracker for each chromosome
+	assign_cumulative_probabilities(population)
+
+	// evolved_population := make([]Chromosome, 50)
+	
+	for i := 0; i < 1; i++ {
+		
+		// Get parents
+		parent1 := select_first_parent(population)
+		parent2 := select_second_parent(population)
+
+		fmt.Println(parent1.FitnessScore)
+		fmt.Println(parent2.FitnessScore)
+
+		// Get children
+		// child1, child2 := get_children(parent1, parent2, fas, free_positions, week)
+
+		// Add children to evolved population
+		// evolved_population[i*2] = child1
+		// evolved_population[i*2+1] = child2
+	
+	}
+
+	return population
+}
+
+// Function to assign cumulative probabilities to a population for a ranked selection
+func assign_cumulative_probabilities(population []Chromosome) {
+
+	// Function to get the probability of a chromosome being selected
+	get_probability := func(x int) float64 {
+		return ((5.25 * (50 - float64(x))) + 55) / (2000)
+	}
+
+	cum_prob := get_probability(0)
+	population[0].CumProbTracker = cum_prob
+
+	// Loop through each chromosome and assign cumulative probabilities
+	for i := 1; i < len(population); i++ {
+		fmt.Println(cum_prob)
+		cum_prob += get_probability(i)
+		population[i].CumProbTracker = cum_prob
+	}
+}
+
+// Function to select the first parent based on a ranked selection
+func select_first_parent(population []Chromosome) Chromosome {
+
+	// Get random seed
+	src := rand.NewSource(time.Now().UnixNano())
+	rng := rand.New(src)
+	
+	// Get random number between 0 and total cumulative probability
+	rand_num := rng.Float64() * population[len(population)-1].CumProbTracker
+
+	// Loop through each chromosome and return the first one that is greater than the random number
+	for _, chromosome := range population {
+		if chromosome.CumProbTracker > rand_num {
+			return chromosome
+		}
+	}
+
+	// If no chromosome is returned, return the last one
+	return population[len(population)-1]
+}
+
+// Function to select the second parent based on a randomized tournament selection
+func select_second_parent(population []Chromosome) Chromosome {
+
+	// Get random seed
+	src := rand.NewSource(time.Now().UnixNano())
+	rng := rand.New(src)
+
+	tournament := make([][5]Chromosome, 3)
+
+	// Create tournament
+	for i := 0; i < 3; i++ {
+		
+		for j := 0; j < 5; j++ {
+
+			// Insert random chromosome
+			tournament[i][j] = population[rng.Intn(len(population))]
+		}
+
+		// Sort tournament
+		sort.Slice(tournament[i][:], func(k, l int) bool {
+			return tournament[i][k].FitnessScore > tournament[i][l].FitnessScore
+		})
+	}
+
+	return tournament[rng.Intn(3)][0]
 }

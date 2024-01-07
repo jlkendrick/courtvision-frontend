@@ -49,6 +49,7 @@ type Chromosome struct {
 	Genes 	     	 []Gene
 	FitnessScore	 int
 	TotalAquisitions int
+	CumProbTracker 	 float64
 }
 
 // Struct for gene for genetic algorithm
