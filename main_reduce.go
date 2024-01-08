@@ -21,7 +21,7 @@ func optimize_slotting(roster_map map[string]Player, week string) map[int]map[st
 
 		first_day_players = append(first_day_players, player)
 
-		if player.AvgPoints > 32 {
+		if player.AvgPoints > 33 {
 			sorted_good_players = append(sorted_good_players, player)
 		}
 	}
