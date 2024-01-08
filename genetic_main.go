@@ -12,24 +12,26 @@ func optimize_streaming(free_agent_map []Player, free_positions map[int][]string
 	// Create initial population
 	population := create_initial_population(free_agent_map, free_positions, week, streamable_count)
 
-	// Score fitness of initial population and get total acquisitions
-	for i := 0; i < len(population); i++ {
-		get_acquisitions(&population[i])
-		score_fitness(&population[i], week)
-	}
-
-	// Sort population by increasing fitness score
-	sort.Slice(population, func(i, j int) bool {
-		return population[i].FitnessScore < population[j].FitnessScore
-	})
-
-	// Print initial population
-	for i, chromosome := range population {
-		fmt.Println(i, chromosome.FitnessScore)
-	}
-
 	// Evolve population
 	for i := 0; i < 1; i++ {
+
+		// Score fitness of initial population and get total acquisitions
+		for i := 0; i < len(population); i++ {
+			get_acquisitions(&population[i])
+			score_fitness(&population[i], week)
+		}
+
+		// Sort population by increasing fitness score
+		sort.Slice(population, func(i, j int) bool {
+			return population[i].FitnessScore < population[j].FitnessScore
+		})
+
+	// // Print initial population
+	// for i, chromosome := range population {
+	// 	fmt.Println(i, chromosome.FitnessScore)
+	// }
+
+		// Evolve population
 		population = evolve_population(population, free_agent_map, free_positions, week)
 	}
 }
@@ -62,7 +64,7 @@ func score_fitness(chromosome *Chromosome, week string) {
 		penalty_factor = 1.0 / math.Pow(1.3, float64(chromosome.TotalAquisitions - schedule_map[week].GameSpan))
 	}
 	for _, gene := range chromosome.Genes {
-		for _, player := range gene.Players {
+		for _, player := range gene.Roster {
 			fitness_score += player.AvgPoints
 		}
 	}
@@ -89,7 +91,7 @@ func print_population(population []Chromosome) {
 	for _, gene := range population[0].Genes {
 		fmt.Println("Day:", gene.Day)
 		for _, pos := range order_to_print {
-			fmt.Println(pos, gene.Players[pos].Name)
+			fmt.Println(pos, gene.Roster[pos].Name)
 		}
 	}
 }

@@ -13,12 +13,19 @@ func evolve_population(population []Chromosome, fas []Player, free_positions map
 	// Fill cumulative probabilities tracker for each chromosome
 	assign_cumulative_probabilities(population)
 
-	// evolved_population := make([]Chromosome, 50)
+	evolved_population := make([]Chromosome, 50)
 
 	p1_total := 0
 	p2_total := 0
 
-	for i := 0; i < 50; i++ {
+	for i := 0; i < 25; i++ {
+
+		// Implement elitism
+		if i == 24 {
+			evolved_population[i*2] = population[i*2]
+			evolved_population[i*2+1] = population[i*2+1]
+			continue
+		}
 		
 		// Get parents
 		parent1 := select_first_parent(population)
@@ -32,11 +39,11 @@ func evolve_population(population []Chromosome, fas []Player, free_positions map
 		// fmt.Println()
 
 		// Get children
-		// child1, child2 := get_children(parent1, parent2, fas, free_positions, week)
+		child1, child2 := get_children(parent1, parent2, fas, free_positions, week)
 
 		// Add children to evolved population
-		// evolved_population[i*2] = child1
-		// evolved_population[i*2+1] = child2
+		evolved_population[i*2] = child1
+		evolved_population[i*2+1] = child2
 	
 	}
 

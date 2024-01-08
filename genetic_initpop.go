@@ -15,11 +15,11 @@ func create_initial_population(fas []Player, free_positions map[int][]string, we
 
 	chromosomes := make([]Chromosome, 50)
 
-	// Keep track of dropped players
-	dropped_players := make(map[string]DroppedPlayer)
-
 	// Create 50 chromosomes
 	for i := 0; i < 50; i++ {
+
+		// Keep track of dropped players
+		dropped_players := make(map[string]DroppedPlayer)
 
 		// Create copy of free agents and free positions
 		fas_copy := make([]Player, len(fas))
@@ -37,7 +37,7 @@ func create_initial_population(fas []Player, free_positions map[int][]string, we
 
 		// Initialize a gene for all days
 		for j := 0; j <= days_in_week; j++ {
-			chromosome.Genes[j] = Gene{Players: make(map[string]Player), Day: j, Acquisitions: 0}
+			chromosome.Genes[j] = Gene{Roster: make(map[string]Player), NewPlayers: make(map[string]bool), Day: j, Acquisitions: 0}
 		}
 
 		// Create a gene for each day
@@ -58,12 +58,15 @@ func create_initial_population(fas []Player, free_positions map[int][]string, we
 				acq_count = streamable_count
 			}
 
+			fmt.Println("# of aquisitions", acq_count)
+
 			// Add acq_count players to gene
 			for k := 0; k < acq_count; k++ {
 
 				// Get random free agent that fits into free_positions
+				trials := 0
 				cont := true
-				for cont {
+				for cont && trials < 200 {
 
 					// Get random free agent
 					rand_index := rand.Intn(len(fas_copy))
@@ -80,45 +83,33 @@ func create_initial_population(fas []Player, free_positions map[int][]string, we
 
 					if has_match {
 
-						// Choose the positon that results in the highest "net rostering"
-						pos := find_best_pos(fa, chromosome, matches, free_positions_copy, j, week)
+						// Choose the positon that results in the highest "net rostering". Adjuested for choosing the best position for each day
+						pos_map := find_best_positions(fa, chromosome, matches, free_positions_copy, j, week, dropped_players)
 
-						// Remove position from available_positions and player from free agents
-						index_of_pos := index_of(free_positions_copy[j], pos)
+						// Remove position from available_positions and player from free agents. Only remove from free_pos on inital day so it doesn't interfere with same day moves
+						index_of_pos := index_of(free_positions_copy[j], pos_map[j])
 						free_positions_copy[j] = append(free_positions_copy[j][:index_of_pos], free_positions_copy[j][index_of_pos+1:]...)
 						fas_copy = remove(fas_copy, rand_index)
 
-						gene.Players[pos] = fa
+						// When added here, counts as a new player
+						gene.NewPlayers[pos_map[j]] = true
+						gene.Roster[pos_map[j]] = fa
 						gene.Acquisitions++
 						cont = false
 
 						// Fill other game days with added player because on other days, he can go on the bench
-						cur_day := j
-						for _, day := range schedule_map[week].Games[fa.Team] {
-							
-							// If the day is before or the same as the current day, skip it
-							if day <= cur_day {
-								continue
-							}
+						for day, pos := range pos_map {
 
-							if contains(free_positions_copy[day], pos) {
-
-								// If a player is already in the position, add them to dropped_players
-								if player, ok := chromosome.Genes[day].Players[pos]; ok {
-									if _, ok := dropped_players[player.Name]; !ok {
-										dropped_players[player.Name] = DroppedPlayer{Player: player, Countdown: 3}
-									}
-								}
-
-								// Add player to gene for that day
-								chromosome.Genes[day].Players[pos] = fa
-							}
+								// Add player to gene for that day. When added here, doesn't count as a new player
+								chromosome.Genes[day].Roster[pos] = fa
 						}
 
 						// Once a player is added, add another player or go to next day
 						break
 					}
+					trials++
 				}
+				trials = 0
 			}
 			// After each day, decrement countdown for dropped players
 			for name, dp := range dropped_players {
@@ -139,11 +130,11 @@ func create_initial_population(fas []Player, free_positions map[int][]string, we
 
 	for i := 0; i < 2; i++ {
 		fmt.Println("Chromosome", i)
-		for j, _ := range chromosomes[i].Genes {
-			fmt.Println("Day", j)
+		for j := range chromosomes[i].Genes {
 			fmt.Println()
+			fmt.Println("Day", j)
 			for _, pos := range order {
-				fmt.Println(pos, chromosomes[i].Genes[j].Players[pos].Name)
+				fmt.Println(pos, chromosomes[i].Genes[j].Roster[pos].Name)
 			}
 		}
 		fmt.Println()
@@ -175,45 +166,51 @@ func get_matches(valid_positions []string, available_positions []string, has_mat
 
 
 // Function to find the best position to put a player in
-func find_best_pos(player Player, chromosome Chromosome, matches []string, free_positions map[int][]string, start_day int, week string) string {
+func find_best_positions(player Player, chromosome Chromosome, matches []string, free_positions map[int][]string, start_day int, week string, dropped_players map[string]DroppedPlayer) map[int]string {
 
-	// Keep track of the conflicts for each position and the best position
-	return_pos := ""
-	conflict_counts := map[string]int{"": 100}
+	// Create random seed
+	src := rand.NewSource(time.Now().UnixNano())
+	rng := rand.New(src)
 
-	// Loop through each match and find the conflicts for each position
-	for _, match := range matches {
+	pos_map := make(map[int]string)
 
-		cur_conflicts := 0
+	// Loop through each day and find the best position for each day
+	for _, day := range schedule_map[week].Games[player.Team] {
 
-		// Loop through each day and find the conflicts for each position
-		for _, day := range schedule_map[week].Games[player.Team] {
+		// If the day is before or the same as the current day, skip it
+		if day < start_day {
+			continue
+		}
 
-			// If the day is before or the same as the current day, skip it
-			if day < start_day {
-				continue
-			}
+		// If the player is not playing on the day, skip it
+		if !contains(schedule_map[week].Games[player.Team], day) {
+			continue
+		}
 
-			// If the position has a player in it or is not a available positon for that day, increment the conflict count
-			if contains(free_positions[day], match) {
-				if _, ok := chromosome.Genes[day].Players[match]; ok {
-					cur_conflicts++
-				}
-			} else {
-				cur_conflicts++
+		has_match := false
+		updated_matches := get_matches(player.ValidPositions, free_positions[day], &has_match)
+
+		// If there are no matches, skip the day
+		if !has_match {
+			continue
+		}
+
+		// Go through matches in decreasing restriction order and assign the player to the first match that doesn't have a player in it
+		for _, pos := range updated_matches {
+			
+			// If the position doesn't have a player in it, add to pos_map and break
+			if _, ok := chromosome.Genes[day].Roster[pos]; !ok {
+				pos_map[day] = pos
+				fmt.Println("Adding", player.Name, "to", pos, "on day", day)
+				break
 			}
 		}
 
-		// Add the conflict count to the map
-		conflict_counts[match] = cur_conflicts
-
-		// After each match, see if the current matching pos is better than the best position or early return if there are no conflicts
-		if conflict_counts[match] == 0 {
-			return match
-		} else if conflict_counts[match] < conflict_counts[return_pos] {
-			return_pos = match
-		}
+		// If every position has a player in it, put player in a random position
+		rand_index := rng.Intn(len(updated_matches))
+		pos_map[day] = updated_matches[rand_index]
+		dropped_players[player.Name] = DroppedPlayer{Player: chromosome.Genes[day].Roster[pos_map[day]], Countdown: 3}
 	}
 
-	return return_pos
+	return pos_map
 }

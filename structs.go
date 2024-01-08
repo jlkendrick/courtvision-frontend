@@ -54,7 +54,8 @@ type Chromosome struct {
 
 // Struct for gene for genetic algorithm
 type Gene struct {
-	Players 	 map[string]Player
+	Roster  	 map[string]Player
+	NewPlayers 	 map[string]bool
 	Day     	 int
 	Acquisitions int
 }

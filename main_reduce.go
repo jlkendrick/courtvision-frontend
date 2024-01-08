@@ -13,7 +13,7 @@ func optimize_slotting(roster_map map[string]Player, week string) map[int]map[st
 	var sorted_good_players []Player
 	var ir []Player
 	for _, player := range roster_map {
-		
+
 		if player.InjuryStatus == "OUT" {
 			ir = append(ir, player)
 			continue
@@ -195,7 +195,7 @@ func calculate_max_score(players []Player) int {
 	}
 }
 
-// Function to check if a slice contains an int
+// Function to check if a slice contains an element
 func contains(slice interface{}, value interface{}) bool {
 
 	// Convert slice to reflect.Value
