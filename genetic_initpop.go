@@ -1,12 +1,13 @@
 package main
 
 import (
+	"fmt"
 	"time"
 	"math/rand"
 )
 
 // Function to create initial population
-func create_initial_population(fas []Player, free_positions map[int][]string, week string) []Chromosome {
+func create_initial_population(fas []Player, free_positions map[int][]string, week string, streamable_count int) []Chromosome {
 
 	// Create random seed
 	src := rand.NewSource(time.Now().UnixNano())
@@ -50,6 +51,11 @@ func create_initial_population(fas []Player, free_positions map[int][]string, we
 			// Check if there are enough available positions to make acq_count moves
 			if len(free_positions_copy[j]) < acq_count {
 				acq_count = len(free_positions_copy[j])
+			}
+
+			// Check if there are enough droppable players to make acq_count moves
+			if streamable_count < acq_count {
+				acq_count = streamable_count
 			}
 
 			// Add acq_count players to gene
@@ -127,6 +133,20 @@ func create_initial_population(fas []Player, free_positions map[int][]string, we
 			}
 		}
 		chromosomes[i] = chromosome
+	}
+
+	order := []string{"PG", "SG", "SF", "PF", "C", "G", "F", "UT1", "UT2", "UT3"}
+
+	for i := 0; i < 2; i++ {
+		fmt.Println("Chromosome", i)
+		for j, _ := range chromosomes[i].Genes {
+			fmt.Println("Day", j)
+			fmt.Println()
+			for _, pos := range order {
+				fmt.Println(pos, chromosomes[i].Genes[j].Players[pos].Name)
+			}
+		}
+		fmt.Println()
 	}
 	return chromosomes
 }

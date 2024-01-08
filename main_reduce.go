@@ -8,14 +8,19 @@ import (
 // Finds available slots and players to experiment with on a roster when considering undroppable players and restrictive positions
 func optimize_slotting(roster_map map[string]Player, week string) map[int]map[string]string {
 
-	// Convert roster_map to slices and abstract out IR spot
+	// Convert roster_map to slices and abstract out IR spot. For the first day, pass all players to get_available_slots
+	var first_day_players []Player
 	var sorted_good_players []Player
 	var ir []Player
 	for _, player := range roster_map {
+		
 		if player.InjuryStatus == "OUT" {
 			ir = append(ir, player)
 			continue
 		}
+
+		first_day_players = append(first_day_players, player)
+
 		if player.AvgPoints > 32 {
 			sorted_good_players = append(sorted_good_players, player)
 		}
@@ -29,7 +34,8 @@ func optimize_slotting(roster_map map[string]Player, week string) map[int]map[st
 	return_table := make(map[int]map[string]string)
 
 	// Fill return table and put extra IR players on bench
-	for i := 0; i <= schedule_map[week].GameSpan; i++ {
+	return_table[0] = get_available_slots(first_day_players, 0, week)
+	for i := 1; i <= schedule_map[week].GameSpan; i++ {
 		return_table[i] = get_available_slots(sorted_good_players, i, week)
 	}
 

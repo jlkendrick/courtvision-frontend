@@ -7,10 +7,10 @@ import (
 )
 
 // Genetic algorithm to optimize streaming moves for the week
-func optimize_streaming(free_agent_map []Player, free_positions map[int][]string, week string) {
+func optimize_streaming(free_agent_map []Player, free_positions map[int][]string, week string, streamable_count int) {
 
 	// Create initial population
-	population := create_initial_population(free_agent_map, free_positions, week)
+	population := create_initial_population(free_agent_map, free_positions, week, streamable_count)
 
 	// Score fitness of initial population and get total acquisitions
 	for i := 0; i < len(population); i++ {

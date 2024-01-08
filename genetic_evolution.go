@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"time"
 	"sort"
 	"math"
@@ -28,9 +27,9 @@ func evolve_population(population []Chromosome, fas []Player, free_positions map
 		p1_total += parent1.FitnessScore
 		p2_total += parent2.FitnessScore
 
-		fmt.Println(parent1.FitnessScore)
-		fmt.Println(parent2.FitnessScore)
-		fmt.Println()
+		// fmt.Println(parent1.FitnessScore)
+		// fmt.Println(parent2.FitnessScore)
+		// fmt.Println()
 
 		// Get children
 		// child1, child2 := get_children(parent1, parent2, fas, free_positions, week)
@@ -41,8 +40,8 @@ func evolve_population(population []Chromosome, fas []Player, free_positions map
 	
 	}
 
-	fmt.Println("parent 1 average:", p1_total / 50)
-	fmt.Println("parent 2 average:", p2_total / 50)
+	// fmt.Println("parent 1 average:", p1_total / 50)
+	// fmt.Println("parent 2 average:", p2_total / 50)
 
 	return population
 }
@@ -118,14 +117,14 @@ func select_second_parent(population []Chromosome) Chromosome {
 func get_children(parent1 Chromosome, parent2 Chromosome, fas []Player, free_positions map[int][]string, week string) (Chromosome, Chromosome) {
 
 	// Get random seed
-	src := rand.NewSource(time.Now().UnixNano())
-	rng := rand.New(src)
+	// src := rand.NewSource(time.Now().UnixNano())
+	// rng := rand.New(src)
 
 	// Create children
 	child1 := Chromosome{Genes: make([]Gene, len(parent1.Genes)), FitnessScore: 0, TotalAquisitions: 0, CumProbTracker: 0.0}
 	child2 := Chromosome{Genes: make([]Gene, len(parent2.Genes)), FitnessScore: 0, TotalAquisitions: 0, CumProbTracker: 0.0}
 
 	
-	
+
 	return child1, child2
 }
