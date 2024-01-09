@@ -1,15 +1,16 @@
 package main
 
 import (
-	"sort"
+	"fmt"
 	"reflect"
+	"sort"
 )
 
 // Finds available slots and players to experiment with on a roster when considering undroppable players and restrictive positions
-func optimize_slotting(roster_map map[string]Player, week string) map[int]map[string]string {
+func optimize_slotting(roster_map map[string]Player, week string, threshold float64) (map[int]map[string]string, []Player) {
 
 	// Convert roster_map to slices and abstract out IR spot. For the first day, pass all players to get_available_slots
-	var first_day_players []Player
+	var streamable_players []Player
 	var sorted_good_players []Player
 	var ir []Player
 	for _, player := range roster_map {
@@ -19,12 +20,14 @@ func optimize_slotting(roster_map map[string]Player, week string) map[int]map[st
 			continue
 		}
 
-		first_day_players = append(first_day_players, player)
-
-		if player.AvgPoints > 33 {
+		if player.AvgPoints > threshold {
 			sorted_good_players = append(sorted_good_players, player)
+		} else {
+			streamable_players = append(streamable_players, player)
 		}
 	}
+
+	fmt.Println("Number of streamable players:", len(streamable_players))
 
 	// Sort good players by average points
 	sort.Slice(sorted_good_players, func(i, j int) bool {
@@ -34,12 +37,11 @@ func optimize_slotting(roster_map map[string]Player, week string) map[int]map[st
 	return_table := make(map[int]map[string]string)
 
 	// Fill return table and put extra IR players on bench
-	return_table[0] = get_available_slots(first_day_players, 0, week)
-	for i := 1; i <= schedule_map[week].GameSpan; i++ {
+	for i := 0; i <= schedule_map[week].GameSpan; i++ {
 		return_table[i] = get_available_slots(sorted_good_players, i, week)
 	}
 
-	return return_table
+	return return_table, streamable_players
 }
 
 // Function to get available slots for a given day

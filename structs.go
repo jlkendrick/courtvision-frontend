@@ -55,7 +55,7 @@ type Chromosome struct {
 // Struct for gene for genetic algorithm
 type Gene struct {
 	Roster  	 map[string]Player
-	NewPlayers 	 map[string]bool
+	NewPlayers 	 map[string]Player
 	Day     	 int
 	Acquisitions int
 }
@@ -64,4 +64,11 @@ type Gene struct {
 type DroppedPlayer struct {
 	Player 	  Player
 	Countdown int
+}
+
+// Struct to allow for finding the position of the lowest scoring player in a group
+type PlayerScore struct {
+	Player     Player
+	AvgPoints  float64
+	Position   string
 }
