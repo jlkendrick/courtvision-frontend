@@ -22,35 +22,30 @@ func create_initial_population(fas []Player, free_positions map[int][]string, we
 	// Create 50 chromosomes
 	for i := 0; i < 1; i++ {
 
+		cur_streamers := []Player{}
+
 		days_in_week := schedule_map[week].GameSpan
 
 		chromosome := Chromosome{Genes: make([]Gene, days_in_week+1), FitnessScore: 0, TotalAquisitions: 0, CumProbTracker: 0.0}
 
+		// Initialize genes
 		for j := 0; j <= days_in_week; j++ {
 			chromosome.Genes[j] = Gene{Roster: make(map[string]Player), NewPlayers: make(map[string]Player), Day: j, Acquisitions: 0}
 		}
 
 		// Insert streamable players into chromosome
-		insert_streamable_players(streamable_players, free_positions, week, chromosome)
+		insert_streamable_players(streamable_players, free_positions, week, &chromosome, cur_streamers)
 
+		// Print initial chromosome
 		order := []string{"PG", "SG", "SF", "PF", "C", "G", "F", "UT1", "UT2", "UT3"}
-
-		chromosomes[i] = chromosome
-
-		for i := 0; i < 1; i++ {
-			fmt.Println("Chromosome", i)
-			for j := range chromosomes[i].Genes {
-				fmt.Println()
-				fmt.Println("Day", j)
-				for _, pos := range order {
-					fmt.Println(pos, chromosomes[i].Genes[j].Roster[pos].Name)
-				}
-			}
+		for j := range chromosome.Genes {
 			fmt.Println()
+			fmt.Println("Day", j)
+			for _, pos := range order {
+				fmt.Println(pos, chromosome.Genes[j].Roster[pos].Name)
+			}
 		}
-
 		os.Exit(0)
-
 
 		// Keep track of dropped players
 		dropped_players := make(map[string]DroppedPlayer)
@@ -63,15 +58,6 @@ func create_initial_population(fas []Player, free_positions map[int][]string, we
 		for k, v := range free_positions {
 			free_positions_copy[k] = make([]string, len(v))
 			copy(free_positions_copy[k], v)
-		}
-
-		// days_in_week := schedule_map[week].GameSpan
-
-		// chromosome := Chromosome{Genes: make([]Gene, days_in_week+1), FitnessScore: 0, TotalAquisitions: 0, CumProbTracker: 0.0}
-
-		// Initialize a gene for all days
-		for j := 0; j <= days_in_week; j++ {
-			chromosome.Genes[j] = Gene{Roster: make(map[string]Player), NewPlayers: make(map[string]Player), Day: j, Acquisitions: 0}
 		}
 
 		// Fill the gene for each day
@@ -92,6 +78,11 @@ func create_initial_population(fas []Player, free_positions map[int][]string, we
 			if streamable_count < acq_count {
 				fmt.Println("Not enough droppable players")
 				acq_count = streamable_count
+			}
+
+			// On the first day, make it so you cant drop streamable players who are playing
+			if j == 0 {
+				acq_count = streamable_count - len(gene.Roster)
 			}
 
 			fmt.Println("# of aquisitions", acq_count)
@@ -120,27 +111,27 @@ func create_initial_population(fas []Player, free_positions map[int][]string, we
 					if has_match {
 
 						// Choose the positon that results in the highest "net rostering". Adjusted for choosing the best position for each day
-						pos_map := find_best_positions(fa, 
-													   chromosome, 
-													   matches, 
-													   free_positions_copy, 
-													   j, 
-													   week, 
-													   dropped_players, 
-													   )
-
-
-						// If fa was not better than the worst player when added_players was full, skip him
-						if pos_map[j] == "" || len(pos_map) == 0 {
-							trials++
-							continue
-						}
+						pos_map := drop_and_find_pos(fa, 
+												   &chromosome, 
+												   matches, 
+												   free_positions_copy, 
+												   j, 
+												   week, 
+												   dropped_players,
+												   cur_streamers,
+												   streamable_players,
+												   j == 0,
+												   )
 
 						fmt.Println("Pos map:", pos_map)
 						fmt.Println("day:", j)
 
-						// Remove position from available_positions and player from free agents. Only remove from free_pos on inital day so it doesn't interfere with same day moves
-						index_of_pos := index_of(free_positions_copy[j], pos_map[j])
+						// Remove position from free_positions_copy and player from free agents. Only remove from free pos on inital day so it doesn't interfere with same day moves
+						free_positions_copy_interface := make([]interface{}, len(free_positions_copy[j]))
+						for i, v := range free_positions_copy[j] {
+							free_positions_copy_interface[i] = v
+						}
+						index_of_pos := index_of(free_positions_copy_interface, pos_map[j])
 						free_positions_copy[j] = append(free_positions_copy[j][:index_of_pos], free_positions_copy[j][index_of_pos+1:]...)
 						fas_copy = remove(fas_copy, rand_index)
 
@@ -219,81 +210,60 @@ func get_matches(valid_positions []string, available_positions []string, has_mat
 
 
 // Function to find the best position to put a player in
-func find_best_positions(player Player, 
-						 chromosome Chromosome, 
-						 matches []string, 
-						 free_positions map[int][]string, 
-						 start_day int, 
-						 week string, 
-						 dropped_players map[string]DroppedPlayer, 
-						 ) map[int]string {
+func drop_and_find_pos(player Player, 
+					 chromosome *Chromosome, 
+					 matches []string, 
+					 free_positions map[int][]string, 
+					 start_day int, 
+					 week string, 
+					 dropped_players map[string]DroppedPlayer, 
+					 cur_streamers []Player,
+					 streamable_players []Player,
+					 first_day bool,
+					 ) map[int]string {
 
 	pos_map := make(map[int]string)
 
-	// Loop through each day and find the best position for each day
-	for _, day := range schedule_map[week].Games[player.Team] {
+	// If there are streamers on the bench, find best position for new player and drop the worst bench streamer
+	if first_day {
 
-		// If the day is before or the same as the current day, skip it
-		if day < start_day {
-			continue
-		}
+		find_best_positions(player, chromosome, free_positions, pos_map, start_day, week)
+		
+	} else if len(chromosome.Genes[start_day].Roster) < len(streamable_players) {
 
-		// If the player is not playing on the day, skip it
-		if !contains(schedule_map[week].Games[player.Team], day) {
-			continue
-		}
+		not_playing_streamers := []Player{}
 
-		has_match := false
-		updated_matches := get_matches(player.ValidPositions, free_positions[day], &has_match)
+		// Get all the players that are not playing on the day
+		for _, player := range cur_streamers {
 
-		// If there are no matches, skip the day
-		if !has_match {
-			continue
-		}
-
-		// Go through matches in decreasing restriction order and assign the player to the first match that doesn't have a player in it
-		found_match := false
-		for _, pos := range updated_matches {
-			
-			// If the position doesn't have a player in it, add to pos_map and break
-			if _, ok := chromosome.Genes[day].Roster[pos]; !ok {
-				pos_map[day] = pos
-				found_match = true
-				fmt.Println("Adding", player.Name, "to", pos, "on day", day)
-				break
+			key := map_contains_value(chromosome.Genes[start_day], player.Name)
+			if key == "" {
+				not_playing_streamers = append(not_playing_streamers, player)
 			}
 		}
 
-		// If every position has a player in it, put player in the position that has the worst player in it
-		if !found_match {
+		// Get the worst player
+		sort.Slice(not_playing_streamers, func(i, j int) bool {
+			return not_playing_streamers[i].AvgPoints < not_playing_streamers[j].AvgPoints })
+		worst_player := not_playing_streamers[0]
 
-			fmt.Println("No opening for", player.Name, "on day", day, "because free positions are", free_positions[day])
+		// Drop the worst player from the chromosome
+		delete_all_occurences(chromosome, cur_streamers, worst_player, week, start_day)
+		dropped_players[worst_player.Name] = DroppedPlayer{Player: worst_player, Countdown: 3}
 
-			playing := []PlayerScore{}
+		// Choose the positon that results in the highest "net rostering". Adjusted for choosing the best position for each day
+		find_best_positions(player, chromosome, free_positions, pos_map, start_day, week)
 
-			// Get all the players that are playing on the day
-			for _, pos := range updated_matches {
+	} else {
+		// If there are no streamers on the bench, drop a random playing streamer and find best position
+		rand_index := rand.Intn(len(cur_streamers))
+		random_streamer := cur_streamers[rand_index]
+		delete_all_occurences(chromosome, cur_streamers, random_streamer, week, start_day)
 
-				player_score := PlayerScore{Player: chromosome.Genes[day].Roster[pos], AvgPoints: chromosome.Genes[day].Roster[pos].AvgPoints, Position: pos}
-				playing = append(playing, player_score)
-			}
-
-			// Get the worst player
-			sort.Slice(playing, func(i, j int) bool {
-				return playing[i].AvgPoints < playing[j].AvgPoints })
-			worst_player := playing[0]
-			
-			// If the worst player is worse than the player being added, drop the worst player and add the new player
-			if worst_player.AvgPoints < player.AvgPoints {
-				delete_all_occurences(&chromosome, worst_player, week, start_day)
-				pos_map[day] = worst_player.Position
-				dropped_players[worst_player.Player.Name] = DroppedPlayer{Player: worst_player.Player, Countdown: 3}
-			} else {
-				pos_map[day] = ""
-			}
-		}
+		// Choose the positon that results in the highest "net rostering". Adjusted for choosing the best position for each day
+		find_best_positions(player, chromosome, free_positions, pos_map, start_day, week)
 	}
-
+	
 	return pos_map
 }
 
@@ -309,33 +279,32 @@ func map_contains_value(m Gene, value string) string {
 }
 
 // Function to delete all occurences of a value in a chromosome
-func delete_all_occurences(chromosome *Chromosome, player_to_drop PlayerScore, week string, start_day int) {
+func delete_all_occurences(chromosome *Chromosome, cur_streamers []Player, player_to_drop Player, week string, start_day int) {
 
-	for _, day := range schedule_map[week].Games[player_to_drop.Player.Team] {
+	for _, day := range schedule_map[week].Games[player_to_drop.Team] {
 
 		// If the day is before the current day, skip it
 		if day < start_day {
 			continue
 		}
 
-		key := map_contains_value(chromosome.Genes[day], player_to_drop.Player.Name)
+		key := map_contains_value(chromosome.Genes[day], player_to_drop.Name)
 		if key != "" {
 			delete(chromosome.Genes[day].Roster, key)
-			fmt.Println("Dropping", player_to_drop.Player.Name, "on day", day, "from position", key)
+			fmt.Println("Dropping", player_to_drop.Name, "on day", day, "from position", key)
 		}
 	}
+
+	// Remove player from added players
+	cur_streamers_interface := make([]interface{}, len(cur_streamers))
+	for i, v := range cur_streamers {
+		cur_streamers_interface[i] = v
+	}
+	remove(cur_streamers, index_of(cur_streamers_interface, player_to_drop))
 }
 
 // Function to insert initial streamable players into a chromosome
-func insert_streamable_players(streamable_players []Player, free_positions map[int][]string, week string, chromosome Chromosome) {
-
-	// Create map to keep track of streamable players
-	streamable_map := make(map[string]Player)
-
-	// Insert streamable players into map
-	for _, player := range streamable_players {
-		streamable_map[player.Name] = player
-	}
+func insert_streamable_players(streamable_players []Player, free_positions map[int][]string, week string, chromosome *Chromosome, cur_streamers []Player) {
 
 	// Insert streamable players into chromosome
 	for _, player := range streamable_players {
@@ -348,14 +317,18 @@ func insert_streamable_players(streamable_players []Player, free_positions map[i
 		if has_match {
 
 			// Choose the positon that results in the highest "net rostering". Adjusted for choosing the best position for each day
-			pos_map := find_best_positions(player, 
-										   chromosome, 
-										   matches, 
-										   free_positions, 
-										   first_game, 
-										   week, 
-										   make(map[string]DroppedPlayer), 
-										   )
+			fmt.Println(cur_streamers)
+			pos_map := drop_and_find_pos(player, 
+									   chromosome, 
+									   matches, 
+									   free_positions, 
+									   first_game, 
+									   week, 
+									   make(map[string]DroppedPlayer), 
+									   cur_streamers,
+									   streamable_players,
+									   true,
+									   )
 
 			// Fill other game days with added player because on other days, he can go on the bench
 			for day, pos := range pos_map {
@@ -364,29 +337,41 @@ func insert_streamable_players(streamable_players []Player, free_positions map[i
 					chromosome.Genes[day].Roster[pos] = player
 					fmt.Println("Actually adding", player.Name, "to", pos, "on day", day)
 			}
+			chromosome.Genes[first_game].NewPlayers[pos_map[first_game]] = player
+			cur_streamers = append(cur_streamers, player)
 		}
 	}
 }
 
 
-// full := len(added_players) >= streamable_count
+// Function to find the best position for a player
+func find_best_positions(player Player, chromosome *Chromosome, free_positions map[int][]string, pos_map map[int]string, start_day int, week string) {
 
-// if full {
+	// Loop through each day and find the best position for each day
+	for _, day := range schedule_map[week].Games[player.Team] {
 
-// 	// Sort added players by average points so we can drop the worst player if needed
-// 	sort.Slice(added_players, func(i, j int) bool {
-// 		return added_players[i].AvgPoints < added_players[j].AvgPoints
-// 	})
+		// If the day is before the current day, skip it
+		if day < start_day {
+			continue
+		}
 
-// 	// Get the worst player
-// 	worst_player := PlayerScore{Player: added_players[0], AvgPoints: added_players[0].AvgPoints, Position: ""}
+		has_match := false
+		updated_matches := get_matches(player.ValidPositions, free_positions[day], &has_match)
 
-// 	// If the worst player is worse than the player being added, drop the worst player and add the new player
-// 	if worst_player.AvgPoints < player.AvgPoints {
-// 		delete_all_occurences(&chromosome, worst_player, week, start_day)
-// 		dropped_players[worst_player.Player.Name] = DroppedPlayer{Player: worst_player.Player, Countdown: 3}
-// 	} else {
-// 		return make(map[int]string)
-// 	}
+		// If there are no matches, skip the day
+		if !has_match {
+			continue
+		}
 
-// } // Proceed with finding the best position for the player based on remaining free positions after dropping the worst player if needed
+		// Go through matches in decreasing restriction order and assign the player to the first match that doesn't have a player in it
+		for _, pos := range updated_matches {
+			
+			// If the position doesn't have a player in it, add to pos_map and break
+			if _, ok := chromosome.Genes[day].Roster[pos]; !ok {
+				pos_map[day] = pos
+				fmt.Println("Adding", player.Name, "to", pos, "on day", day)
+				break
+			}
+		}
+	}
+}

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math"
 	"sort"
+	"reflect"
 )
 
 // Genetic algorithm to optimize streaming moves for the week
@@ -42,11 +43,11 @@ func remove(slice []Player, index int) []Player {
 }
 
 // Function to get the index of an element in a slice
-func index_of(slice []string, element string) int {
+func index_of(slice []interface{}, element interface{}) int {
 
 	for i, e := range slice {
 
-		if e == element {
+		if reflect.DeepEqual(e, element) {
 			return i
 		}
 	}
