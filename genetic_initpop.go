@@ -1,7 +1,6 @@
 package main
 
 import (
-	"os"
 	"fmt"
 	"time"
 	"sort"
@@ -20,10 +19,11 @@ func create_initial_population(fas []Player, free_positions map[int][]string, we
 	chromosomes := make([]Chromosome, 50)
 
 	// Create 50 chromosomes
-	for i := 0; i < 1; i++ {
+	for i := 0; i < 2; i++ {
 
-		cur_streamers := []Player{}
+		cur_streamers := make([]Player, 3)
 
+		// Create chromosome
 		days_in_week := schedule_map[week].GameSpan
 
 		chromosome := Chromosome{Genes: make([]Gene, days_in_week+1), FitnessScore: 0, TotalAquisitions: 0, CumProbTracker: 0.0}
@@ -36,16 +36,7 @@ func create_initial_population(fas []Player, free_positions map[int][]string, we
 		// Insert streamable players into chromosome
 		insert_streamable_players(streamable_players, free_positions, week, &chromosome, cur_streamers)
 
-		// Print initial chromosome
-		order := []string{"PG", "SG", "SF", "PF", "C", "G", "F", "UT1", "UT2", "UT3"}
-		for j := range chromosome.Genes {
-			fmt.Println()
-			fmt.Println("Day", j)
-			for _, pos := range order {
-				fmt.Println(pos, chromosome.Genes[j].Roster[pos].Name)
-			}
-		}
-		os.Exit(0)
+		fmt.Println("Streamers:", cur_streamers)
 
 		// Keep track of dropped players
 		dropped_players := make(map[string]DroppedPlayer)
@@ -70,13 +61,11 @@ func create_initial_population(fas []Player, free_positions map[int][]string, we
 
 			// Check if there are enough available positions to make acq_count moves
 			if len(free_positions_copy[j]) < acq_count {
-				fmt.Println("Not enough available positions")
 				acq_count = len(free_positions_copy[j])
 			}
 
 			// Check if there are enough droppable players to make acq_count moves
 			if streamable_count < acq_count {
-				fmt.Println("Not enough droppable players")
 				acq_count = streamable_count
 			}
 
@@ -84,8 +73,6 @@ func create_initial_population(fas []Player, free_positions map[int][]string, we
 			if j == 0 {
 				acq_count = streamable_count - len(gene.Roster)
 			}
-
-			fmt.Println("# of aquisitions", acq_count)
 
 			// Add acq_count players to gene
 			for k := 0; k < acq_count; k++ {
@@ -121,18 +108,10 @@ func create_initial_population(fas []Player, free_positions map[int][]string, we
 												   cur_streamers,
 												   streamable_players,
 												   j == 0,
+												   true,
 												   )
 
-						fmt.Println("Pos map:", pos_map)
-						fmt.Println("day:", j)
-
 						// Remove position from free_positions_copy and player from free agents. Only remove from free pos on inital day so it doesn't interfere with same day moves
-						free_positions_copy_interface := make([]interface{}, len(free_positions_copy[j]))
-						for i, v := range free_positions_copy[j] {
-							free_positions_copy_interface[i] = v
-						}
-						index_of_pos := index_of(free_positions_copy_interface, pos_map[j])
-						free_positions_copy[j] = append(free_positions_copy[j][:index_of_pos], free_positions_copy[j][index_of_pos+1:]...)
 						fas_copy = remove(fas_copy, rand_index)
 
 						// When added here, counts as a new player
@@ -145,10 +124,10 @@ func create_initial_population(fas []Player, free_positions map[int][]string, we
 
 								// Add player to gene for that day. When added here, doesn't count as a new player
 								chromosome.Genes[day].Roster[pos] = fa
-								fmt.Println("Actually adding", fa.Name, "to", pos, "on day", day)
 						}
 
 						// Once a player is added, add another player or go to next day
+						cur_streamers[2] = fa
 						break
 					}
 					trials++
@@ -173,15 +152,16 @@ func create_initial_population(fas []Player, free_positions map[int][]string, we
 	order := []string{"PG", "SG", "SF", "PF", "C", "G", "F", "UT1", "UT2", "UT3"}
 
 	for i := 0; i < 2; i++ {
-		fmt.Println("Chromosome", i)
+		total_acquisitions := 0
 		for j := range chromosomes[i].Genes {
 			fmt.Println()
 			fmt.Println("Day", j)
 			for _, pos := range order {
 				fmt.Println(pos, chromosomes[i].Genes[j].Roster[pos].Name)
 			}
+			total_acquisitions += chromosomes[i].Genes[j].Acquisitions
 		}
-		fmt.Println()
+		fmt.Println(total_acquisitions)
 	}
 	return chromosomes
 }
@@ -220,16 +200,37 @@ func drop_and_find_pos(player Player,
 					 cur_streamers []Player,
 					 streamable_players []Player,
 					 first_day bool,
+					 not_initial bool,
 					 ) map[int]string {
 
 	pos_map := make(map[int]string)
 
-	// If there are streamers on the bench, find best position for new player and drop the worst bench streamer
 	if first_day {
+		// If it is the first day, either put intial streamers in or adjust for other than initial streamers
 
 		find_best_positions(player, chromosome, free_positions, pos_map, start_day, week)
-		
+
+		// After adding the initial streamers, when doing regular pickups on the first day, drop the streamer with the lowest average points
+		if not_initial {
+
+			// Delete the worst bench streamer
+			sort.Slice(cur_streamers, func(i, j int) bool {
+				return cur_streamers[i].AvgPoints < cur_streamers[j].AvgPoints 
+			})
+
+			index := 0
+			for _, player := range cur_streamers {
+				if !contains(player.ValidPositions, 0) {
+					break
+				}
+				index++
+			}
+			// Drop the worst player from the chromosome
+			delete_all_occurences(chromosome, cur_streamers, cur_streamers[index], week, start_day)
+		}
+
 	} else if len(chromosome.Genes[start_day].Roster) < len(streamable_players) {
+		// If there are streamers on the bench, find best position for new player and drop the worst bench streamer
 
 		not_playing_streamers := []Player{}
 
@@ -242,7 +243,7 @@ func drop_and_find_pos(player Player,
 			}
 		}
 
-		// Get the worst player
+		// Get the worst player that is not playing on the day
 		sort.Slice(not_playing_streamers, func(i, j int) bool {
 			return not_playing_streamers[i].AvgPoints < not_playing_streamers[j].AvgPoints })
 		worst_player := not_playing_streamers[0]
@@ -291,7 +292,6 @@ func delete_all_occurences(chromosome *Chromosome, cur_streamers []Player, playe
 		key := map_contains_value(chromosome.Genes[day], player_to_drop.Name)
 		if key != "" {
 			delete(chromosome.Genes[day].Roster, key)
-			fmt.Println("Dropping", player_to_drop.Name, "on day", day, "from position", key)
 		}
 	}
 
@@ -300,14 +300,15 @@ func delete_all_occurences(chromosome *Chromosome, cur_streamers []Player, playe
 	for i, v := range cur_streamers {
 		cur_streamers_interface[i] = v
 	}
-	remove(cur_streamers, index_of(cur_streamers_interface, player_to_drop))
+	index := index_of(cur_streamers_interface, player_to_drop)
+	cur_streamers = append(cur_streamers[:index], cur_streamers[index+1:]...)
 }
 
 // Function to insert initial streamable players into a chromosome
 func insert_streamable_players(streamable_players []Player, free_positions map[int][]string, week string, chromosome *Chromosome, cur_streamers []Player) {
 
 	// Insert streamable players into chromosome
-	for _, player := range streamable_players {
+	for index, player := range streamable_players {
 
 		// Get all the positions that the player fits in to
 		has_match := false
@@ -317,7 +318,6 @@ func insert_streamable_players(streamable_players []Player, free_positions map[i
 		if has_match {
 
 			// Choose the positon that results in the highest "net rostering". Adjusted for choosing the best position for each day
-			fmt.Println(cur_streamers)
 			pos_map := drop_and_find_pos(player, 
 									   chromosome, 
 									   matches, 
@@ -328,6 +328,7 @@ func insert_streamable_players(streamable_players []Player, free_positions map[i
 									   cur_streamers,
 									   streamable_players,
 									   true,
+									   false,
 									   )
 
 			// Fill other game days with added player because on other days, he can go on the bench
@@ -335,10 +336,9 @@ func insert_streamable_players(streamable_players []Player, free_positions map[i
 
 					// Add player to gene for that day. When added here, doesn't count as a new player
 					chromosome.Genes[day].Roster[pos] = player
-					fmt.Println("Actually adding", player.Name, "to", pos, "on day", day)
 			}
 			chromosome.Genes[first_game].NewPlayers[pos_map[first_game]] = player
-			cur_streamers = append(cur_streamers, player)
+			cur_streamers[index] = player
 		}
 	}
 }
@@ -369,7 +369,6 @@ func find_best_positions(player Player, chromosome *Chromosome, free_positions m
 			// If the position doesn't have a player in it, add to pos_map and break
 			if _, ok := chromosome.Genes[day].Roster[pos]; !ok {
 				pos_map[day] = pos
-				fmt.Println("Adding", player.Name, "to", pos, "on day", day)
 				break
 			}
 		}
