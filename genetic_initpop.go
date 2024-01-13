@@ -21,7 +21,7 @@ func create_initial_population(fas []Player, free_positions map[int][]string, we
 	// Create 50 chromosomes
 	for i := 0; i < 50; i++ {
 
-		cur_streamers := make([]Player, 3)
+		cur_streamers := make([]Player, streamable_count)
 
 		// Create chromosome
 		days_in_week := schedule_map[week].GameSpan
@@ -111,6 +111,7 @@ func create_initial_population(fas []Player, free_positions map[int][]string, we
 
 						// Remove position from free_positions_copy and player from free agents. Only remove from free pos on inital day so it doesn't interfere with same day moves
 						fas_copy = remove(fas_copy, rand_index)
+						
 
 						// When added here, counts as a new player
 						gene.NewPlayers[pos_map[j]] = fa
@@ -125,7 +126,7 @@ func create_initial_population(fas []Player, free_positions map[int][]string, we
 						}
 
 						// Once a player is added, add another player or go to next day
-						cur_streamers[2] = fa
+						cur_streamers[streamable_count - 1] = fa
 						break
 					}
 					trials++
@@ -250,7 +251,6 @@ func drop_and_find_pos(player Player,
 		delete_all_occurences(chromosome, cur_streamers, worst_player, week, start_day)
 		dropped_players[worst_player.Name] = DroppedPlayer{Player: worst_player, Countdown: 3}
 
-		// Choose the positon that results in the highest "net rostering". Adjusted for choosing the best position for each day
 		find_best_positions(player, chromosome, free_positions, pos_map, start_day, week)
 
 	} else {
@@ -259,7 +259,6 @@ func drop_and_find_pos(player Player,
 		random_streamer := cur_streamers[rand_index]
 		delete_all_occurences(chromosome, cur_streamers, random_streamer, week, start_day)
 
-		// Choose the positon that results in the highest "net rostering". Adjusted for choosing the best position for each day
 		find_best_positions(player, chromosome, free_positions, pos_map, start_day, week)
 	}
 	
@@ -335,7 +334,6 @@ func insert_streamable_players(streamable_players []Player, free_positions map[i
 					// Add player to gene for that day. When added here, doesn't count as a new player
 					chromosome.Genes[day].Roster[pos] = player
 			}
-			chromosome.Genes[first_game].NewPlayers[pos_map[first_game]] = player
 			cur_streamers[index] = player
 		}
 	}

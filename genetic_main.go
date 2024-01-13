@@ -14,7 +14,7 @@ func optimize_streaming(free_agent_map []Player, free_positions map[int][]string
 	initial_population := create_initial_population(free_agent_map, free_positions, week, streamable_players)
 
 	// Evolve population
-	for i := 0; i < 1; i++ {
+	for i := 0; i < 20; i++ {
 
 		// Score fitness of initial population and get total acquisitions
 		for i := 0; i < len(initial_population); i++ {
@@ -28,29 +28,31 @@ func optimize_streaming(free_agent_map []Player, free_positions map[int][]string
 		})
 
 		// Print initial population
-		for i, chromosome := range initial_population {
-			fmt.Println(i, chromosome.FitnessScore)
+		total_fitness_score := 0
+		for _, chromosome := range initial_population {
+			total_fitness_score += chromosome.FitnessScore
 		}
+		fmt.Println("Average fitness score:", total_fitness_score / 50)
 
-		// Print the best chromosome
-		order := []string{"PG", "SG", "SF", "PF", "C", "G", "F", "UT1", "UT2", "UT3"}
-		fmt.Println("Best chromosome:")
-		fmt.Println("Acquisitions:", initial_population[49].TotalAcquisitions)
-		games_played := 0
-		for _, gene := range initial_population[49].Genes {
-			games_played += len(gene.Roster)
-			fmt.Println()
-			fmt.Println(gene.Day)
-			fmt.Println("Acquisitions:", gene.Acquisitions)
-			fmt.Println("New players:", gene.NewPlayers)
-			for _, pos := range order {
-				fmt.Println(pos, gene.Roster[pos].Name)
-			}
-		}
-		fmt.Println("No streaming games played:", 8, "vs with streaming", games_played)
+		// // Print the best chromosome
+		// order := []string{"PG", "SG", "SF", "PF", "C", "G", "F", "UT1", "UT2", "UT3"}
+		// fmt.Println("Best chromosome:")
+		// fmt.Println("Acquisitions:", initial_population[49].TotalAcquisitions)
+		// games_played := 0
+		// for _, gene := range initial_population[49].Genes {
+		// 	games_played += len(gene.Roster)
+		// 	fmt.Println()
+		// 	fmt.Println(gene.Day)
+		// 	fmt.Println("Acquisitions:", gene.Acquisitions)
+		// 	fmt.Println("New players:", gene.NewPlayers)
+		// 	for _, pos := range order {
+		// 		fmt.Println(pos, gene.Roster[pos].Name)
+		// 	}
+		// }
+		// fmt.Println("No streaming games played:", 8, "vs with streaming", games_played)
 
 		// Evolve population
-		initial_population = evolve_population(initial_population, free_agent_map, free_positions, week)
+		initial_population = evolve_population(initial_population, free_agent_map, free_positions, streamable_players, week)
 	}
 }
 

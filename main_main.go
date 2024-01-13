@@ -92,7 +92,7 @@ func main() {
 
 	fmt.Println("Time after getting data:", time.Since(start))
 
-	threshold := 32.0
+	threshold := 34.0
 	optimized_slotting, streamable_players := optimize_slotting(roster_map, "13", threshold)
 	fmt.Println("Optimized slotting for intial day:", optimized_slotting[0])
 	free_positions := get_unused_positions(optimized_slotting)
