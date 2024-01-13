@@ -48,7 +48,7 @@ type FitPlayersContext struct {
 type Chromosome struct {
 	Genes 	     	 []Gene
 	FitnessScore	 int
-	TotalAquisitions int
+	TotalAcquisitions int
 	CumProbTracker 	 float64
 }
 

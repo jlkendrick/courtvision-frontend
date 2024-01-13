@@ -19,14 +19,14 @@ func create_initial_population(fas []Player, free_positions map[int][]string, we
 	chromosomes := make([]Chromosome, 50)
 
 	// Create 50 chromosomes
-	for i := 0; i < 2; i++ {
+	for i := 0; i < 50; i++ {
 
 		cur_streamers := make([]Player, 3)
 
 		// Create chromosome
 		days_in_week := schedule_map[week].GameSpan
 
-		chromosome := Chromosome{Genes: make([]Gene, days_in_week+1), FitnessScore: 0, TotalAquisitions: 0, CumProbTracker: 0.0}
+		chromosome := Chromosome{Genes: make([]Gene, days_in_week+1), FitnessScore: 0, TotalAcquisitions: 0, CumProbTracker: 0.0}
 
 		// Initialize genes
 		for j := 0; j <= days_in_week; j++ {
@@ -35,8 +35,6 @@ func create_initial_population(fas []Player, free_positions map[int][]string, we
 
 		// Insert streamable players into chromosome
 		insert_streamable_players(streamable_players, free_positions, week, &chromosome, cur_streamers)
-
-		fmt.Println("Streamers:", cur_streamers)
 
 		// Keep track of dropped players
 		dropped_players := make(map[string]DroppedPlayer)
@@ -71,7 +69,7 @@ func create_initial_population(fas []Player, free_positions map[int][]string, we
 
 			// On the first day, make it so you cant drop streamable players who are playing
 			if j == 0 {
-				acq_count = streamable_count - len(gene.Roster)
+				acq_count = len(free_positions_copy[j]) - len(gene.Roster)
 			}
 
 			// Add acq_count players to gene

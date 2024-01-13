@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"time"
 	"sort"
 	"math"
@@ -13,7 +14,7 @@ func evolve_population(population []Chromosome, fas []Player, free_positions map
 	// Fill cumulative probabilities tracker for each chromosome
 	assign_cumulative_probabilities(population)
 
-	evolved_population := make([]Chromosome, 50)
+	next_generation := make([]Chromosome, 50)
 
 	p1_total := 0
 	p2_total := 0
@@ -22,8 +23,8 @@ func evolve_population(population []Chromosome, fas []Player, free_positions map
 
 		// Implement elitism
 		if i == 24 {
-			evolved_population[i*2] = population[i*2]
-			evolved_population[i*2+1] = population[i*2+1]
+			next_generation[i*2] = population[i*2]
+			next_generation[i*2+1] = population[i*2+1]
 			continue
 		}
 		
@@ -34,21 +35,21 @@ func evolve_population(population []Chromosome, fas []Player, free_positions map
 		p1_total += parent1.FitnessScore
 		p2_total += parent2.FitnessScore
 
-		// fmt.Println(parent1.FitnessScore)
-		// fmt.Println(parent2.FitnessScore)
-		// fmt.Println()
+		fmt.Println(parent1.FitnessScore)
+		fmt.Println(parent2.FitnessScore)
+		fmt.Println()
 
 		// Get children
 		child1, child2 := get_children(parent1, parent2, fas, free_positions, week)
 
 		// Add children to evolved population
-		evolved_population[i*2] = child1
-		evolved_population[i*2+1] = child2
+		next_generation[i*2] = child1
+		next_generation[i*2+1] = child2
 	
 	}
 
-	// fmt.Println("parent 1 average:", p1_total / 50)
-	// fmt.Println("parent 2 average:", p2_total / 50)
+	fmt.Println("parent 1 average:", p1_total / 25)
+	fmt.Println("parent 2 average:", p2_total / 25)
 
 	return population
 }
@@ -100,12 +101,12 @@ func select_second_parent(population []Chromosome) Chromosome {
 	src := rand.NewSource(time.Now().UnixNano())
 	rng := rand.New(src)
 
-	tournament := make([][6]Chromosome, 3)
+	tournament := make([][5]Chromosome, 3)
 
 	// Create tournament
 	for i := 0; i < 3; i++ {
 		
-		for j := 0; j < 6; j++ {
+		for j := 0; j < 5; j++ {
 
 			// Insert random chromosome
 			tournament[i][j] = population[rng.Intn(len(population))]
@@ -117,7 +118,7 @@ func select_second_parent(population []Chromosome) Chromosome {
 		})
 	}
 
-	return tournament[rng.Intn(3)][2]
+	return tournament[rng.Intn(3)][1]
 }
 
 // Function to get the children of two parents
@@ -128,8 +129,8 @@ func get_children(parent1 Chromosome, parent2 Chromosome, fas []Player, free_pos
 	// rng := rand.New(src)
 
 	// Create children
-	child1 := Chromosome{Genes: make([]Gene, len(parent1.Genes)), FitnessScore: 0, TotalAquisitions: 0, CumProbTracker: 0.0}
-	child2 := Chromosome{Genes: make([]Gene, len(parent2.Genes)), FitnessScore: 0, TotalAquisitions: 0, CumProbTracker: 0.0}
+	child1 := Chromosome{Genes: make([]Gene, len(parent1.Genes)), FitnessScore: 0, TotalAcquisitions: 0, CumProbTracker: 0.0}
+	child2 := Chromosome{Genes: make([]Gene, len(parent2.Genes)), FitnessScore: 0, TotalAcquisitions: 0, CumProbTracker: 0.0}
 
 	
 
