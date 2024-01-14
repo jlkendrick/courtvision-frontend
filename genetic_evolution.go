@@ -136,69 +136,47 @@ func get_children(parent1 Chromosome, parent2 Chromosome, fas []Player, free_pos
 	insert_streamable_players(streamable_players, free_positions, week, &child1, cur_streamers1)
 	insert_streamable_players(streamable_players, free_positions, week, &child2, cur_streamers2)
 
-	child_dropped_players := make(map[string]DroppedPlayer, 0)
+	child1_dropped_players := make(map[string]DroppedPlayer, 0)
+	child2_dropped_players := make(map[string]DroppedPlayer, 0)
 
 	for i := 0; i < len(parent1.Genes); i++ {
 
 		// If before crossover point, children are same as the respective parent
 		if i < crossover_point {
 			
+			// Replicate the parent's roster
 			for _, player := range parent1.Genes[i].NewPlayers {
 
-				dummy_has_match := false
-				matches := get_matches(player.ValidPositions, free_positions[i], &dummy_has_match)
-				pos_map := drop_and_find_pos(player, &child1, matches, free_positions, i, week, child_dropped_players, cur_streamers1, make([]Player, len(streamable_players)), false, true)
-				cur_streamers1[len(cur_streamers1) - 1] = player
-
-				for day, pos := range pos_map {
-					child1.Genes[day].Roster[pos] = player
-				}
+				insert_child1(i, player, free_positions, &child1, week, child1_dropped_players, cur_streamers1, streamable_players)
 			}
 
 			for _, player := range parent2.Genes[i].NewPlayers {
 				
-				dummy_has_match := false
-				matches := get_matches(player.ValidPositions, free_positions[i], &dummy_has_match)
-				pos_map := drop_and_find_pos(player, &child2, matches, free_positions, i, week, child_dropped_players, cur_streamers2, make([]Player, len(streamable_players)), false, true)
-				cur_streamers2[len(cur_streamers2) - 1] = player
-
-				for day, pos := range pos_map {
-					child2.Genes[day].Roster[pos] = player
-				}
+				insert_child2(i, player, free_positions, &child2, week, child2_dropped_players, cur_streamers2, streamable_players)
 			}
 
 		} else {
 
-			// Get matches for each player
+			// Replicate the parent's roster but into the opposite child
 			for _, player := range parent1.Genes[i].NewPlayers {
 
-				dummy_has_match := false
-				matches := get_matches(player.ValidPositions, free_positions[i], &dummy_has_match)
-				pos_map := drop_and_find_pos(player, &child2, matches, free_positions, i, week, child_dropped_players, cur_streamers1, make([]Player, len(streamable_players)), false, true)
-				cur_streamers1[len(cur_streamers1) - 1] = player
-
-				for day, pos := range pos_map {
-					child2.Genes[day].Roster[pos] = player
-				}
+				insert_child2(i, player, free_positions, &child2, week, child2_dropped_players, cur_streamers2, streamable_players)
 			}
 
 			for _, player := range parent2.Genes[i].NewPlayers {
 
-				dummy_has_match := false
-				matches := get_matches(player.ValidPositions, free_positions[i], &dummy_has_match)
-				pos_map := drop_and_find_pos(player, &child1, matches, free_positions, i, week, child_dropped_players, cur_streamers2, make([]Player, len(streamable_players)), false, true)
-				cur_streamers2[len(cur_streamers2) - 1] = player
-
-				for day, pos := range pos_map {
-					child1.Genes[day].Roster[pos] = player
-				}
+				insert_child1(i, player, free_positions, &child1, week, child1_dropped_players, cur_streamers1, streamable_players)
 			}
 		}
 	}
 
+	// Add the total acquisitions to the children chromosomes
+	get_total_acquisitions(&child1)
+	get_total_acquisitions(&child2)
+
 	// Mutate children
-	mutate(&child1, fas, free_positions, cur_streamers1, week)
-	mutate(&child2, fas, free_positions, cur_streamers2, week)
+	// mutate(&child1, fas, free_positions, cur_streamers1, week)
+	// mutate(&child2, fas, free_positions, cur_streamers2, week)
 
 	return child1, child2
 }
@@ -275,5 +253,36 @@ func simple_delete_all_occurences(chromosome *Chromosome, player_to_drop Player,
 		if key != "" {
 			delete(chromosome.Genes[day].Roster, key)
 		}
+	}
+}
+
+// Function to insert a player into child1
+func insert_child1(i int, player Player, free_positions map[int][]string, child1 *Chromosome, week string, child1_dropped_players map[string]DroppedPlayer, cur_streamers1 []Player, streamable_players []Player) {
+
+	dummy_has_match := false
+	matches := get_matches(player.ValidPositions, free_positions[i], &dummy_has_match)
+	pos_map := drop_and_find_pos(player, child1, matches, free_positions, i, week, child1_dropped_players, cur_streamers1, make([]Player, len(streamable_players)), false, true)
+	cur_streamers1[len(cur_streamers1) - 1] = player
+	child1.Genes[i].NewPlayers[player.Name] = player
+	child1.Genes[i].Acquisitions++
+
+	for day, pos := range pos_map {
+		child1.Genes[day].Roster[pos] = player
+	}
+
+}
+
+// Function to insert a player into child2
+func insert_child2(i int, player Player, free_positions map[int][]string, child2 *Chromosome, week string, child2_dropped_players map[string]DroppedPlayer, cur_streamers2 []Player, streamable_players []Player) {
+	
+	dummy_has_match := false
+	matches := get_matches(player.ValidPositions, free_positions[i], &dummy_has_match)
+	pos_map := drop_and_find_pos(player, child2, matches, free_positions, i, week, child2_dropped_players, cur_streamers2, make([]Player, len(streamable_players)), false, true)
+	cur_streamers2[len(cur_streamers2) - 1] = player
+	child2.Genes[i].NewPlayers[player.Name] = player
+	child2.Genes[i].Acquisitions++
+
+	for day, pos := range pos_map {
+		child2.Genes[day].Roster[pos] = player
 	}
 }

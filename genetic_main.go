@@ -11,25 +11,25 @@ import (
 func optimize_streaming(free_agent_map []Player, free_positions map[int][]string, week string, streamable_players []Player) {
 
 	// Create initial population
-	initial_population := create_initial_population(free_agent_map, free_positions, week, streamable_players)
+	population := create_initial_population(free_agent_map, free_positions, week, streamable_players)
 
 	// Evolve population
-	for i := 0; i < 20; i++ {
+	for i := 0; i < 10; i++ {
 
 		// Score fitness of initial population and get total acquisitions
-		for i := 0; i < len(initial_population); i++ {
-			get_acquisitions(&initial_population[i])
-			score_fitness(&initial_population[i], week)
+		for i := 0; i < len(population); i++ {
+			get_total_acquisitions(&population[i])
+			score_fitness(&population[i], week)
 		}
 
 		// Sort population by increasing fitness score
-		sort.Slice(initial_population, func(i, j int) bool {
-			return initial_population[i].FitnessScore < initial_population[j].FitnessScore
+		sort.Slice(population, func(i, j int) bool {
+			return population[i].FitnessScore < population[j].FitnessScore
 		})
 
 		// Print initial population
 		total_fitness_score := 0
-		for _, chromosome := range initial_population {
+		for _, chromosome := range population {
 			total_fitness_score += chromosome.FitnessScore
 		}
 		fmt.Println("Average fitness score:", total_fitness_score / 50)
@@ -37,9 +37,9 @@ func optimize_streaming(free_agent_map []Player, free_positions map[int][]string
 		// // Print the best chromosome
 		// order := []string{"PG", "SG", "SF", "PF", "C", "G", "F", "UT1", "UT2", "UT3"}
 		// fmt.Println("Best chromosome:")
-		// fmt.Println("Acquisitions:", initial_population[49].TotalAcquisitions)
+		// fmt.Println("Acquisitions:", population[49].TotalAcquisitions)
 		// games_played := 0
-		// for _, gene := range initial_population[49].Genes {
+		// for _, gene := range population[49].Genes {
 		// 	games_played += len(gene.Roster)
 		// 	fmt.Println()
 		// 	fmt.Println(gene.Day)
@@ -52,8 +52,23 @@ func optimize_streaming(free_agent_map []Player, free_positions map[int][]string
 		// fmt.Println("No streaming games played:", 8, "vs with streaming", games_played)
 
 		// Evolve population
-		initial_population = evolve_population(initial_population, free_agent_map, free_positions, streamable_players, week)
+		population = evolve_population(population, free_agent_map, free_positions, streamable_players, week)
 	}
+
+	// Print the best chromosome
+	order := []string{"PG", "SG", "SF", "PF", "C", "G", "F", "UT1", "UT2", "UT3"}
+	fmt.Println("Best chromosome:")
+	fmt.Println("Acquisitions:", population[49].TotalAcquisitions)
+	games_played := 0
+	for _, gene := range population[49].Genes {
+		games_played += len(gene.Roster)
+		fmt.Println()
+		fmt.Println(gene.Day)
+		for _, pos := range order {
+			fmt.Println(pos, gene.Roster[pos].Name)
+		}
+	}
+
 }
 
 // Function to remove an element from a slice
@@ -93,7 +108,7 @@ func score_fitness(chromosome *Chromosome, week string) {
 }
 
 // Function to get the number of acquisitions in a chromosome
-func get_acquisitions(chromosome *Chromosome) {
+func get_total_acquisitions(chromosome *Chromosome) {
 
 	acquisitions := 0
 
