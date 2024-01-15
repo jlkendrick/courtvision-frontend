@@ -21,6 +21,8 @@ func create_initial_population(fas []Player, free_positions map[int][]string, we
 	// Create 50 chromosomes
 	for i := 0; i < 50; i++ {
 
+		fmt.Println("Creating initial chromosome", i)
+
 		cur_streamers := make([]Player, streamable_count)
 
 		// Create chromosome
@@ -86,6 +88,7 @@ func create_initial_population(fas []Player, free_positions map[int][]string, we
 
 					// Check if the free agent has a game on the day
 					if !contains(schedule_map[week].Games[fa.Team], j) || fa.InjuryStatus == "OUT" {
+						trials++
 						continue
 					}
 
@@ -245,6 +248,9 @@ func drop_and_find_pos(player Player,
 		// Get the worst player that is not playing on the day
 		sort.Slice(not_playing_streamers, func(i, j int) bool {
 			return not_playing_streamers[i].AvgPoints < not_playing_streamers[j].AvgPoints })
+		if len(not_playing_streamers) == 0 {
+			fmt.Println(len(chromosome.Genes[start_day].Roster), len(streamable_players))
+		}
 		worst_player := not_playing_streamers[0]
 
 		// Drop the worst player from the chromosome

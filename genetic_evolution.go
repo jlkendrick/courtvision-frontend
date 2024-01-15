@@ -15,12 +15,12 @@ func evolve_population(population []Chromosome, fas []Player, free_positions map
 
 	next_generation := make([]Chromosome, 50)
 
-	for i := 0; i < 25; i++ {
-
-		// // Implement elitism
-		// if i == 24 {
-		// 	next_generation[i*2+1] = population[i*2+1]
-		// }
+	// // Implement elitism
+	
+	next_generation[48] = population[48]
+	next_generation[49] = population[49]
+	
+	for i := 0; i < 24; i++ {
 		
 		// Get parents
 		parent1 := select_first_parent(population)
@@ -31,13 +31,9 @@ func evolve_population(population []Chromosome, fas []Player, free_positions map
 		child1, child2 := get_children(parent1, parent2, fas, free_positions, streamable_players, week)
 
 		// Add children to evolved population
-		if i != 26 {
-			next_generation[i*2] = child1
-			next_generation[i*2+1] = child2
-		} else {
-			next_generation[i*2] = child1
-		}
-	
+		next_generation[i*2] = child1
+		next_generation[i*2+1] = child2
+		
 	}
 
 	return next_generation
@@ -147,12 +143,12 @@ func get_children(parent1 Chromosome, parent2 Chromosome, fas []Player, free_pos
 			// Replicate the parent's roster
 			for _, player := range parent1.Genes[i].NewPlayers {
 
-				insert_child1(i, player, free_positions, &child1, week, child1_dropped_players, cur_streamers1, streamable_players)
+				insert_player(i, player, free_positions, &child1, week, child1_dropped_players, cur_streamers1, streamable_players)
 			}
 
 			for _, player := range parent2.Genes[i].NewPlayers {
 				
-				insert_child2(i, player, free_positions, &child2, week, child2_dropped_players, cur_streamers2, streamable_players)
+				insert_player(i, player, free_positions, &child2, week, child2_dropped_players, cur_streamers2, streamable_players)
 			}
 
 		} else {
@@ -160,12 +156,26 @@ func get_children(parent1 Chromosome, parent2 Chromosome, fas []Player, free_pos
 			// Replicate the parent's roster but into the opposite child
 			for _, player := range parent1.Genes[i].NewPlayers {
 
-				insert_child2(i, player, free_positions, &child2, week, child2_dropped_players, cur_streamers2, streamable_players)
+				// Check if the player is already on the child's roster or if he is still on the waiver wire
+				valid := validate_player(player, parent2.Genes, child2_dropped_players)
+
+				if valid {
+					insert_player(i, player, free_positions, &child2, week, child2_dropped_players, cur_streamers2, streamable_players)
+				} else {
+					continue
+				}
 			}
 
 			for _, player := range parent2.Genes[i].NewPlayers {
 
-				insert_child1(i, player, free_positions, &child1, week, child1_dropped_players, cur_streamers1, streamable_players)
+				// Check if the player is already on the child's roster or if he is still on the waiver wire
+				valid := validate_player(player, parent1.Genes, child1_dropped_players)
+
+				if valid {
+					insert_player(i, player, free_positions, &child1, week, child1_dropped_players, cur_streamers1, streamable_players)
+				} else {
+					continue
+				}
 			}
 		}
 	}
@@ -256,33 +266,38 @@ func simple_delete_all_occurences(chromosome *Chromosome, player_to_drop Player,
 	}
 }
 
-// Function to insert a player into child1
-func insert_child1(i int, player Player, free_positions map[int][]string, child1 *Chromosome, week string, child1_dropped_players map[string]DroppedPlayer, cur_streamers1 []Player, streamable_players []Player) {
+// Function to insert a player into a chromosome
+func insert_player(day int, player Player, free_positions map[int][]string, child *Chromosome, week string, dropped_players map[string]DroppedPlayer, cur_streamers []Player, streamable_players []Player) {
 
 	dummy_has_match := false
-	matches := get_matches(player.ValidPositions, free_positions[i], &dummy_has_match)
-	pos_map := drop_and_find_pos(player, child1, matches, free_positions, i, week, child1_dropped_players, cur_streamers1, make([]Player, len(streamable_players)), false, true)
-	cur_streamers1[len(cur_streamers1) - 1] = player
-	child1.Genes[i].NewPlayers[player.Name] = player
-	child1.Genes[i].Acquisitions++
+	matches := get_matches(player.ValidPositions, free_positions[day], &dummy_has_match)
+	pos_map := drop_and_find_pos(player, child, matches, free_positions, day, week, dropped_players, cur_streamers, make([]Player, len(streamable_players)), false, true)
+	cur_streamers[len(cur_streamers) - 1] = player
+	child.Genes[day].NewPlayers[player.Name] = player
+	child.Genes[day].Acquisitions++
 
 	for day, pos := range pos_map {
-		child1.Genes[day].Roster[pos] = player
+		child.Genes[day].Roster[pos] = player
 	}
-
 }
 
-// Function to insert a player into child2
-func insert_child2(i int, player Player, free_positions map[int][]string, child2 *Chromosome, week string, child2_dropped_players map[string]DroppedPlayer, cur_streamers2 []Player, streamable_players []Player) {
-	
-	dummy_has_match := false
-	matches := get_matches(player.ValidPositions, free_positions[i], &dummy_has_match)
-	pos_map := drop_and_find_pos(player, child2, matches, free_positions, i, week, child2_dropped_players, cur_streamers2, make([]Player, len(streamable_players)), false, true)
-	cur_streamers2[len(cur_streamers2) - 1] = player
-	child2.Genes[i].NewPlayers[player.Name] = player
-	child2.Genes[i].Acquisitions++
+// Function to validate the insertion of a player into a chromosome
+func validate_player(player Player, roster []Gene, dropped_players map[string]DroppedPlayer) bool {
 
-	for day, pos := range pos_map {
-		child2.Genes[day].Roster[pos] = player
+	// Function to see if the player is in the dropped players map
+	check_dropped_players := func(dropped_players map[string]DroppedPlayer, player_name string) bool {
+		if _, ok := dropped_players[player_name]; ok {
+			return true
+		}
+		return false
 	}
+
+	// Check if the player is already on the roster or if he is still on the waiver wire
+	for _, gene := range roster {
+		if map_contains_value(gene, player.Name) != "" || check_dropped_players(dropped_players, player.Name) {
+			return false
+		}
+	}
+
+	return true
 }

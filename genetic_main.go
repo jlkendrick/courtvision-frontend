@@ -14,7 +14,7 @@ func optimize_streaming(free_agent_map []Player, free_positions map[int][]string
 	population := create_initial_population(free_agent_map, free_positions, week, streamable_players)
 
 	// Evolve population
-	for i := 0; i < 10; i++ {
+	for i := 0; i < 15; i++ {
 
 		// Score fitness of initial population and get total acquisitions
 		for i := 0; i < len(population); i++ {
@@ -122,6 +122,7 @@ func get_total_acquisitions(chromosome *Chromosome) {
 
 // Function to print a population
 func print_population(initial_population []Chromosome) {
+	
 	// Print initial population
 	order_to_print := []string{"PG", "SG", "SF", "PF", "C", "G", "F", "UT1", "UT2", "UT3"}
 	for _, gene := range initial_population[0].Genes {
