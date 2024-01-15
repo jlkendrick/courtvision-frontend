@@ -185,8 +185,8 @@ func get_children(parent1 Chromosome, parent2 Chromosome, fas []Player, free_pos
 	get_total_acquisitions(&child2)
 
 	// Mutate children
-	// mutate(&child1, fas, free_positions, cur_streamers1, week)
-	// mutate(&child2, fas, free_positions, cur_streamers2, week)
+	mutate(&child1, fas, free_positions, cur_streamers1, week)
+	mutate(&child2, fas, free_positions, cur_streamers2, week)
 
 	return child1, child2
 }
@@ -210,6 +210,9 @@ func mutate(chromosome *Chromosome, fas []Player, free_positions map[int][]strin
 			new_players := []Player{}
 			for _, player := range chromosome.Genes[rand_day].NewPlayers {
 				new_players = append(new_players, player)
+			}
+			if len(new_players) == 0 {
+				return
 			}
 			rand_index := rng.Intn(len(new_players))
 
@@ -244,7 +247,35 @@ func mutate(chromosome *Chromosome, fas []Player, free_positions map[int][]strin
 
 		} else {
 		// Find a valid swap for a random player on a random day and swap them
-			
+			player1, day1, player2, day2 := find_valid_swap(chromosome, fas, free_positions, cur_streamers, week)
+
+			if player1.Name != "" && player2.Name != "" {
+				
+				// Delete all occurences of the players
+				simple_delete_all_occurences(chromosome, player1, week, -1)
+				simple_delete_all_occurences(chromosome, player2, week, -1)
+
+				// Insert the players
+				dummy_has_match := false
+				matches := get_matches(player1.ValidPositions, free_positions[day1], &dummy_has_match)
+				pos_map := drop_and_find_pos(player1, chromosome, matches, free_positions, day1, week, make(map[string]DroppedPlayer, 0), cur_streamers, make([]Player, len(fas)), false, true)
+				cur_streamers[len(cur_streamers) - 1] = player1
+
+				for day, pos := range pos_map {
+
+					chromosome.Genes[day].Roster[pos] = player1
+				}
+
+				dummy_has_match = false
+				matches = get_matches(player2.ValidPositions, free_positions[day2], &dummy_has_match)
+				pos_map = drop_and_find_pos(player2, chromosome, matches, free_positions, day2, week, make(map[string]DroppedPlayer, 0), cur_streamers, make([]Player, len(fas)), false, true)
+				cur_streamers[len(cur_streamers) - 1] = player2
+
+				for day, pos := range pos_map {
+
+					chromosome.Genes[day].Roster[pos] = player2
+				}
+			}
 		}
 	}
 }
@@ -300,4 +331,96 @@ func validate_player(player Player, roster []Gene, dropped_players map[string]Dr
 	}
 
 	return true
+}
+
+// Function to find a valid swap for a chromosome mutation
+func find_valid_swap(chromosome *Chromosome, fas []Player, free_positions map[int][]string, streamable_players []Player, week string) (Player, int, Player, int) {
+
+	// Get random seed
+	src := rand.NewSource(time.Now().UnixNano())
+	rng := rand.New(src)
+
+	check := func(day1 int, day2 int, player1 Player, player2 Player) bool {
+
+		// Check if the players are playing on the days
+		if (!contains(schedule_map[week].Games[player1.Team], day1)) || (!contains(schedule_map[week].Games[player2.Team], day2)) {
+			return false
+
+		}
+
+		// Check if the player can be rostered on the day
+		free_positions_on_day1_map := make(map[string]bool)
+		free_positions_on_day2_map := make(map[string]bool)
+		
+		for _, pos := range free_positions[day1] {
+			free_positions_on_day1_map[pos] = true
+		}
+		for _, pos := range free_positions[day2] {
+			free_positions_on_day2_map[pos] = true
+		}
+
+		// Remove the positions that are already filled
+		for pos, player1 := range chromosome.Genes[day1].Roster {
+			if _, ok := free_positions_on_day1_map[pos]; ok && chromosome.Genes[day1].Roster[pos].Name != player1.Name {
+				delete(free_positions_on_day1_map, pos)
+			}
+		}
+		for pos, player2 := range chromosome.Genes[day2].Roster {
+			if _, ok := free_positions_on_day2_map[pos]; ok && chromosome.Genes[day2].Roster[pos].Name != player2.Name {
+				delete(free_positions_on_day2_map, pos)
+			}
+		}
+
+		// Check if the players can be rostered on the days
+		for _, pos := range player1.ValidPositions {
+			if _, ok := free_positions_on_day2_map[pos]; ok {
+				return true
+			}
+		}
+		for _, pos := range player2.ValidPositions {
+			if _, ok := free_positions_on_day1_map[pos]; ok {
+				return true
+			}
+		}
+
+		return false
+	}
+
+	for trials := 0; trials < 100; trials++ {
+		// Get two random days that are not the same
+		rand_day1 := rng.Intn(len(chromosome.Genes))
+		rand_day2 := rng.Intn(len(chromosome.Genes))
+		for rand_day1 == rand_day2 {
+			rand_day2 = rng.Intn(len(chromosome.Genes))
+		}
+
+		for not_found_swap := true; not_found_swap; {
+
+			// Get two random players that were added on that day
+			if len(chromosome.Genes[rand_day1].NewPlayers) == 0 || len(chromosome.Genes[rand_day2].NewPlayers) == 0 {
+				break
+			}
+			rand_index1 := rng.Intn(len(chromosome.Genes[rand_day1].NewPlayers))
+			rand_index2 := rng.Intn(len(chromosome.Genes[rand_day2].NewPlayers))
+			map_keys1 := make([]string, 0, len(chromosome.Genes[rand_day1].NewPlayers))
+			for key := range chromosome.Genes[rand_day1].NewPlayers {
+				map_keys1 = append(map_keys1, key)
+			}
+			map_keys2 := make([]string, 0, len(chromosome.Genes[rand_day2].NewPlayers))
+			for key := range chromosome.Genes[rand_day2].NewPlayers {
+				map_keys2 = append(map_keys2, key)
+			}
+			player1 := chromosome.Genes[rand_day1].NewPlayers[map_keys1[rand_index1]]
+			player2 := chromosome.Genes[rand_day2].NewPlayers[map_keys2[rand_index2]]
+
+			if check(rand_day1, rand_day2, player1, player2) {
+				return player1, rand_day1, player2, rand_day2
+
+			} else {
+				continue
+
+			}
+		}
+	}
+	return Player{}, 0, Player{}, 0
 }

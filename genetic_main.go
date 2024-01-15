@@ -14,7 +14,7 @@ func optimize_streaming(free_agent_map []Player, free_positions map[int][]string
 	population := create_initial_population(free_agent_map, free_positions, week, streamable_players)
 
 	// Evolve population
-	for i := 0; i < 15; i++ {
+	for i := 0; i < 10; i++ {
 
 		// Score fitness of initial population and get total acquisitions
 		for i := 0; i < len(population); i++ {
