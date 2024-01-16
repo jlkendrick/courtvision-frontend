@@ -117,7 +117,7 @@ func get_data(index int, api_url string, league_id int, espn_s2 string, swid str
 		fmt.Println("Error", err)
 	}
 
-	// Send POST request to API
+	// Send POST request to server
 	response, err := http.Post(api_url, "application/json", bytes.NewBuffer(json_roster_meta))
 	if err != nil {
 		fmt.Println("Error sending or recieving from api:", err)

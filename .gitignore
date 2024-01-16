@@ -1,5 +1,7 @@
 venv
 .vscode
+static/diagram.txt
+server/__pycache__
 __pycache__
 tests/speedtest.go
 tests/apispeedtest.py

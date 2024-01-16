@@ -250,6 +250,7 @@ func drop_and_find_pos(player Player,
 			return not_playing_streamers[i].AvgPoints < not_playing_streamers[j].AvgPoints })
 		if len(not_playing_streamers) == 0 {
 			fmt.Println(len(chromosome.Genes[start_day].Roster), len(streamable_players))
+			fmt.Println(streamable_players)
 		}
 		worst_player := not_playing_streamers[0]
 

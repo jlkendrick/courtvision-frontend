@@ -103,7 +103,7 @@ func select_second_parent(population []Chromosome) Chromosome {
 		})
 	}
 
-	return tournament[rng.Intn(3)][1]
+	return tournament[rng.Intn(3)][0]
 }
 
 // Function to get the children of two parents
@@ -185,14 +185,14 @@ func get_children(parent1 Chromosome, parent2 Chromosome, fas []Player, free_pos
 	get_total_acquisitions(&child2)
 
 	// Mutate children
-	mutate(&child1, fas, free_positions, cur_streamers1, week)
-	mutate(&child2, fas, free_positions, cur_streamers2, week)
+	mutate(&child1, child1_dropped_players, fas, free_positions, cur_streamers1, week, streamable_players)
+	mutate(&child2, child2_dropped_players, fas, free_positions, cur_streamers2, week, streamable_players)
 
 	return child1, child2
 }
 
 // Function to mutate a chromosome
-func mutate(chromosome *Chromosome, fas []Player, free_positions map[int][]string, cur_streamers []Player, week string) {
+func mutate(chromosome *Chromosome, dropped_players map[string]DroppedPlayer, fas []Player, free_positions map[int][]string, cur_streamers []Player, week string, streamable_players []Player) {
 	
 	// Get random seed
 	src := rand.NewSource(time.Now().UnixNano())
@@ -218,7 +218,7 @@ func mutate(chromosome *Chromosome, fas []Player, free_positions map[int][]strin
 
 			simple_delete_all_occurences(chromosome, new_players[rand_index], week, rand_day)
 
-		} else if rand_num < 0.066 {
+		} else if rand_num < 0.66{
 		// Add a random player in a random position on a random day
 
 			for not_found := true; not_found; {
@@ -236,7 +236,7 @@ func mutate(chromosome *Chromosome, fas []Player, free_positions map[int][]strin
 				// Insert the player into the roster
 				dummy_has_match := false
 				matches := get_matches(fa.ValidPositions, free_positions[rand_day], &dummy_has_match)
-				pos_map := drop_and_find_pos(fa, chromosome, matches, free_positions, rand_day, week, make(map[string]DroppedPlayer, 0), cur_streamers, make([]Player, len(fas)), false, true)
+				pos_map := drop_and_find_pos(fa, chromosome, matches, free_positions, rand_day, week, make(map[string]DroppedPlayer, 0), cur_streamers, streamable_players, false, true)
 				cur_streamers[len(cur_streamers) - 1] = fa
 
 				for day, pos := range pos_map {
@@ -247,34 +247,12 @@ func mutate(chromosome *Chromosome, fas []Player, free_positions map[int][]strin
 
 		} else {
 		// Find a valid swap for a random player on a random day and swap them
-			player1, day1, player2, day2 := find_valid_swap(chromosome, fas, free_positions, cur_streamers, week)
+			player1, day1, player2, day2 := find_valid_swap(chromosome, free_positions, cur_streamers, week)
 
 			if player1.Name != "" && player2.Name != "" {
 				
-				// Delete all occurences of the players
-				simple_delete_all_occurences(chromosome, player1, week, -1)
-				simple_delete_all_occurences(chromosome, player2, week, -1)
-
-				// Insert the players
-				dummy_has_match := false
-				matches := get_matches(player1.ValidPositions, free_positions[day1], &dummy_has_match)
-				pos_map := drop_and_find_pos(player1, chromosome, matches, free_positions, day1, week, make(map[string]DroppedPlayer, 0), cur_streamers, make([]Player, len(fas)), false, true)
-				cur_streamers[len(cur_streamers) - 1] = player1
-
-				for day, pos := range pos_map {
-
-					chromosome.Genes[day].Roster[pos] = player1
-				}
-
-				dummy_has_match = false
-				matches = get_matches(player2.ValidPositions, free_positions[day2], &dummy_has_match)
-				pos_map = drop_and_find_pos(player2, chromosome, matches, free_positions, day2, week, make(map[string]DroppedPlayer, 0), cur_streamers, make([]Player, len(fas)), false, true)
-				cur_streamers[len(cur_streamers) - 1] = player2
-
-				for day, pos := range pos_map {
-
-					chromosome.Genes[day].Roster[pos] = player2
-				}
+				insert_player(day1, player2, free_positions, chromosome, week, dropped_players, cur_streamers, streamable_players)
+				insert_player(day2, player1, free_positions, chromosome, week, dropped_players, cur_streamers, streamable_players)
 			}
 		}
 	}
@@ -334,7 +312,7 @@ func validate_player(player Player, roster []Gene, dropped_players map[string]Dr
 }
 
 // Function to find a valid swap for a chromosome mutation
-func find_valid_swap(chromosome *Chromosome, fas []Player, free_positions map[int][]string, streamable_players []Player, week string) (Player, int, Player, int) {
+func find_valid_swap(chromosome *Chromosome, free_positions map[int][]string, streamable_players []Player, week string) (Player, int, Player, int) {
 
 	// Get random seed
 	src := rand.NewSource(time.Now().UnixNano())
