@@ -228,7 +228,7 @@ func mutate(chromosome *Chromosome, dropped_players map[string]DroppedPlayer, fa
 				fa := fas[rand_index]
 
 				// Check if the player is already on the roster or if the player is not playing on the day
-				if map_contains_value(chromosome.Genes[rand_day], fa.Name) != "" || !contains(schedule_map[week].Games[fa.Team], rand_day) {
+				if map_contains_value(chromosome.Genes[rand_day], fa.Name) != "" || !contains(schedule_map[week].Games[fa.Team], rand_day) || fa.InjuryStatus == "OUT" {
 					continue
 				}
 				not_found = false
