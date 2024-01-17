@@ -1,8 +1,7 @@
 venv
 .vscode
+deprecated
 static/diagram.txt
 server/__pycache__
 __pycache__
-tests/speedtest.go
-tests/apispeedtest.py
-tests/api_st_client.py
+speedtests
