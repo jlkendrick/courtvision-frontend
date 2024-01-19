@@ -1,4 +1,4 @@
-package main
+package helper
 
 // Structs to keep track of the order of the responses
 type PlayersResponse struct {
@@ -24,8 +24,8 @@ type Player struct {
 	Name           string   `json:"name"`
 	AvgPoints      float64  `json:"avg_points"`
 	Team           string   `json:"team"`
-	InjuryStatus   string   `json:"injury_status"`
 	ValidPositions []string `json:"valid_positions"`
+	Injured        bool     `json:"injured"`
 }
 
 // Struct for JSON schedule file that is used to get days a player is playing
@@ -38,7 +38,7 @@ type GameSchedule struct {
 
 // Struct for keeping track of state across recursive function calls to allow for early exit
 type FitPlayersContext struct {
-	BestLineup map[string]string
+	BestLineup map[string]Player
 	TopScore   int
 	MaxScore   int
 	EarlyExit  bool

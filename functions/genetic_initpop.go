@@ -1,4 +1,4 @@
-package main
+package helper
 
 import (
 	"fmt"
@@ -8,7 +8,7 @@ import (
 )
 
 // Function to create initial population
-func create_initial_population(fas []Player, free_positions map[int][]string, week string, streamable_players []Player) []Chromosome {
+func CreateInitialPopulation(fas []Player, free_positions map[int][]string, week string, streamable_players []Player) []Chromosome {
 
 	// Create random seed
 	src := rand.NewSource(time.Now().UnixNano())
@@ -87,7 +87,7 @@ func create_initial_population(fas []Player, free_positions map[int][]string, we
 					fa := fas_copy[rand_index]
 
 					// Check if the free agent has a game on the day
-					if !contains(schedule_map[week].Games[fa.Team], j) || fa.InjuryStatus == "OUT" {
+					if !Contains(schedule_map[week].Games[fa.Team], j) || fa.Injured {
 						trials++
 						continue
 					}
@@ -222,7 +222,7 @@ func drop_and_find_pos(player Player,
 
 			index := 0
 			for _, player := range cur_streamers {
-				if !contains(player.ValidPositions, 0) {
+				if !Contains(player.ValidPositions, 0) {
 					break
 				}
 				index++
@@ -245,6 +245,9 @@ func drop_and_find_pos(player Player,
 			}
 		}
 
+		if len(not_playing_streamers) == 0 {
+			fmt.Println("LJLSJFIJFLSJFKSJFLSFJLSJFLS")
+		}
 		// Get the worst player that is not playing on the day
 		sort.Slice(not_playing_streamers, func(i, j int) bool {
 			return not_playing_streamers[i].AvgPoints < not_playing_streamers[j].AvgPoints })

@@ -2,8 +2,7 @@ import requests
 import json
 from fastapi import FastAPI
 from pydantic import BaseModel, field_validator
-from espn_api.utils.utils import json_parsing
-from utils import POSITION_MAP, PRO_TEAM_MAP, STAT_ID_MAP
+from espn_api.basketball import Player
 
 # Find a team in a list of teams
 def find_team(team_name, teams):
@@ -12,22 +11,6 @@ def find_team(team_name, teams):
             return team
     return None
 
-# Converts a stat id to a more readable format
-def stat_id_pretty(id: str, scoring_period):
-    id_type = STAT_ID_MAP.get(id[:2])
-    return f'{id[2:]}_{id_type}' if id_type else str(scoring_period)
-
-# Returns the average points for a player in a given year
-def get_average_points(player, year):
-    stats = {}
-    for split in player.get('stats', []):
-        if split.get('seasonId') == year:
-            id = stat_id_pretty(split['id'], split['scoringPeriodId'])
-            applied_total = split.get('appliedTotal', 0)
-            applied_avg =  round(split.get('appliedAverage', 0), 2)
-            stats[id] = dict(applied_total=applied_total, applied_avg=applied_avg)
-            return stats.get(f'{year}_total', {}).get('applied_avg', 0)
-        
 def get_roster(team_name, teams):
         
         for team in teams:
@@ -47,8 +30,8 @@ class PlayerModelResponse(BaseModel):
     name: str
     avg_points: float
     team: str
-    injury_status: str
     valid_positions: list[str]
+    injured: bool
 
     @field_validator("valid_positions", mode="before")
     @classmethod
@@ -70,13 +53,14 @@ async def get_team_data(req: TeamDataRequest):
     endpoint = f'https://fantasy.espn.com/apis/v3/games/fba/seasons/{req.year}/segments/0/leagues/{req.league_id}'
     data = requests.get(endpoint, params=params).json()
     roster = get_roster(req.team_name, data['teams'])
+    players = [Player(player, req.year) for player in roster]
 
-    return [PlayerModelResponse(name=(json_parsing(player, 'fullName')),
-                                avg_points=(get_average_points(player['playerPoolEntry']['player'] if 'playerPoolEntry' in player else player['player'], 2024)),
-                                team=(PRO_TEAM_MAP[json_parsing(player, 'proTeamId')]),
-                                injury_status=str((json_parsing(player, 'injuryStatus'))),
-                                valid_positions=([POSITION_MAP[pos] for pos in json_parsing(player, 'eligibleSlots')]),
-                                ) for player in roster]
+    return [PlayerModelResponse(name=player.name,
+                                avg_points=player.avg_points,
+                                team=player.proTeam,
+                                valid_positions=player.eligibleSlots,
+                                injured=player.injured,
+                                ) for player in players]
     
     
             
@@ -96,10 +80,11 @@ def get_free_agents(req: TeamDataRequest):
 
     endpoint = f'https://fantasy.espn.com/apis/v3/games/fba/seasons/{req.year}/segments/0/leagues/{req.league_id}'
     data = requests.get(endpoint, params=params, headers=headers).json()
+    players = [Player(player, req.year) for player in data['players']]
 
-    return [PlayerModelResponse(name=(json_parsing(player, 'fullName')),
-                                avg_points=(get_average_points(player['playerPoolEntry']['player'] if 'playerPoolEntry' in player else player['player'], 2024)),
-                                team=(PRO_TEAM_MAP[json_parsing(player, 'proTeamId')]),
-                                injury_status=str((json_parsing(player, 'injuryStatus'))),
-                                valid_positions=([POSITION_MAP[pos] for pos in json_parsing(player, 'eligibleSlots')]),
-                                ) for player in data['players']]
+    return [PlayerModelResponse(name=player.name,
+                                avg_points=player.avg_points,
+                                team=player.proTeam,
+                                valid_positions=player.eligibleSlots,
+                                injured=player.injured,
+                                ) for player in players]

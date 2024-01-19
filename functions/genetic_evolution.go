@@ -1,4 +1,4 @@
-package main
+package helper
 
 import (
 	"time"
@@ -228,7 +228,7 @@ func mutate(chromosome *Chromosome, dropped_players map[string]DroppedPlayer, fa
 				fa := fas[rand_index]
 
 				// Check if the player is already on the roster or if the player is not playing on the day
-				if map_contains_value(chromosome.Genes[rand_day], fa.Name) != "" || !contains(schedule_map[week].Games[fa.Team], rand_day) || fa.InjuryStatus == "OUT" {
+				if map_contains_value(chromosome.Genes[rand_day], fa.Name) != "" || !Contains(schedule_map[week].Games[fa.Team], rand_day) || fa.Injured {
 					continue
 				}
 				not_found = false
@@ -321,7 +321,7 @@ func find_valid_swap(chromosome *Chromosome, free_positions map[int][]string, st
 	check := func(day1 int, day2 int, player1 Player, player2 Player) bool {
 
 		// Check if the players are playing on the days
-		if (!contains(schedule_map[week].Games[player1.Team], day1)) || (!contains(schedule_map[week].Games[player2.Team], day2)) {
+		if (!Contains(schedule_map[week].Games[player1.Team], day1)) || (!Contains(schedule_map[week].Games[player2.Team], day2)) {
 			return false
 
 		}

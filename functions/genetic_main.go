@@ -1,4 +1,4 @@
-package main
+package helper
 
 import (
 	"fmt"
@@ -11,7 +11,7 @@ import (
 func optimize_streaming(free_agent_map []Player, free_positions map[int][]string, week string, streamable_players []Player) {
 
 	// Create initial population
-	population := create_initial_population(free_agent_map, free_positions, week, streamable_players)
+	population := CreateInitialPopulation(free_agent_map, free_positions, week, streamable_players)
 
 	// Evolve population
 	for i := 0; i < 50; i++ {
@@ -34,23 +34,6 @@ func optimize_streaming(free_agent_map []Player, free_positions map[int][]string
 		}
 		fmt.Println("Average fitness score:", total_fitness_score / 50)
 
-		// // Print the best chromosome
-		// order := []string{"PG", "SG", "SF", "PF", "C", "G", "F", "UT1", "UT2", "UT3"}
-		// fmt.Println("Best chromosome:")
-		// fmt.Println("Acquisitions:", population[49].TotalAcquisitions)
-		// games_played := 0
-		// for _, gene := range population[49].Genes {
-		// 	games_played += len(gene.Roster)
-		// 	fmt.Println()
-		// 	fmt.Println(gene.Day)
-		// 	fmt.Println("Acquisitions:", gene.Acquisitions)
-		// 	fmt.Println("New players:", gene.NewPlayers)
-		// 	for _, pos := range order {
-		// 		fmt.Println(pos, gene.Roster[pos].Name)
-		// 	}
-		// }
-		// fmt.Println("No streaming games played:", 8, "vs with streaming", games_played)
-
 		// Evolve population
 		population = evolve_population(population, free_agent_map, free_positions, streamable_players, week)
 	}
@@ -64,10 +47,13 @@ func optimize_streaming(free_agent_map []Player, free_positions map[int][]string
 		games_played += len(gene.Roster)
 		fmt.Println()
 		fmt.Println(gene.Day)
+		fmt.Println("Acquisitions:", gene.Acquisitions)
+		fmt.Println("New players:", gene.NewPlayers)
 		for _, pos := range order {
 			fmt.Println(pos, gene.Roster[pos].Name)
 		}
 	}
+	fmt.Println("No streaming games played:", 8, "vs with streaming", games_played)
 
 }
 
