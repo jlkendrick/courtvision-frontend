@@ -1,8 +1,9 @@
-package helper
+package tests
 
 import (
 	"fmt"
 	"testing"
+	. "main/functions"
 )
 
 func TestAPI(t *testing.T) {

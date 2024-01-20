@@ -1,6 +1,7 @@
-package helper
+package tests
 
 import (
+	. "main/functions"
 	"math/rand"
 	"time"
 	"testing"
