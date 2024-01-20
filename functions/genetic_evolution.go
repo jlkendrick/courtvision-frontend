@@ -181,8 +181,8 @@ func get_children(parent1 Chromosome, parent2 Chromosome, fas []Player, free_pos
 	}
 
 	// Add the total acquisitions to the children chromosomes
-	get_total_acquisitions(&child1)
-	get_total_acquisitions(&child2)
+	GetTotalAcquisitions(&child1)
+	GetTotalAcquisitions(&child2)
 
 	// Mutate children
 	mutate(&child1, child1_dropped_players, fas, free_positions, cur_streamers1, week, streamable_players)

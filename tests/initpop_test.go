@@ -3,8 +3,8 @@ package tests
 import (
 	. "main/functions"
 	"math/rand"
-	"time"
 	"testing"
+	"time"
 )
 
 func TestInitPopIntegration(t *testing.T) {
@@ -22,7 +22,7 @@ func TestCreateChromosome(t *testing.T) {
 	team_name := "James's Scary Team"
 	year := 2024
 	week := "13"
-	threshold := 33.0
+	threshold := 35.0
 
 	roster_map, free_agents := GetPlayers(league_id, espn_s2, swid, team_name, year)
 
@@ -38,10 +38,18 @@ func TestCreateChromosome(t *testing.T) {
 	for _, player := range streamable_players {
 		if Contains(ScheduleMap[week].Games[player.Team], 0) {
 			if MapContainsValue(chromosome.Genes[0], player.Name) == "" {
-				t.Error("Player not in roster")
+				t.Error("Initial streamer not in roster")
 			}
 		}
 	}
 
+	// Check to see if every player in NewPlayers is in the roster
+	for _, gene := range chromosome.Genes {
+		for _, player := range gene.NewPlayers {
+			if MapContainsValue(gene, player.Name) == "" {
+				t.Error("NewPlayer not in roster")
+			}
+		}
+	}
 	
 }

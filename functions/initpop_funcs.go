@@ -20,6 +20,9 @@ func CreateInitialPopulation(size int, fas []Player, free_positions map[int][]st
 	for i := 0; i < size; i++ {
 
 		chromosome := CreateChromosome(streamable_players, week, fas, free_positions, rng)
+
+		GetTotalAcquisitions(&chromosome)
+
 		chromosomes[i] = chromosome
 	}
 
@@ -28,8 +31,8 @@ func CreateInitialPopulation(size int, fas []Player, free_positions map[int][]st
 
 func CreateChromosome(streamable_players []Player, week string, fas []Player, free_positions map[int][]string, rng *rand.Rand) Chromosome {
 
-	cur_streamers := []Player{}
 	streamable_count := len(streamable_players)
+	cur_streamers := make([]Player, streamable_count)
 	days_in_week := ScheduleMap[week].GameSpan
 
 	chromosome := Chromosome{Genes: make([]Gene, days_in_week+1), FitnessScore: 0, TotalAcquisitions: 0, CumProbTracker: 0.0, DroppedPlayers: make(map[string]DroppedPlayer)}
@@ -128,7 +131,6 @@ func CreateChromosome(streamable_players []Player, week string, fas []Player, fr
 					}
 
 					// Once a player is added, add another player or go to next day
-					cur_streamers = append(cur_streamers, fa)
 					break
 				}
 				trials++
@@ -184,7 +186,7 @@ func GetPosMap(player Player,
 			for _, dropped_player := range cur_streamers {
 				if !Contains(ScheduleMap[week].Games[player.Team], 0) {
 				// Drop the worst player from the chromosome
-				DeleteAllOccurrences(chromosome, cur_streamers, dropped_player, week, start_day)
+				DeleteAllOccurrences(chromosome, cur_streamers, player, dropped_player, week, start_day)
 				chromosome.DroppedPlayers[dropped_player.Name] = DroppedPlayer{Player: dropped_player, Countdown: 3}
 				}
 			}
@@ -209,25 +211,30 @@ func GetPosMap(player Player,
 		sort.Slice(not_playing_streamers, func(i, j int) bool {
 			return not_playing_streamers[i].AvgPoints < not_playing_streamers[j].AvgPoints })
 		if len(not_playing_streamers) == 0 {
+			fmt.Println(start_day)
+			fmt.Println(chromosome.Genes[start_day].Roster)
 			fmt.Println(len(chromosome.Genes[start_day].Roster), len(streamable_players))
 			fmt.Println(streamable_players)
 		}
 		worst_player := not_playing_streamers[0]
 
 		// Drop the worst player from the chromosome
-		DeleteAllOccurrences(chromosome, cur_streamers, worst_player, week, start_day)
+		DeleteAllOccurrences(chromosome, cur_streamers, player, worst_player, week, start_day)
 		chromosome.DroppedPlayers[worst_player.Name] = DroppedPlayer{Player: worst_player, Countdown: 3}
 		FindBestPositions(player, chromosome, free_positions, pos_map, start_day, week)
 
 	} else {
-	// If there are no streamers on the bench, drop a random playing streamer and find best position
+	// If there are no streamers on the bench, drop the worst playing streamer and find best position
 
-		rand_index := rand.Intn(len(cur_streamers))
-		random_streamer := cur_streamers[rand_index]
+		sort.Slice(cur_streamers, func(i, j int) bool {
+			return cur_streamers[i].AvgPoints < cur_streamers[j].AvgPoints
+		})
+		worst_player := cur_streamers[0]
 
-		DeleteAllOccurrences(chromosome, cur_streamers, random_streamer, week, start_day)
-		chromosome.DroppedPlayers[random_streamer.Name] = DroppedPlayer{Player: random_streamer, Countdown: 3}
+		DeleteAllOccurrences(chromosome, cur_streamers, player, worst_player, week, start_day)
+		chromosome.DroppedPlayers[worst_player.Name] = DroppedPlayer{Player: worst_player, Countdown: 3}
 		FindBestPositions(player, chromosome, free_positions, pos_map, start_day, week)
+	
 	}
 
 	return pos_map
@@ -238,7 +245,7 @@ func GetPosMap(player Player,
 func InsertStreamablePlayers(streamable_players []Player, free_positions map[int][]string, week string, chromosome *Chromosome, cur_streamers []Player) {
 
 	// Insert streamable players into chromosome
-	for _, player := range streamable_players {
+	for i, player := range streamable_players {
 
 		// Get all the positions that the player fits in to
 		has_match := false
@@ -266,7 +273,33 @@ func InsertStreamablePlayers(streamable_players []Player, free_positions map[int
 					// Add player to gene for that day. When added here, doesn't count as a new player
 					chromosome.Genes[day].Roster[pos] = player
 			}
-			cur_streamers = append(cur_streamers, player)
+			cur_streamers[i] = player
 		}
 	}
+}
+
+
+// Function to delete all occurences of a value in a chromosome
+func DeleteAllOccurrences(chromosome *Chromosome, cur_streamers []Player, player_to_add Player, player_to_drop Player, week string, start_day int) {
+
+	for _, day := range ScheduleMap[week].Games[player_to_drop.Team] {
+
+		// If the day is before the current day, skip it
+		if day < start_day {
+			continue
+		}
+
+		key := MapContainsValue(chromosome.Genes[day], player_to_drop.Name)
+		if key != "" {
+			delete(chromosome.Genes[day].Roster, key)
+		}
+	}
+
+	// Remove player from added players
+	cur_streamers_interface := make([]interface{}, len(cur_streamers))
+	for i, v := range cur_streamers {
+		cur_streamers_interface[i] = v
+	}
+	index := IndexOf(cur_streamers_interface, player_to_drop)
+	cur_streamers[index] = player_to_add
 }

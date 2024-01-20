@@ -17,7 +17,7 @@ func optimize_streaming(free_agent_map []Player, free_positions map[int][]string
 
 		// Score fitness of initial population and get total acquisitions
 		for i := 0; i < len(population); i++ {
-			get_total_acquisitions(&population[i])
+			GetTotalAcquisitions(&population[i])
 			score_fitness(&population[i], week)
 		}
 
@@ -76,7 +76,7 @@ func score_fitness(chromosome *Chromosome, week string) {
 }
 
 // Function to get the number of acquisitions in a chromosome
-func get_total_acquisitions(chromosome *Chromosome) {
+func GetTotalAcquisitions(chromosome *Chromosome) {
 
 	acquisitions := 0
 

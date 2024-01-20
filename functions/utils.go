@@ -33,7 +33,6 @@ func LoadSchedule() {
 	if err != nil {
 		fmt.Println("Error turning jsonBytes into map:", err)
 	}
-	fmt.Println("Schedule loaded", ScheduleMap["13"].Games["SAS"])
 
 }
 
