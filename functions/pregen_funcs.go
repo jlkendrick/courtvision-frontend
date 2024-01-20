@@ -1,9 +1,96 @@
 package helper
 
 import (
-	"reflect"
+	"fmt"
+	"encoding/json"
+	"net/http"
 	"sort"
+	"io"
+	"bytes"
+	"sync"
+
 )
+
+// Function to make HTTP POST requests to API to get a team's roster and free agent data for the league
+func GetPlayers(league_id int, espn_s2 string, swid string, team_name string, year int) (map[string]Player, []Player) {
+
+	Request := func (index int, api_url string, league_id int, espn_s2 string, swid string, team_name string, year int, ch chan<-PlayersResponse, wg *sync.WaitGroup) {
+		defer wg.Done()
+	
+		// Create roster_meta struct
+		roster_meta := RosterMeta{LeagueId: league_id, 
+								  EspnS2: espn_s2,
+								  Swid: swid,
+								  TeamName: team_name, 
+								  Year: year}
+	
+		// Convert roster_meta to JSON
+		json_roster_meta, err := json.Marshal(roster_meta)
+		if err != nil {
+			fmt.Println("Error", err)
+		}
+	
+		// Send POST request to server
+		response, err := http.Post(api_url, "application/json", bytes.NewBuffer(json_roster_meta))
+		if err != nil {
+			fmt.Println("Error sending or recieving from api:", err)
+		}
+		defer response.Body.Close()
+	
+		var players []Player
+	
+		// Read response body and decode JSON into players slice
+		if response.StatusCode == http.StatusOK {
+			body, err := io.ReadAll(response.Body)
+			if err != nil {
+				fmt.Println("Error reading api response:", err)
+			}
+	
+			err = json.Unmarshal(body, &players)
+			if err != nil {
+				fmt.Println("Error decoding json response into player list:", err)
+			}
+		} else {
+			fmt.Println("Error:", response.StatusCode)
+		}
+	
+		ch <- PlayersResponse{Index: index, Players: players}
+	}
+
+	// List of URLs to send POST requests to
+	urls := []string{
+		"http://127.0.0.1:8000/get_roster_data/",
+		"http://127.0.0.1:8000/get_freeagent_data/",
+	}
+
+	// Response channel to receive responses from goroutines
+	response_chan := make(chan PlayersResponse, len(urls))
+
+	// WaitGroup to wait for all goroutines to finish
+	var wg sync.WaitGroup
+
+	// Launch goroutine for each URL
+	for i, url := range urls {
+		wg.Add(1)
+		go Request(i, url, league_id, espn_s2, swid, team_name, year, response_chan, &wg)
+	}
+
+	// Wait for all goroutines to finish then close the response channel
+	go func() {
+		wg.Wait()
+
+	close(response_chan)
+
+	}()
+
+	// Collect and sort responses from channel
+	responses := make([][]Player, len(urls))
+	for response := range response_chan {
+		responses[response.Index] = response.Players
+	}
+
+	return PlayersToMap(responses[0]), responses[1]
+}
 
 // Finds available slots and players to experiment with on a roster when considering undroppable players and restrictive positions
 func OptimizeSlotting(roster_map map[string]Player, week string, threshold float64) (map[int]map[string]Player, []Player) {
@@ -11,11 +98,11 @@ func OptimizeSlotting(roster_map map[string]Player, week string, threshold float
 	// Convert roster_map to slices and abstract out IR spot. For the first day, pass all players to get_available_slots
 	var streamable_players []Player
 	var sorted_good_players []Player
-	var ir []Player
+	// var ir []Player
 	for _, player := range roster_map {
 
 		if player.Injured {
-			ir = append(ir, player)
+			// ir = append(ir, player)
 			continue
 		}
 
@@ -34,15 +121,15 @@ func OptimizeSlotting(roster_map map[string]Player, week string, threshold float
 	return_table := make(map[int]map[string]Player)
 
 	// Fill return table and put extra IR players on bench
-	for i := 0; i <= schedule_map[week].GameSpan; i++ {
-		return_table[i] = get_available_slots(sorted_good_players, i, week)
+	for i := 0; i <= ScheduleMap[week].GameSpan; i++ {
+		return_table[i] = GetAvailableSlots(sorted_good_players, i, week)
 	}
 
 	return return_table, streamable_players
 }
 
 // Function to get available slots for a given day
-func get_available_slots(players []Player, day int, week string) map[string]Player {
+func GetAvailableSlots(players []Player, day int, week string) map[string]Player {
 
 	// Priority order of most restrictive positions to funnel streamers into flexible positions
 	position_order := []string{"PG", "SG", "SF", "PF", "G", "F", "C", "UT1", "UT2", "UT3", "BE1", "BE2", "BE3"} // For players playing
@@ -52,7 +139,7 @@ func get_available_slots(players []Player, day int, week string) map[string]Play
 	for _, player := range players {
 
 		// Checks if the player is playing on the given day
-		if Contains(schedule_map[week].Games[player.Team], day) {
+		if Contains(ScheduleMap[week].Games[player.Team], day) {
 			playing = append(playing, player)
 		}
 	}
@@ -65,7 +152,7 @@ func get_available_slots(players []Player, day int, week string) map[string]Play
 		})
 
 		// Create struct to keep track of state across recursive function calls
-		max_score := calculate_max_score(playing)
+		max_score := CalculateMaxScore(playing)
 		p_context := &FitPlayersContext{
 			BestLineup: make(map[string]Player), 
 			TopScore: 0, 
@@ -74,7 +161,7 @@ func get_available_slots(players []Player, day int, week string) map[string]Play
 		}
 	
 		// Recursive function call
-		fit_players(playing, make(map[string]Player), position_order, p_context, 0)
+		FitPlayers(playing, make(map[string]Player), position_order, p_context, 0)
 	
 		// Create response map and fill with best lineup or empty strings for unused positions except for bench spots
 		response := make(map[string]Player)
@@ -99,7 +186,7 @@ func get_available_slots(players []Player, day int, week string) map[string]Play
 }
 
 // Recursive backtracking function to find most restrictive positions for players
-func fit_players(players []Player, cur_lineup map[string]Player, position_order []string, ctx *FitPlayersContext, index int) {
+func FitPlayers(players []Player, cur_lineup map[string]Player, position_order []string, ctx *FitPlayersContext, index int) {
 
 	// If we have found a lineup that has the max score, we can send returns to all other recursive calls
 	if ctx.EarlyExit {
@@ -108,7 +195,7 @@ func fit_players(players []Player, cur_lineup map[string]Player, position_order 
 	
 	// If all players have been given positions, check if the current lineup is better than the best lineup
 	if len(players) == 0 {
-		score := score_roster(cur_lineup)
+		score := ScoreRoster(cur_lineup)
 		// fmt.Println("Score:", score, "Max score:", ctx.MaxScore)
 		if score > ctx.TopScore {
 			ctx.TopScore = score
@@ -140,7 +227,7 @@ func fit_players(players []Player, cur_lineup map[string]Player, position_order 
 				}
 			}
 
-			fit_players(remaining_players, cur_lineup, position_order, ctx, index + 1) // Recurse
+			FitPlayers(remaining_players, cur_lineup, position_order, ctx, index + 1) // Recurse
 
 			delete(cur_lineup, position) // Backtrack
 		}
@@ -148,12 +235,12 @@ func fit_players(players []Player, cur_lineup map[string]Player, position_order 
 
 	// If we did not find a player for the position, advance to the next position
 	if !found_player {
-		fit_players(players, cur_lineup, position_order, ctx, index + 1) // Recurse
+		FitPlayers(players, cur_lineup, position_order, ctx, index + 1) // Recurse
 	}
 }
 
 // Function to score a roster based on restricitveness of positions
-func score_roster(roster map[string]Player) int {
+func ScoreRoster(roster map[string]Player) int {
 
 	// Scoring system
 	score_map := make(map[string]int)
@@ -175,7 +262,7 @@ func score_roster(roster map[string]Player) int {
 }
 
 // Function to calculate the max restrictiveness score for a given set of players
-func calculate_max_score(players []Player) int {
+func CalculateMaxScore(players []Player) int {
 
 	size := len(players)
 
@@ -194,23 +281,31 @@ func calculate_max_score(players []Player) int {
 	}
 }
 
-// Function to check if a slice contains an element
-func Contains(slice interface{}, value interface{}) bool {
+// Function to get the unused positions from the optimal slotting for good players playing for the week
+func GetUnusedPositions(optimal_slotting map[int]map[string]Player) map[int][]string {
 
-	// Convert slice to reflect.Value
-	s := reflect.ValueOf(slice)
+	// Order that the slice should be in
+	order := []string{"PG", "SG", "SF", "PF", "C", "G", "F", "UT1", "UT2", "UT3"}
 
-	// Check if slice is a slice
-	if s.Kind() != reflect.Slice {
-		return false
-	}
+	// Create map to keep track of unused positions
+	unused_positions := make(map[int][]string)
 
-	// Loop through slice and check if value is in slice
-	for i := 0; i < s.Len(); i++ {
-		if reflect.DeepEqual(s.Index(i).Interface(), value) {
-			return true
+	// Loop through each optimal slotting and add unused positions to map
+	for day, schedule := range optimal_slotting {
+
+		// Initialize map for day if it doesn't exist
+		if unused_positions[day] == nil {
+			unused_positions[day] = []string{}
+		}
+		
+		for _, pos := range order {
+			
+			// If the position is empty, add it to the unused positions
+			if player := schedule[pos]; player.Name == "" {
+				unused_positions[day] = append(unused_positions[day], pos)
+			}
 		}
 	}
-
-	return false
+	
+	return unused_positions
 }

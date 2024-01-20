@@ -5,10 +5,10 @@ import (
 	"main/functions"
 )
 
-// Create global variable for schedule map
-var schedule_map map[string]helper.GameSchedule = helper.LoadSchedule()
-
 func main() {
+
+	// Load schedule from JSON file
+	helper.LoadSchedule()
 
 	// League information
 	espn_s2 := ""
@@ -44,7 +44,7 @@ func main() {
 
 
 	// // Create the initial population for the genetic algorithm
-	// initial_poulation := helper.CreateInitialPopulation(free_agents, free_positions, week, streamable_players)
+	initial_poulation := helper.CreateInitialPopulation(50, free_agents, free_positions, week, streamable_players)
 
-	// fmt.Println("Initial population created", initial_poulation[0])
+	fmt.Println("Initial population created", initial_poulation[0])
 }

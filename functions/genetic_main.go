@@ -4,14 +4,13 @@ import (
 	"fmt"
 	"math"
 	"sort"
-	"reflect"
 )
 
 // Genetic algorithm to optimize streaming moves for the week
 func optimize_streaming(free_agent_map []Player, free_positions map[int][]string, week string, streamable_players []Player) {
 
 	// Create initial population
-	population := CreateInitialPopulation(free_agent_map, free_positions, week, streamable_players)
+	population := CreateInitialPopulation(50, free_agent_map, free_positions, week, streamable_players)
 
 	// Evolve population
 	for i := 0; i < 50; i++ {
@@ -57,23 +56,6 @@ func optimize_streaming(free_agent_map []Player, free_positions map[int][]string
 
 }
 
-// Function to remove an element from a slice
-func remove(slice []Player, index int) []Player {
-	return append(slice[:index], slice[index+1:]...)
-}
-
-// Function to get the index of an element in a slice
-func index_of(slice []interface{}, element interface{}) int {
-
-	for i, e := range slice {
-
-		if reflect.DeepEqual(e, element) {
-			return i
-		}
-	}
-	return -1
-}
-
 // Function to give fitness score to a chromosome
 func score_fitness(chromosome *Chromosome, week string) {
 
@@ -81,8 +63,8 @@ func score_fitness(chromosome *Chromosome, week string) {
 	penalty_factor := 1.0
 
 	// Loop through each day and add the average points for each player with adjustments for lineups that go over the limit
-	if chromosome.TotalAcquisitions > schedule_map[week].GameSpan + 1 {
-		penalty_factor = 1.0 / math.Pow(1.3, float64(chromosome.TotalAcquisitions - schedule_map[week].GameSpan))
+	if chromosome.TotalAcquisitions > ScheduleMap[week].GameSpan + 1 {
+		penalty_factor = 1.0 / math.Pow(1.3, float64(chromosome.TotalAcquisitions - ScheduleMap[week].GameSpan))
 	}
 	for _, gene := range chromosome.Genes {
 		for _, player := range gene.Roster {

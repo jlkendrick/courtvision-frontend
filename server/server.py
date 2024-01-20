@@ -33,6 +33,15 @@ class PlayerModelResponse(BaseModel):
     valid_positions: list[str]
     injured: bool
 
+    @field_validator("team")
+    @classmethod
+    def correct_team_name(cls, v):
+        corretions = {
+            "PHL": "PHI",
+            "PHO": "PHX",
+        }
+        return corretions.get(v, v)
+
     @field_validator("valid_positions", mode="before")
     @classmethod
     def keep_valid_positions(cls, v, values, **kwargs):

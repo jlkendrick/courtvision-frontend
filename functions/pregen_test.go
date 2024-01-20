@@ -56,9 +56,9 @@ func TestAPI(t *testing.T) {
 
 }
 
-func TestOptimizeSlottingAndGetUnused(t *testing.T) {
+func TestOptimizeSlotting(t *testing.T) {
 
-	schedule_map := LoadSchedule()
+	LoadSchedule()
 
 	// Retrieve team and free agent data from API
 	espn_s2 := ""
@@ -78,8 +78,8 @@ func TestOptimizeSlottingAndGetUnused(t *testing.T) {
 
 	// Check to see if there are the correct number of days in the optimal_lineup
 	fmt.Println(len(optimal_lineup))
-	fmt.Println(schedule_map[week].GameSpan + 1)
-	if len(optimal_lineup) != schedule_map[week].GameSpan + 1 {
+	fmt.Println(ScheduleMap[week].GameSpan + 1)
+	if len(optimal_lineup) != ScheduleMap[week].GameSpan + 1 {
 		t.Error("Incorrect number of days in optimal_lineup")
 	}
 
@@ -95,7 +95,7 @@ func TestOptimizeSlottingAndGetUnused(t *testing.T) {
 
 		correct_num_players := 0
 		for pos, player := range roster {
-			if Contains(schedule_map[week].Games[player.Team], day) && player.AvgPoints > threshold {
+			if Contains(ScheduleMap[week].Games[player.Team], day) && player.AvgPoints > threshold {
 				correct_num_players += 1
 				if pos == "IR" {
 					t.Error("IR player in optimal_lineup")
@@ -131,6 +131,22 @@ func TestOptimizeSlottingAndGetUnused(t *testing.T) {
 		}
 	}
 
+}
+
+func TestGetUnusedPositions(t *testing.T) {
+
+	LoadSchedule()
+
+	// Retrieve team and free agent data from API
+	espn_s2 := ""
+	swid := ""
+	league_id := 424233486
+	team_name := "James's Scary Team"
+	year := 2024
+	week := "13"
+
+	roster_map, _ := GetPlayers(league_id, espn_s2, swid, team_name, year)
+
 	// Test different thresholds to see if the correct number of unused positions are returned
 	test_thresholds := []float64{0.0, 33.0, 40.0, 80.0}
 	for _, test_threshold := range test_thresholds {
@@ -141,7 +157,7 @@ func TestOptimizeSlottingAndGetUnused(t *testing.T) {
 		taken := make(map[int]int)
 		for day := range new_optimal_lineup {
 			for _, player := range roster_map {
-				if Contains(schedule_map[week].Games[player.Team], day) && player.AvgPoints > test_threshold && player.Injured == false{
+				if Contains(ScheduleMap[week].Games[player.Team], day) && player.AvgPoints > test_threshold && player.Injured == false{
 					taken[day] += 1
 				}
 			}
@@ -153,11 +169,11 @@ func TestOptimizeSlottingAndGetUnused(t *testing.T) {
 					fmt.Println(len(free_pos_roster), len(new_streamable_players))
 					t.Error("Incorrect number of free positions")
 				}
-			} else if len(free_pos_roster) != 10 - taken[day] {
+			} else if len(free_pos_roster) != (10 - taken[day]) {
 				fmt.Println(len(free_pos_roster), 10 - taken[day])
 				t.Error("Incorrect number of free positions")
 			}
 		}
 	}
-}
 
+}

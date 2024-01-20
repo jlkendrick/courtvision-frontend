@@ -114,11 +114,11 @@ func get_children(parent1 Chromosome, parent2 Chromosome, fas []Player, free_pos
 	rng := rand.New(src)
 
 	// Create children
-	child1 := Chromosome{Genes: make([]Gene, schedule_map[week].GameSpan + 1), FitnessScore: 0, TotalAcquisitions: 0, CumProbTracker: 0.0}
-	child2 := Chromosome{Genes: make([]Gene, schedule_map[week].GameSpan + 1), FitnessScore: 0, TotalAcquisitions: 0, CumProbTracker: 0.0}
+	child1 := Chromosome{Genes: make([]Gene, ScheduleMap[week].GameSpan + 1), FitnessScore: 0, TotalAcquisitions: 0, CumProbTracker: 0.0}
+	child2 := Chromosome{Genes: make([]Gene, ScheduleMap[week].GameSpan + 1), FitnessScore: 0, TotalAcquisitions: 0, CumProbTracker: 0.0}
 
 	// Initialize genes
-	for j := 0; j <= schedule_map[week].GameSpan; j++ {
+	for j := 0; j <= ScheduleMap[week].GameSpan; j++ {
 		child1.Genes[j] = Gene{Roster: make(map[string]Player), NewPlayers: make(map[string]Player), Day: j, Acquisitions: 0}
 		child2.Genes[j] = Gene{Roster: make(map[string]Player), NewPlayers: make(map[string]Player), Day: j, Acquisitions: 0}
 	}
@@ -129,8 +129,8 @@ func get_children(parent1 Chromosome, parent2 Chromosome, fas []Player, free_pos
 	// Fill genes with initial streamers
 	cur_streamers1 := make([]Player, len(streamable_players))
 	cur_streamers2 := make([]Player, len(streamable_players))
-	insert_streamable_players(streamable_players, free_positions, week, &child1, cur_streamers1)
-	insert_streamable_players(streamable_players, free_positions, week, &child2, cur_streamers2)
+	InsertStreamablePlayers(streamable_players, free_positions, week, &child1, cur_streamers1)
+	InsertStreamablePlayers(streamable_players, free_positions, week, &child2, cur_streamers2)
 
 	child1_dropped_players := make(map[string]DroppedPlayer, 0)
 	child2_dropped_players := make(map[string]DroppedPlayer, 0)
@@ -228,15 +228,15 @@ func mutate(chromosome *Chromosome, dropped_players map[string]DroppedPlayer, fa
 				fa := fas[rand_index]
 
 				// Check if the player is already on the roster or if the player is not playing on the day
-				if map_contains_value(chromosome.Genes[rand_day], fa.Name) != "" || !Contains(schedule_map[week].Games[fa.Team], rand_day) || fa.Injured {
+				if MapContainsValue(chromosome.Genes[rand_day], fa.Name) != "" || !Contains(ScheduleMap[week].Games[fa.Team], rand_day) || fa.Injured {
 					continue
 				}
 				not_found = false
 
 				// Insert the player into the roster
 				dummy_has_match := false
-				matches := get_matches(fa.ValidPositions, free_positions[rand_day], &dummy_has_match)
-				pos_map := drop_and_find_pos(fa, chromosome, matches, free_positions, rand_day, week, make(map[string]DroppedPlayer, 0), cur_streamers, streamable_players, false, true)
+				matches := GetMatches(fa.ValidPositions, free_positions[rand_day], &dummy_has_match)
+				pos_map := GetPosMap(fa, chromosome, matches, free_positions, rand_day, week, cur_streamers, streamable_players, false, true)
 				cur_streamers[len(cur_streamers) - 1] = fa
 
 				for day, pos := range pos_map {
@@ -261,14 +261,14 @@ func mutate(chromosome *Chromosome, dropped_players map[string]DroppedPlayer, fa
 // Function to delete all occurences of a player from a chromosome (simplified version)
 func simple_delete_all_occurences(chromosome *Chromosome, player_to_drop Player, week string, start_day int) {
 
-	for _, day := range schedule_map[week].Games[player_to_drop.Team] {
+	for _, day := range ScheduleMap[week].Games[player_to_drop.Team] {
 
 		// If the day is before the current day, skip it
 		if day < start_day {
 			continue
 		}
 
-		key := map_contains_value(chromosome.Genes[day], player_to_drop.Name)
+		key := MapContainsValue(chromosome.Genes[day], player_to_drop.Name)
 		if key != "" {
 			delete(chromosome.Genes[day].Roster, key)
 		}
@@ -279,8 +279,8 @@ func simple_delete_all_occurences(chromosome *Chromosome, player_to_drop Player,
 func insert_player(day int, player Player, free_positions map[int][]string, child *Chromosome, week string, dropped_players map[string]DroppedPlayer, cur_streamers []Player, streamable_players []Player) {
 
 	dummy_has_match := false
-	matches := get_matches(player.ValidPositions, free_positions[day], &dummy_has_match)
-	pos_map := drop_and_find_pos(player, child, matches, free_positions, day, week, dropped_players, cur_streamers, make([]Player, len(streamable_players)), false, true)
+	matches := GetMatches(player.ValidPositions, free_positions[day], &dummy_has_match)
+	pos_map := GetPosMap(player, child, matches, free_positions, day, week, cur_streamers, make([]Player, len(streamable_players)), false, true)
 	cur_streamers[len(cur_streamers) - 1] = player
 	child.Genes[day].NewPlayers[player.Name] = player
 	child.Genes[day].Acquisitions++
@@ -303,7 +303,7 @@ func validate_player(player Player, roster []Gene, dropped_players map[string]Dr
 
 	// Check if the player is already on the roster or if he is still on the waiver wire
 	for _, gene := range roster {
-		if map_contains_value(gene, player.Name) != "" || check_dropped_players(dropped_players, player.Name) {
+		if MapContainsValue(gene, player.Name) != "" || check_dropped_players(dropped_players, player.Name) {
 			return false
 		}
 	}
@@ -321,7 +321,7 @@ func find_valid_swap(chromosome *Chromosome, free_positions map[int][]string, st
 	check := func(day1 int, day2 int, player1 Player, player2 Player) bool {
 
 		// Check if the players are playing on the days
-		if (!Contains(schedule_map[week].Games[player1.Team], day1)) || (!Contains(schedule_map[week].Games[player2.Team], day2)) {
+		if (!Contains(ScheduleMap[week].Games[player1.Team], day1)) || (!Contains(ScheduleMap[week].Games[player2.Team], day2)) {
 			return false
 
 		}
