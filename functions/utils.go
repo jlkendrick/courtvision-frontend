@@ -11,12 +11,10 @@ import (
 var ScheduleMap map[string]GameSchedule
 
 // Function to load schedule from JSON file
-func LoadSchedule() {
-
-	json_scheule_path := "../static/schedule.json"
+func LoadSchedule(path string) {
 
 	// Load JSON schedule file
-	json_schedule, err := os.Open(json_scheule_path)
+	json_schedule, err := os.Open(path)
 	if err != nil {
 		fmt.Println("Error opening json schedule:", err)
 	}
@@ -120,4 +118,15 @@ func MapContainsValue(m Gene, value string) string {
 		}
 	}
 	return ""
+}
+
+// Function to check if a map contains a value
+func MapContainsValue2(m map[int]string, value string) bool {
+
+	for _, v := range m {
+		if v == value {
+			return true
+		}
+	}
+	return false
 }

@@ -4,12 +4,6 @@ from fastapi import FastAPI
 from pydantic import BaseModel, field_validator
 from espn_api.basketball import Player
 
-# Find a team in a list of teams
-def find_team(team_name, teams):
-    for team in teams:
-        if team.team_name == team_name:
-            return team
-    return None
 
 def get_roster(team_name, teams):
         
@@ -24,6 +18,7 @@ class TeamDataRequest(BaseModel):
     swid: str | None
     team_name: str
     year: int
+    fa_count: int
 
 # Defines the response body
 class PlayerModelResponse(BaseModel):
@@ -84,7 +79,7 @@ def get_free_agents(req: TeamDataRequest):
         'scoringPeriodId': 0,
     }
 
-    filters = {"players":{"filterStatus":{"value":["FREEAGENT","WAIVERS"]},"filterSlotIds":{"value":[]},"limit":100,"sortPercOwned":{"sortPriority":1,"sortAsc":False},"sortDraftRanks":{"sortPriority":100,"sortAsc":True,"value":"STANDARD"}}}
+    filters = {"players":{"filterStatus":{"value":["FREEAGENT","WAIVERS"]},"filterSlotIds":{"value":[]},"limit":req.fa_count,"sortPercOwned":{"sortPriority":1,"sortAsc":False},"sortDraftRanks":{"sortPriority":100,"sortAsc":True,"value":"STANDARD"}}}
     headers = {'x-fantasy-filter': json.dumps(filters)}
 
     endpoint = f'https://fantasy.espn.com/apis/v3/games/fba/seasons/{req.year}/segments/0/leagues/{req.league_id}'

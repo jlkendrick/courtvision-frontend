@@ -11,12 +11,13 @@ type PositionsResponse struct {
 }
 
 // Struct for how necessary variables are passed to API
-type RosterMeta struct {
+type ReqMeta struct {
 	LeagueId int    `json:"league_id"`
 	EspnS2   string `json:"espn_s2"`
 	Swid     string `json:"swid"`
 	TeamName string `json:"team_name"`
 	Year     int    `json:"year"`
+	FaCount  int    `json:"fa_count"`
 }
 
 // Struct for how to contruct Players using the returned player data
@@ -55,10 +56,11 @@ type Chromosome struct {
 
 // Struct for gene for genetic algorithm
 type Gene struct {
-	Roster  	 map[string]Player
-	NewPlayers 	 map[string]Player
-	Day     	 int
-	Acquisitions int
+	Roster  	   map[string]Player
+	NewPlayers 	   map[string]Player
+	Day     	   int
+	Acquisitions   int
+	DroppedPlayers []Player
 }
 
 // Struct to keep track of dropped players during the genetic algorithm

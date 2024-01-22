@@ -6,6 +6,37 @@ import (
 	. "main/functions"
 )
 
+func TestLoadSchedule(t *testing.T) {
+	
+	LoadSchedule("../static/schedule.json")
+
+	// Check to see if ScheduleMap is empty
+	if len(ScheduleMap) == 0 {
+		t.Error("ScheduleMap is empty")
+	}
+
+	// Load freeagents
+	league_id := 424233486
+	espn_s2 := ""
+	swid := ""
+	team_name := "James's Scary Team"
+	year := 2024
+	fa_count := 500
+	week := "13"
+	_, free_agents := GetPlayers(league_id, espn_s2, swid, team_name, year, fa_count)
+
+	// Check to see if every team has a schedule
+	for _, player := range free_agents {
+		if player.Team == "FA" {
+			continue
+		}
+		if _, ok := ScheduleMap[week].Games[player.Team]; !ok {
+			t.Error("ScheduleMap missing team:", player.Team)
+		}
+	}
+
+}
+
 func TestAPI(t *testing.T) {
 	
 	// Retrieve team and free agent data from API
@@ -14,7 +45,8 @@ func TestAPI(t *testing.T) {
 	league_id := 424233486
 	team_name := "James's Scary Team"
 	year := 2024
-	roster_map, free_agents := GetPlayers(league_id, espn_s2, swid, team_name, year)
+	fa_count := 100
+	roster_map, free_agents := GetPlayers(league_id, espn_s2, swid, team_name, year, fa_count)
 
 	// Check if roster_map is empty
 	if len(roster_map) == 0 {
@@ -59,7 +91,7 @@ func TestAPI(t *testing.T) {
 
 func TestOptimizeSlotting(t *testing.T) {
 
-	LoadSchedule()
+	LoadSchedule("../static/schedule.json")
 
 	// Retrieve team and free agent data from API
 	espn_s2 := ""
@@ -68,11 +100,12 @@ func TestOptimizeSlotting(t *testing.T) {
 	team_name := "James's Scary Team"
 	year := 2024
 	week := "13"
+	fa_count := 100
 	// Set threshold for streamable players
-	threshold := 33.0
+	threshold := 35.0
 
 	// Retrieve team and free agent data from API
-	roster_map, _ := GetPlayers(league_id, espn_s2, swid, team_name, year)
+	roster_map, _ := GetPlayers(league_id, espn_s2, swid, team_name, year, fa_count)
 
 	// Optimize slotting and get streamable players
 	optimal_lineup, _ := OptimizeSlotting(roster_map, week, threshold)
@@ -82,6 +115,16 @@ func TestOptimizeSlotting(t *testing.T) {
 	fmt.Println(ScheduleMap[week].GameSpan + 1)
 	if len(optimal_lineup) != ScheduleMap[week].GameSpan + 1 {
 		t.Error("Incorrect number of days in optimal_lineup")
+	}
+
+	// Check to see if there are any injured players in the optimal_lineup
+	for day, roster := range optimal_lineup {
+		fmt.Println(day, roster)
+		for _, player := range roster {
+			if player.Injured == true {
+				t.Error("Injured player in optimal_lineup")
+			}
+		}
 	}
 
 	// Check to see if there are the correct number of players in the optimal_lineup
@@ -136,7 +179,7 @@ func TestOptimizeSlotting(t *testing.T) {
 
 func TestGetUnusedPositions(t *testing.T) {
 
-	LoadSchedule()
+	LoadSchedule("../static/schedule.json")
 
 	// Retrieve team and free agent data from API
 	espn_s2 := ""
@@ -145,8 +188,8 @@ func TestGetUnusedPositions(t *testing.T) {
 	team_name := "James's Scary Team"
 	year := 2024
 	week := "13"
-
-	roster_map, _ := GetPlayers(league_id, espn_s2, swid, team_name, year)
+	fa_count := 100
+	roster_map, _ := GetPlayers(league_id, espn_s2, swid, team_name, year, fa_count)
 
 	// Test different thresholds to see if the correct number of unused positions are returned
 	test_thresholds := []float64{0.0, 33.0, 40.0, 80.0}

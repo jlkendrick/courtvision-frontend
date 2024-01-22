@@ -235,8 +235,9 @@ func mutate(chromosome *Chromosome, dropped_players map[string]DroppedPlayer, fa
 
 				// Insert the player into the roster
 				dummy_has_match := false
+				add := false
 				matches := GetMatches(fa.ValidPositions, free_positions[rand_day], &dummy_has_match)
-				pos_map := GetPosMap(fa, chromosome, matches, free_positions, rand_day, week, cur_streamers, streamable_players, false, true)
+				pos_map := GetPosMap(fa, chromosome, matches, free_positions, rand_day, week, cur_streamers, streamable_players, false, true, &add)
 				cur_streamers[len(cur_streamers) - 1] = fa
 
 				for day, pos := range pos_map {
@@ -280,7 +281,8 @@ func insert_player(day int, player Player, free_positions map[int][]string, chil
 
 	dummy_has_match := false
 	matches := GetMatches(player.ValidPositions, free_positions[day], &dummy_has_match)
-	pos_map := GetPosMap(player, child, matches, free_positions, day, week, cur_streamers, make([]Player, len(streamable_players)), false, true)
+	add := false
+	pos_map := GetPosMap(player, child, matches, free_positions, day, week, cur_streamers, make([]Player, len(streamable_players)), false, true, &add)
 	cur_streamers[len(cur_streamers) - 1] = player
 	child.Genes[day].NewPlayers[player.Name] = player
 	child.Genes[day].Acquisitions++

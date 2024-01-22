@@ -12,17 +12,18 @@ import (
 )
 
 // Function to make HTTP POST requests to API to get a team's roster and free agent data for the league
-func GetPlayers(league_id int, espn_s2 string, swid string, team_name string, year int) (map[string]Player, []Player) {
+func GetPlayers(league_id int, espn_s2 string, swid string, team_name string, year int, fa_count int) (map[string]Player, []Player) {
 
-	Request := func (index int, api_url string, league_id int, espn_s2 string, swid string, team_name string, year int, ch chan<-PlayersResponse, wg *sync.WaitGroup) {
+	Request := func (index int, api_url string, league_id int, espn_s2 string, swid string, team_name string, year int, fa_count int, ch chan<-PlayersResponse, wg *sync.WaitGroup) {
 		defer wg.Done()
 	
 		// Create roster_meta struct
-		roster_meta := RosterMeta{LeagueId: league_id, 
+		roster_meta := ReqMeta{LeagueId: league_id, 
 								  EspnS2: espn_s2,
 								  Swid: swid,
 								  TeamName: team_name, 
-								  Year: year}
+								  Year: year,
+								  FaCount: fa_count,}
 	
 		// Convert roster_meta to JSON
 		json_roster_meta, err := json.Marshal(roster_meta)
@@ -72,7 +73,7 @@ func GetPlayers(league_id int, espn_s2 string, swid string, team_name string, ye
 	// Launch goroutine for each URL
 	for i, url := range urls {
 		wg.Add(1)
-		go Request(i, url, league_id, espn_s2, swid, team_name, year, response_chan, &wg)
+		go Request(i, url, league_id, espn_s2, swid, team_name, year, fa_count, response_chan, &wg)
 	}
 
 	// Wait for all goroutines to finish then close the response channel
