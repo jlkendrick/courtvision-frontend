@@ -32,7 +32,8 @@ func main() {
 	free_positions := helper.GetUnusedPositions(optimal_lineup)
 
 	// // Create the initial population for the genetic algorithm
-	initial_population := helper.CreateInitialPopulation(50, free_agents, free_positions, week, streamable_players)
+	initial_population := make([]helper.Chromosome, 50)
+	helper.CreateInitialPopulation(50, initial_population, free_agents, free_positions, week, streamable_players)
 
 	order := []string{"PG", "SG", "SF", "PF", "C", "G", "F", "UT1", "UT2", "UT3"}
 	for day, gene := range initial_population[49].Genes {

@@ -8,25 +8,21 @@ import (
 )
 
 // Function to create initial population
-func CreateInitialPopulation(size int, fas []Player, free_positions map[int][]string, week string, streamable_players []Player) []Chromosome {
+func CreateInitialPopulation(size int, chromosomes []Chromosome, fas []Player, free_positions map[int][]string, week string, streamable_players []Player) {
 
 	// Create random seed
 	src := rand.NewSource(time.Now().UnixNano())
 	rng := rand.New(src)
 
-	chromosomes := make([]Chromosome, size)
-
-	// Create 50 chromosomes
+	// Create (size) chromosomes
 	for i := 0; i < size; i++ {
 
 		chromosome := CreateChromosome(streamable_players, week, fas, free_positions, rng)
 
-		GetTotalAcquisitions(&chromosome)
+		// GetTotalAcquisitions(&chromosome)
 
 		chromosomes[i] = chromosome
 	}
-
-	return chromosomes
 }
 
 func CreateChromosome(streamable_players []Player, week string, fas []Player, free_positions map[int][]string, rng *rand.Rand) Chromosome {

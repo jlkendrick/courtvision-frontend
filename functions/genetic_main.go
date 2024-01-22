@@ -10,7 +10,8 @@ import (
 func optimize_streaming(free_agent_map []Player, free_positions map[int][]string, week string, streamable_players []Player) {
 
 	// Create initial population
-	population := CreateInitialPopulation(50, free_agent_map, free_positions, week, streamable_players)
+	population := make([]Chromosome, 50)
+	CreateInitialPopulation(50, population, free_agent_map, free_positions, week, streamable_players)
 
 	// Evolve population
 	for i := 0; i < 50; i++ {
