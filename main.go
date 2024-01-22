@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"sort"
 	"main/functions"
 )
 
@@ -31,16 +32,33 @@ func main() {
 	// Use optimal_lineup to get the spots available for streamable players
 	free_positions := helper.GetUnusedPositions(optimal_lineup)
 
-	// // Create the initial population for the genetic algorithm
-	initial_population := make([]helper.Chromosome, 50)
-	helper.CreateInitialPopulation(50, initial_population, free_agents, free_positions, week, streamable_players)
+	// Create the initial population for the genetic algorithm
+	size := 50
+	population := make([]helper.Chromosome, size)
+	helper.CreateInitialPopulation(size, population, free_agents, free_positions, week, streamable_players)
 
-	order := []string{"PG", "SG", "SF", "PF", "C", "G", "F", "UT1", "UT2", "UT3"}
-	for day, gene := range initial_population[49].Genes {
-		fmt.Println(day)
-		for _, pos := range order {
-			fmt.Println(pos, gene.Roster[pos])
+	// Evolve the population
+	for i := 0; i < size; i++ {
+		
+		// Score fitness of initial population and get total acquisitions
+		for i := 0; i < len(population); i++ {
+			helper.GetTotalAcquisitions(&population[i])
+			helper.ScoreFitness(&population[i], week)
 		}
-		fmt.Println()
+
+		// Sort population by increasing fitness score
+		sort.Slice(population, func(i, j int) bool {
+			return population[i].FitnessScore < population[j].FitnessScore
+		})
+
+		// Print fitness scores
+		total_fitness_score := 0
+		for _, chromosome := range population {
+			total_fitness_score += chromosome.FitnessScore
+		}
+		fmt.Println("Average fitness score:", total_fitness_score / size)
+
+		// Evolve population
+		population = helper.EvolvePopulation(size, population, free_agents, free_positions, streamable_players, week)
 	}
 }

@@ -10,6 +10,32 @@ import (
 
 var ScheduleMap map[string]GameSchedule
 
+// Function to get a population of chromosomes
+func HelperInitPop(size int) ([]Chromosome, int, []Player, map[int][]string, []Player, string) {
+
+	LoadSchedule("../static/schedule.json")
+
+	// Get roster and free agent data
+	league_id := 424233486
+	espn_s2 := ""
+	swid := ""
+	team_name := "James's Scary Team"
+	year := 2024
+	week := "13"
+	threshold := 35.0
+	fa_count := 125
+
+	roster_map, free_agents := GetPlayers(league_id, espn_s2, swid, team_name, year, fa_count)
+
+	new_optimal_lineup, streamable_players := OptimizeSlotting(roster_map, week, threshold)
+	free_positions := GetUnusedPositions(new_optimal_lineup)
+
+	population := make([]Chromosome, size)
+	CreateInitialPopulation(size, population, free_agents, free_positions, week, streamable_players)
+
+	return population, size, free_agents, free_positions, streamable_players, week
+}
+
 // Function to load schedule from JSON file
 func LoadSchedule(path string) {
 
@@ -120,13 +146,15 @@ func MapContainsValue(m Gene, value string) string {
 	return ""
 }
 
-// Function to check if a map contains a value
-func MapContainsValue2(m map[int]string, value string) bool {
-
-	for _, v := range m {
-		if v == value {
-			return true
+// Function to print a population
+func PrintPopulation(chromosome Chromosome) {
+	
+	// Print initial population
+	order_to_print := []string{"PG", "SG", "SF", "PF", "C", "G", "F", "UT1", "UT2", "UT3"}
+	for _, gene := range chromosome.Genes {
+		fmt.Println("Day:", gene.Day)
+		for _, pos := range order_to_print {
+			fmt.Println(pos, gene.Roster[pos].Name)
 		}
 	}
-	return false
 }

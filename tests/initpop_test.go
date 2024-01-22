@@ -11,28 +11,11 @@ func TestInitPopIntegration(t *testing.T) {
 
 	LoadSchedule("../static/schedule.json")
 
-	// Get roster and free agent data
-	league_id := 424233486
-	espn_s2 := ""
-	swid := ""
-	team_name := "James's Scary Team"
-	year := 2024
-	week := "13"
-	threshold := 35.0
-	fa_count := 125
-
-	roster_map, free_agents := GetPlayers(league_id, espn_s2, swid, team_name, year, fa_count)
-
-	new_optimal_lineup, streamable_players := OptimizeSlotting(roster_map, week, threshold)
-	free_positions := GetUnusedPositions(new_optimal_lineup)
-
 	size := 50
-	chromosomes := make([]Chromosome, size)
-
-	CreateInitialPopulation(size, chromosomes, free_agents, free_positions, week, streamable_players)
+	population, _, _, _, _, _ := HelperInitPop(size)
 
 	// Make sure that the initial population has (size) chromosomes
-	if len(chromosomes) != size {
+	if len(population) != size {
 		t.Error("Initial population has incorrect size")
 	}
 
