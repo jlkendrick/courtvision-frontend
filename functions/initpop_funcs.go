@@ -3,6 +3,7 @@ package helper
 import (
 	"fmt"
 	"sort"
+	"sync"
 	"math/rand"
 	"time"
 )
@@ -14,15 +15,33 @@ func CreateInitialPopulation(size int, chromosomes []Chromosome, fas []Player, f
 	src := rand.NewSource(time.Now().UnixNano())
 	rng := rand.New(src)
 
-	// Create (size) chromosomes
+	// Create WaitGroup
+	var wg sync.WaitGroup
+	ch := make(chan Chromosome)
+
+	// Create (size) goroutines to generate chromosomes concurrently
 	for i := 0; i < size; i++ {
-
-		chromosome := CreateChromosome(streamable_players, week, fas, free_positions, rng)
-
-		// GetTotalAcquisitions(&chromosome)
-
-		chromosomes[i] = chromosome
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			chromosome := CreateChromosome(streamable_players, week, fas, free_positions, rng)
+			ch <- chromosome
+		}()
 	}
+
+	// Wait for all goroutines to finish and collect the chromosomes
+	go func() {
+		wg.Wait()
+		close(ch)
+	}()
+
+	// Collect the chromosomes from the channel
+	i := 0
+	for chromosome := range ch {
+		chromosomes[i] = chromosome
+		i++
+	}
+
 }
 
 func CreateChromosome(streamable_players []Player, week string, fas []Player, free_positions map[int][]string, rng *rand.Rand) Chromosome {

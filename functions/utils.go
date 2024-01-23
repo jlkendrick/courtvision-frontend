@@ -3,6 +3,7 @@ package helper
 import (
 	"fmt"
 	"os"
+	"sort"
 	"reflect"
 	"encoding/json"
 	"io"
@@ -32,6 +33,11 @@ func HelperInitPop(size int) ([]Chromosome, int, []Player, map[int][]string, []P
 
 	population := make([]Chromosome, size)
 	CreateInitialPopulation(size, population, free_agents, free_positions, week, streamable_players)
+
+	// Sort population by increasing fitness score
+	sort.Slice(population, func(i, j int) bool {
+		return population[i].FitnessScore < population[j].FitnessScore
+	})
 
 	return population, size, free_agents, free_positions, streamable_players, week
 }

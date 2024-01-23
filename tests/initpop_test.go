@@ -1,6 +1,7 @@
 package tests
 
 import (
+	"main/tests/testresources"
 	. "main/functions"
 	"math/rand"
 	"testing"
@@ -25,17 +26,9 @@ func TestInsertStreamablePlayers(t *testing.T) {
 
 	LoadSchedule("../static/schedule.json")
 
-	// Get roster and free agent data
-	league_id := 424233486
-	espn_s2 := ""
-	swid := ""
-	team_name := "James's Scary Team"
-	year := 2024
+	roster_map := loaders.LoadRosterMap()
 	week := "13"
 	threshold := 35.0
-	fa_count := 0
-
-	roster_map, _ := GetPlayers(league_id, espn_s2, swid, team_name, year, fa_count)
 
 	new_optimal_lineup, streamable_players := OptimizeSlotting(roster_map, week, threshold)
 	free_positions := GetUnusedPositions(new_optimal_lineup)
@@ -74,18 +67,11 @@ func TestCreateChromosome(t *testing.T) {
 
 	LoadSchedule("../static/schedule.json")
 
-	// Get roster and free agent data
-	league_id := 424233486
-	espn_s2 := ""
-	swid := ""
-	team_name := "James's Scary Team"
-	year := 2024
+	roster_map := loaders.LoadRosterMap()
+	free_agents := loaders.LoadFreeAgents()
 	week := "13"
 	threshold := 35.0
-	fa_count := 125
-
-	roster_map, free_agents := GetPlayers(league_id, espn_s2, swid, team_name, year, fa_count)
-
+	
 	new_optimal_lineup, streamable_players := OptimizeSlotting(roster_map, week, threshold)
 	free_positions := GetUnusedPositions(new_optimal_lineup)
 

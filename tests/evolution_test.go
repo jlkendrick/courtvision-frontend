@@ -15,7 +15,21 @@ func TestGetChildren(t *testing.T) {
 
 	population, size, free_agents, free_positions, streamable_players, week := HelperInitPop(50)
 
+	// Make sure population is sorted
+	for i := 0; i < size-1; i++ {
+		if population[i].FitnessScore > population[i+1].FitnessScore {
+			t.Errorf("Population not sorted at index %d", i)
+		}
+	}
+
 	AssignCumProbs(population, size)
+
+	// Make sure CumProbTrackers are assigned
+	for i := 0; i < size; i++ {
+		if population[i].CumProbTracker == 0 {
+			t.Errorf("CumProb not assigned to chromosome %d", i)
+		}
+	}
 
 	next_generation := make([]Chromosome, size)
 
