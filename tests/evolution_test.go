@@ -1,12 +1,17 @@
 package tests
 
 import (
+	"fmt"
 	. "main/functions"
+	"main/tests/testresources"
 	"testing"
 )
 
 func TestEvolutionIntegration(t *testing.T) {
 
+	population := loaders.LoadInitPop()
+	size := len(population)
+	fmt.Println("Population size:", size)
 }
 
 func TestGetChildren(t *testing.T) {
