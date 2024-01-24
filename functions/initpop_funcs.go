@@ -1,7 +1,6 @@
 package helper
 
 import (
-	"fmt"
 	"sort"
 	"sync"
 	"math/rand"
@@ -154,20 +153,6 @@ func CreateChromosome(streamable_players []Player, week string, fas []Player, fr
 						// Add player to gene for that day. When added here, doesn't count as a new player
 						chromosome.Genes[day].Roster[pos] = fa
 					}
-
-					// Debugging
-					if MapContainsValue(*gene, fa.Name) == "" {
-						fmt.Println("eroieiorihoergihoergweiwhrgerghioergiho")
-						fmt.Println("eroieiorihoergihoergweiwhrgerghioergiho")
-						fmt.Println("eroieiorihoergihoergweiwhrgerghioergiho")
-						fmt.Println("eroieiorihoergihoergweiwhrgerghioergiho")
-						fmt.Println(free_positions_copy[j])
-						fmt.Println(fa)
-						fmt.Println("Day:", j)
-						fmt.Println("Posmap:", pos_map)
-					}
-
-
 					// Once a player is added, add another player or go to next day
 					break
 				}
