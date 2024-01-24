@@ -1,7 +1,7 @@
 package tests
 
 import (
-	"main/tests/testresources"
+	"main/tests/resources"
 	. "main/functions"
 	"math/rand"
 	"testing"

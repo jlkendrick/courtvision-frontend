@@ -3,7 +3,7 @@ package tests
 import (
 	"fmt"
 	"testing"
-	"main/tests/testresources"
+	"main/tests/resources"
 	. "main/functions"
 )
 
@@ -176,7 +176,7 @@ func TestGetUnusedPositions(t *testing.T) {
 		taken := make(map[int]int)
 		for day := range new_optimal_lineup {
 			for _, player := range roster_map {
-				if Contains(ScheduleMap[week].Games[player.Team], day) && player.AvgPoints > test_threshold && player.Injured == false{
+				if Contains(ScheduleMap[week].Games[player.Team], day) && player.AvgPoints > test_threshold && player.Injured == false {
 					taken[day] += 1
 				}
 			}

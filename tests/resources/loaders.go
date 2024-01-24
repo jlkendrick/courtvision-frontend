@@ -11,7 +11,7 @@ import (
 func LoadRosterMap() map[string]helper.Player {
 
 	// Load roster from JSON file
-	data, err := os.ReadFile("testresources/mock_roster.json")
+	data, err := os.ReadFile("resources/mock_roster.json")
 	if err != nil {
 		fmt.Println("Error reading mock_roster.json:", err)
 	}
@@ -29,7 +29,7 @@ func LoadRosterMap() map[string]helper.Player {
 func LoadFreeAgents() []helper.Player {
 
 	// Load free agents from JSON file
-	data, err := os.ReadFile("testresources/mock_freeagents.json")
+	data, err := os.ReadFile("resources/mock_freeagents.json")
 	if err != nil {
 		fmt.Println("Error reading mock_free_gents.json:", err)
 	}
@@ -47,7 +47,7 @@ func LoadFreeAgents() []helper.Player {
 func LoadInitPop() []helper.Chromosome {
 
 	// Load initial population from JSON file
-	data, err := os.ReadFile("testresources/mock_initpop.json")
+	data, err := os.ReadFile("resources/mock_initpop.json")
 	if err != nil {
 		fmt.Println("Error reading mock_initpop.json:", err)
 	}

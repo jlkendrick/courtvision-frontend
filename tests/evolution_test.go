@@ -1,24 +1,27 @@
 package tests
 
 import (
-	"fmt"
 	. "main/functions"
-	"main/tests/testresources"
+	"main/tests/resources"
 	"testing"
 )
 
 func TestEvolutionIntegration(t *testing.T) {
 
-	population := loaders.LoadInitPop()
-	size := len(population)
-	fmt.Println("Population size:", size)
+
 }
 
-func TestGetChildren(t *testing.T) {
+func TestCrossover(t *testing.T) {
 
 	LoadSchedule("../static/schedule.json")
 
-	population, size, free_agents, free_positions, streamable_players, week := HelperInitPop(50)
+	free_agents := loaders.LoadFreeAgents()
+	population := loaders.LoadInitPop()
+	size := len(population)
+	week := "13"
+
+	optimal_lineup, streamable_players := OptimizeSlotting(population[0].Genes[0].Roster, week, 35.0)
+	free_positions := GetUnusedPositions(optimal_lineup)
 
 	// Make sure population is sorted
 	for i := 0; i < size-1; i++ {
