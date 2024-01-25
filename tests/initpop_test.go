@@ -1,11 +1,14 @@
 package tests
 
 import (
-	"main/tests/resources"
+	"fmt"
 	. "main/functions"
+	"main/tests/resources"
 	"math/rand"
 	"testing"
 	"time"
+	// "encoding/json"
+	// "os"
 )
 
 func TestInitPopIntegration(t *testing.T) {
@@ -20,6 +23,13 @@ func TestInitPopIntegration(t *testing.T) {
 		t.Error("Initial population has incorrect size")
 	}
 
+	// // Save initpop to JSON file
+	// population_json, err := json.Marshal(population)
+	// if err != nil {
+	// 	fmt.Println("Error marshalling roster_map:", err)
+	// }
+	// os.WriteFile("resources/mock_initpop.json", population_json, 0644)
+
 }
 
 func TestInsertStreamablePlayers(t *testing.T) {
@@ -27,7 +37,7 @@ func TestInsertStreamablePlayers(t *testing.T) {
 	LoadSchedule("../static/schedule.json")
 
 	roster_map := loaders.LoadRosterMap()
-	week := "13"
+	week := "15"
 	threshold := 35.0
 
 	new_optimal_lineup, streamable_players := OptimizeSlotting(roster_map, week, threshold)
@@ -51,10 +61,10 @@ func TestInsertStreamablePlayers(t *testing.T) {
 
 		for _, player := range streamable_players {
 			if Contains(ScheduleMap[week].Games[player.Team], 0) {
-				if MapContainsValue(chromosome.Genes[0], player.Name) == "" {
+				if MapContainsValue(chromosome.Genes[0].Roster, player.Name) == "" {
 					t.Error("Initial streamer not in roster")
 				}
-				key := MapContainsValue(chromosome.Genes[0], player.Name)
+				key := MapContainsValue(chromosome.Genes[0].Roster, player.Name)
 				if !Contains(free_positions[0], key) {
 					t.Error("Streamer in non-free position")
 				}
@@ -69,8 +79,8 @@ func TestCreateChromosome(t *testing.T) {
 
 	roster_map := loaders.LoadRosterMap()
 	free_agents := loaders.LoadFreeAgents()
-	week := "13"
-	threshold := 35.0
+	week := "15"
+	threshold := 34.0
 	
 	new_optimal_lineup, streamable_players := OptimizeSlotting(roster_map, week, threshold)
 	free_positions := GetUnusedPositions(new_optimal_lineup)
@@ -85,13 +95,13 @@ func TestCreateChromosome(t *testing.T) {
 		for _, gene := range chromosome.Genes {
 			// Check to see if every player in NewPlayers is in the roster
 			for _, player := range gene.NewPlayers {
-				if MapContainsValue(gene, player.Name) == "" {
+				if MapContainsValue(gene.Roster, player.Name) == "" {
 					t.Error("NewPlayer not in roster")
 				}
 			}
 			// Check to see if every player in DroppedPlayers is not in the roster
 			for _, player := range gene.DroppedPlayers {
-				if MapContainsValue(gene, player.Name) != "" {
+				if MapContainsValue(gene.Roster, player.Name) != "" {
 					t.Error("DroppedPlayer in roster")
 				}
 			}
@@ -105,6 +115,15 @@ func TestCreateChromosome(t *testing.T) {
 		GetTotalAcquisitions(&chromosome)
 		if acquisitions != chromosome.TotalAcquisitions {
 			t.Error("TotalAcquisitions incorrect")
+		}
+
+		// Check to see if the number of streamers ever exceeds the streamable player count
+		for _, gene := range chromosome.Genes {
+			if len(gene.Roster) > len(streamable_players) {
+				fmt.Println(len(gene.Roster), len(streamable_players))
+				PrintPopulation(chromosome, free_positions)
+				t.Error("Streamer count exceeds streamable player count")
+			}
 		}
 	}
 

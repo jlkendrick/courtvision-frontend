@@ -41,7 +41,7 @@ class PlayerModelResponse(BaseModel):
     @classmethod
     def keep_valid_positions(cls, v, values, **kwargs):
         values_to_keep = {"PG", "SG", "SF", "PF", "C", "G", "F"}
-        return [pos for pos in v if pos in values_to_keep] + ["BE1", "BE2", "BE3", "UT1", "UT2", "UT3"]
+        return [pos for pos in v if pos in values_to_keep] + ["UT1", "UT2", "UT3"]
  
 
 app = FastAPI()

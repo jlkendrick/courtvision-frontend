@@ -1,9 +1,11 @@
 package helper
 
 import (
+	// "fmt"
+	"fmt"
+	"math/rand"
 	"sort"
 	"sync"
-	"math/rand"
 	"time"
 )
 
@@ -227,16 +229,24 @@ func GetPosMap(player Player,
 		// Get all the players that are not playing on the day
 		for _, player := range cur_streamers {
 
-			key := MapContainsValue(chromosome.Genes[start_day], player.Name)
+			key := MapContainsValue(chromosome.Genes[start_day].Roster, player.Name)
 			if key == "" {
 				not_playing_streamers = append(not_playing_streamers, player)
 			}
 		}
 
+		// PrintPopulation(*chromosome, free_positions)
+		// fmt.Println(start_day)
+		// fmt.Println("Not playing streamers:", not_playing_streamers)
+
 		// Get the worst player that is not playing on the day
 		sort.Slice(not_playing_streamers, func(i, j int) bool {
 			return not_playing_streamers[i].AvgPoints < not_playing_streamers[j].AvgPoints })
 
+		if len(not_playing_streamers) == 0 {
+			fmt.Println("Not playing streamers:", not_playing_streamers)
+			fmt.Println("Streamers:", cur_streamers)
+		}
 		worst_player := not_playing_streamers[0]
 
 		// Drop the worst player from the chromosome
@@ -254,7 +264,7 @@ func GetPosMap(player Player,
 
 		i := -1
 		for j := 0; j < len(cur_streamers); j++ {
-			position := MapContainsValue(chromosome.Genes[start_day], cur_streamers[j].Name)
+			position := MapContainsValue(chromosome.Genes[start_day].Roster, cur_streamers[j].Name)
 			if Contains(ScheduleMap[week].Games[player.Team], start_day) && Contains(player.ValidPositions, position) {
 				i = j
 				break
@@ -328,7 +338,7 @@ func DeleteAllOccurrences(chromosome *Chromosome, cur_streamers []Player, player
 			continue
 		}
 
-		key := MapContainsValue(chromosome.Genes[day], player_to_drop.Name)
+		key := MapContainsValue(chromosome.Genes[day].Roster, player_to_drop.Name)
 		if key != "" {
 			delete(chromosome.Genes[day].Roster, key)
 		}

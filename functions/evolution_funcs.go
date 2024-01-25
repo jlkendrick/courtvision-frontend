@@ -1,10 +1,11 @@
 package helper
 
 import (
+	"fmt"
 	"math"
+	"math/rand"
 	"sort"
 	"time"
-	"math/rand"
 )
 
 // Function to evolve a population
@@ -16,23 +17,25 @@ func EvolvePopulation(size int, population []Chromosome, fas []Player, free_posi
 	next_generation := make([]Chromosome, size)
 
 	// Implement elitism
+	next_generation[size-2] = population[size-2]
+	next_generation[size-1] = population[size-1]
 	
-	next_generation[size] = population[size]
-	next_generation[size] = population[size]
-	
-	for i := 0; i < size-1; i++ {
+	for i := 0; i < (size/2)-1; i++ {
 		
 		// Get parents
 		parent1 := SelectFirstParent(population)
 		parent2 := SelectSecondParent(population)
 
-
 		// Get children
-		child1, child2, _ := Crossover(parent1, parent2, fas, free_positions, streamable_players, week)
+		child1, _, child2, _, _ := Crossover(parent1, parent2, fas, free_positions, streamable_players, week)
 
 		// Mutate children
-		Mutate(&child1, fas, free_positions, streamable_players, week, streamable_players)
-		Mutate(&child2, fas, free_positions, streamable_players, week, streamable_players)
+		Mutate(0.10, &child1, fas, free_positions, streamable_players, week, streamable_players)
+		Mutate(0.10, &child2, fas, free_positions, streamable_players, week, streamable_players)
+
+		// Add the total acquisitions to the children chromosomes
+		GetTotalAcquisitions(&child1)
+		GetTotalAcquisitions(&child2)
 
 		// Add children to evolved population
 		next_generation[i*2] = child1
@@ -111,7 +114,7 @@ func SelectSecondParent(population []Chromosome) Chromosome {
 }
 
 // Function to get the children of two parents
-func Crossover(parent1 Chromosome, parent2 Chromosome, fas []Player, free_positions map[int][]string, streamable_players []Player, week string) (Chromosome, Chromosome, int) {
+func Crossover(parent1 Chromosome, parent2 Chromosome, fas []Player, free_positions map[int][]string, streamable_players []Player, week string) (Chromosome, []Player, Chromosome, []Player, int) {
 
 	// Get random seed
 	src := rand.NewSource(time.Now().UnixNano())
@@ -138,18 +141,20 @@ func Crossover(parent1 Chromosome, parent2 Chromosome, fas []Player, free_positi
 
 	for i := 0; i < len(parent1.Genes); i++ {
 
+		fmt.Println(cur_streamers1)
+
 		// If before crossover point, children are same as the respective parent
 		if i < crossover_point {
 			
 			// Replicate the parent's roster
 			for _, player := range parent1.Genes[i].NewPlayers {
 
-				InsertPlayer(i, player, free_positions, &child1, week, cur_streamers1, streamable_players)
+				InsertPlayer(i, player, free_positions, &child1, week, cur_streamers1, streamable_players, false)
 			}
 
 			for _, player := range parent2.Genes[i].NewPlayers {
 				
-				InsertPlayer(i, player, free_positions, &child2, week, cur_streamers2, streamable_players)
+				InsertPlayer(i, player, free_positions, &child2, week, cur_streamers2, streamable_players, false)
 			}
 
 		} else {
@@ -161,7 +166,7 @@ func Crossover(parent1 Chromosome, parent2 Chromosome, fas []Player, free_positi
 				valid := ValidatePlayer(&parent2, player)
 
 				if valid {
-					InsertPlayer(i, player, free_positions, &child2, week, cur_streamers2, streamable_players)
+					InsertPlayer(i, player, free_positions, &child2, week, cur_streamers2, streamable_players, false)
 				} else {
 					continue
 				}
@@ -173,7 +178,7 @@ func Crossover(parent1 Chromosome, parent2 Chromosome, fas []Player, free_positi
 				valid := ValidatePlayer(&parent1, player)
 
 				if valid {
-					InsertPlayer(i, player, free_positions, &child1, week, cur_streamers1, streamable_players)
+					InsertPlayer(i, player, free_positions, &child1, week, cur_streamers1, streamable_players, false)
 				} else {
 					continue
 				}
@@ -199,15 +204,11 @@ func Crossover(parent1 Chromosome, parent2 Chromosome, fas []Player, free_positi
 		}
 	}
 
-	// Add the total acquisitions to the children chromosomes
-	GetTotalAcquisitions(&child1)
-	GetTotalAcquisitions(&child2)
-
-	return child1, child2, crossover_point
+	return child1, cur_streamers1, child2, cur_streamers2, crossover_point
 }
 
 // Function to mutate a chromosome
-func Mutate(chromosome *Chromosome, fas []Player, free_positions map[int][]string, cur_streamers []Player, week string, streamable_players []Player) {
+func Mutate(rate float64, chromosome *Chromosome, fas []Player, free_positions map[int][]string, cur_streamers []Player, week string, streamable_players []Player) {
 	
 	// Get random seed
 	src := rand.NewSource(time.Now().UnixNano())
@@ -216,10 +217,10 @@ func Mutate(chromosome *Chromosome, fas []Player, free_positions map[int][]strin
 	// Get random number to determine if mutation occurs
 	rand_num := rng.Float64()
 
-	if rand_num < 0.1 {
+	if rand_num < rate {
 
+		if rand_num < rate * 0.33 {
 		// Drop a random player on a random day
-		if rand_num < 0.033 {
 
 			rand_day := rng.Intn(len(chromosome.Genes))
 			new_players := []Player{}
@@ -231,9 +232,11 @@ func Mutate(chromosome *Chromosome, fas []Player, free_positions map[int][]strin
 			}
 			rand_index := rng.Intn(len(new_players))
 
+			chromosome.Genes[rand_day].Acquisitions -= 1
+
 			SimpleDeleteAllOccurences(chromosome, new_players[rand_index], week, rand_day)
 
-		} else if rand_num < 0.66{
+		} else if rand_num < rate * 0.66 {
 		// Add a random player in a random position on a random day
 
 			for not_found := true; not_found; {
@@ -243,7 +246,7 @@ func Mutate(chromosome *Chromosome, fas []Player, free_positions map[int][]strin
 				fa := fas[rand_index]
 
 				// Check if the player is already on the roster or if the player is not playing on the day
-				if MapContainsValue(chromosome.Genes[rand_day], fa.Name) != "" || !Contains(ScheduleMap[week].Games[fa.Team], rand_day) || fa.Injured {
+				if MapContainsValue(chromosome.Genes[rand_day].Roster, fa.Name) != "" || !Contains(ScheduleMap[week].Games[fa.Team], rand_day) || fa.Injured {
 					continue
 				}
 				not_found = false
@@ -254,6 +257,10 @@ func Mutate(chromosome *Chromosome, fas []Player, free_positions map[int][]strin
 				matches := GetMatches(fa.ValidPositions, free_positions[rand_day], &dummy_has_match)
 				pos_map := GetPosMap(fa, chromosome, matches, free_positions, rand_day, week, cur_streamers, streamable_players, false, true, &add)
 				cur_streamers[len(cur_streamers) - 1] = fa
+
+				chromosome.Genes[rand_day].Acquisitions += 1
+				chromosome.TotalAcquisitions += 1
+				chromosome.Genes[rand_day].NewPlayers[fa.Name] = fa
 
 				for day, pos := range pos_map {
 
@@ -267,20 +274,27 @@ func Mutate(chromosome *Chromosome, fas []Player, free_positions map[int][]strin
 
 			if player1.Name != "" && player2.Name != "" {
 				
-				InsertPlayer(day1, player2, free_positions, chromosome, week, cur_streamers, streamable_players)
-				InsertPlayer(day2, player1, free_positions, chromosome, week, cur_streamers, streamable_players)
+				InsertPlayer(day1, player2, free_positions, chromosome, week, cur_streamers, streamable_players, true)
+				InsertPlayer(day2, player1, free_positions, chromosome, week, cur_streamers, streamable_players, true)
 			}
 		}
 	}
 }
 
 // Function to insert a player into a chromosome
-func InsertPlayer(day int, player Player, free_positions map[int][]string, child *Chromosome, week string, cur_streamers []Player, streamable_players []Player) {
+func InsertPlayer(day int, player Player, free_positions map[int][]string, child *Chromosome, week string, cur_streamers []Player, streamable_players []Player, swap bool) {
 
 	dummy_has_match := false
 	matches := GetMatches(player.ValidPositions, free_positions[day], &dummy_has_match)
 	add := false
-	pos_map := GetPosMap(player, child, matches, free_positions, day, week, cur_streamers, make([]Player, len(streamable_players)), false, true, &add)
+	pos_map := make(map[int]string)
+
+	// When swapping we treat the pickups as day one initials because we should have a spot cleared out for them already, when crossing over we let things be
+	if !swap {
+		pos_map = GetPosMap(player, child, matches, free_positions, day, week, cur_streamers, streamable_players, false, true, &add)
+	} else {
+		pos_map = GetPosMap(player, child, matches, free_positions, day, week, cur_streamers, streamable_players, true, false, &add)
+	}
 
 	if _, ok := pos_map[day]; ok && add {
 		child.Genes[day].NewPlayers[player.Name] = player
@@ -305,9 +319,9 @@ func ValidatePlayer(chromosome *Chromosome, player Player) bool {
 		return false
 	}
 
-	// Check if the player is already on the roster or if he is still on the waiver wire
+	// Check if the player is already on the roster and he is still on the waiver wire
 	for _, gene := range chromosome.Genes {
-		if MapContainsValue(gene, player.Name) != "" || CheckDroppedPlayers(player.Name) {
+		if MapContainsValue(gene.Roster, player.Name) != "" && CheckDroppedPlayers(player.Name) {
 			return false
 		}
 	}
@@ -325,47 +339,30 @@ func FindValidSwap(chromosome *Chromosome, free_positions map[int][]string, stre
 	check := func(day1 int, day2 int, player1 Player, player2 Player) bool {
 
 		// Check if the players are playing on the days
-		if (!Contains(ScheduleMap[week].Games[player1.Team], day1)) || (!Contains(ScheduleMap[week].Games[player2.Team], day2)) {
+		if (!Contains(ScheduleMap[week].Games[player1.Team], day2)) || (!Contains(ScheduleMap[week].Games[player2.Team], day1)) {
 			return false
 
 		}
 
-		// Check if the player can be rostered on the day
-		free_positions_on_day1_map := make(map[string]bool)
-		free_positions_on_day2_map := make(map[string]bool)
-		
+		// Check if the players can be put into a position on the days
+		opening_for_player1 := false
+		opening_for_player2 := false
 		for _, pos := range free_positions[day1] {
-			free_positions_on_day1_map[pos] = true
+			if Contains(player2.ValidPositions, pos) {
+				if player, ok := chromosome.Genes[day1].Roster[pos]; !ok || player.Name == "" || player.Name == player1.Name {
+					opening_for_player2 = true
+				}
 		}
 		for _, pos := range free_positions[day2] {
-			free_positions_on_day2_map[pos] = true
+			if Contains(player1.ValidPositions, pos) {
+				if player, ok := chromosome.Genes[day2].Roster[pos]; !ok || player.Name == "" || player.Name == player2.Name {
+					opening_for_player1 = true
+				}
+			}
 		}
+	}
 
-		// Remove the positions that are already filled
-		for pos, player1 := range chromosome.Genes[day1].Roster {
-			if _, ok := free_positions_on_day1_map[pos]; ok && chromosome.Genes[day1].Roster[pos].Name != player1.Name {
-				delete(free_positions_on_day1_map, pos)
-			}
-		}
-		for pos, player2 := range chromosome.Genes[day2].Roster {
-			if _, ok := free_positions_on_day2_map[pos]; ok && chromosome.Genes[day2].Roster[pos].Name != player2.Name {
-				delete(free_positions_on_day2_map, pos)
-			}
-		}
-
-		// Check if the players can be rostered on the days
-		for _, pos := range player1.ValidPositions {
-			if _, ok := free_positions_on_day2_map[pos]; ok {
-				return true
-			}
-		}
-		for _, pos := range player2.ValidPositions {
-			if _, ok := free_positions_on_day1_map[pos]; ok {
-				return true
-			}
-		}
-
-		return false
+		return opening_for_player1 && opening_for_player2
 	}
 
 	for trials := 0; trials < 100; trials++ {
@@ -399,7 +396,7 @@ func FindValidSwap(chromosome *Chromosome, free_positions map[int][]string, stre
 				return player1, rand_day1, player2, rand_day2
 
 			} else {
-				continue
+				break
 
 			}
 		}
@@ -444,6 +441,10 @@ func ScoreFitness(chromosome *Chromosome, week string) {
 // Function to delete all occurences of a player from a chromosome (simplified version)
 func SimpleDeleteAllOccurences(chromosome *Chromosome, player_to_drop Player, week string, start_day int) {
 
+	// Remove player from NewPlayers
+	position := MapContainsValue(chromosome.Genes[start_day].NewPlayers, player_to_drop.Name)
+	delete(chromosome.Genes[start_day].NewPlayers, position)
+
 	for _, day := range ScheduleMap[week].Games[player_to_drop.Team] {
 
 		// If the day is before the current day, skip it
@@ -451,7 +452,7 @@ func SimpleDeleteAllOccurences(chromosome *Chromosome, player_to_drop Player, we
 			continue
 		}
 
-		key := MapContainsValue(chromosome.Genes[day], player_to_drop.Name)
+		key := MapContainsValue(chromosome.Genes[day].Roster, player_to_drop.Name)
 		if key != "" {
 			delete(chromosome.Genes[day].Roster, key)
 		}

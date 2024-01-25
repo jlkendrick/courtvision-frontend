@@ -1,6 +1,8 @@
 package tests
 
 import (
+	// "encoding/json"
+	// "os"
 	"fmt"
 	"testing"
 	"main/tests/resources"
@@ -80,6 +82,20 @@ func TestAPI(t *testing.T) {
 		t.Error("Free agents is empty")
 	}
 
+	// // Save roster_map and free_agents to JSON files
+	// roster_map_json, err := json.Marshal(roster_map)
+	// if err != nil {
+	// 	fmt.Println("Error marshalling roster_map:", err)
+	// }
+	// os.WriteFile("resources/mock_roster.json", roster_map_json, 0644)
+
+	// free_agents_json, err := json.Marshal(free_agents)
+	// if err != nil {
+	// 	fmt.Println("Error marshalling free_agents:", err)
+	// }
+	// os.WriteFile("resources/mock_freeagents.json", free_agents_json, 0644)
+
+
 }
 
 func TestOptimizeSlotting(t *testing.T) {
@@ -88,7 +104,7 @@ func TestOptimizeSlotting(t *testing.T) {
 
 	roster_map := loaders.LoadRosterMap()
 
-	week := "13"
+	week := "15"
 	threshold := 35.0
 
 	// Optimize slotting and get streamable players
@@ -164,7 +180,7 @@ func TestGetUnusedPositions(t *testing.T) {
 
 	// Retrieve team and free agent data from API
 	roster_map := loaders.LoadRosterMap()
-	week := "13"
+	week := "15"
 
 	// Test different thresholds to see if the correct number of unused positions are returned
 	test_thresholds := []float64{0.0, 33.0, 40.0, 80.0}

@@ -22,8 +22,8 @@ func HelperInitPop(size int) ([]Chromosome, int, []Player, map[int][]string, []P
 	swid := ""
 	team_name := "James's Scary Team"
 	year := 2024
-	week := "13"
-	threshold := 35.0
+	week := "15"
+	threshold := 34.0
 	fa_count := 125
 
 	roster_map, free_agents := GetPlayers(league_id, espn_s2, swid, team_name, year, fa_count)
@@ -142,9 +142,9 @@ func IndexOf(slice []interface{}, element interface{}) int {
 }
 
 // Function to check if a map contains a value and return the key
-func MapContainsValue(m Gene, value string) string {
+func MapContainsValue(m map[string]Player, value string) string {
 
-	for k, v := range m.Roster {
+	for k, v := range m {
 		if v.Name == value {
 			return k
 		}
@@ -153,14 +153,19 @@ func MapContainsValue(m Gene, value string) string {
 }
 
 // Function to print a population
-func PrintPopulation(chromosome Chromosome) {
+func PrintPopulation(chromosome Chromosome, free_positions map[int][]string) {
 	
 	// Print initial population
 	order_to_print := []string{"PG", "SG", "SF", "PF", "C", "G", "F", "UT1", "UT2", "UT3"}
 	for _, gene := range chromosome.Genes {
 		fmt.Println("Day:", gene.Day)
 		for _, pos := range order_to_print {
-			fmt.Println(pos, gene.Roster[pos].Name)
+			if Contains(free_positions[gene.Day], pos) {
+				fmt.Println(pos, "|", gene.Roster[pos].Name)
+			} else {
+				fmt.Println(pos, gene.Roster[pos].Name)
+			}
 		}
+		fmt.Println()
 	}
 }
