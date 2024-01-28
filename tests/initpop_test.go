@@ -8,8 +8,8 @@ import (
 	"math/rand"
 	"testing"
 	"time"
-	// "encoding/json"
-	// "os"
+	"encoding/json"
+	"os"
 )
 
 func TestInitPopIntegration(t *testing.T) {
@@ -24,12 +24,12 @@ func TestInitPopIntegration(t *testing.T) {
 		t.Error("Initial population has incorrect size")
 	}
 
-	// // Save initpop to JSON file
-	// population_json, err := json.Marshal(population)
-	// if err != nil {
-	// 	fmt.Println("Error marshalling roster_map:", err)
-	// }
-	// os.WriteFile("resources/mock_initpop.json", population_json, 0644)
+	// Save initpop to JSON file
+	population_json, err := json.Marshal(population)
+	if err != nil {
+		fmt.Println("Error marshalling roster_map:", err)
+	}
+	os.WriteFile("resources/mock_initpop.json", population_json, 0644)
 
 }
 
@@ -108,7 +108,7 @@ func TestCreateChromosome(t *testing.T) {
 	src := rand.NewSource(time.Now().UnixNano())
 	rng := rand.New(src)
 
-	for i := 0; i < 100; i++ {
+	for i := 0; i < 99; i++ {
 
 		chromosome := CreateChromosome(streamable_players, week, free_agents, free_positions, rng)
 

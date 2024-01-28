@@ -1,7 +1,6 @@
 package helper
 
 import (
-	"fmt"
 	"math"
 	"math/rand"
 	"sort"
@@ -526,7 +525,5 @@ func Swap(chromosome *Chromosome, free_positions map[int][]string, cur_streamers
 		InsertPlayer(day2, player1, free_positions, chromosome, week, cur_streamers, streamable_players, true)
 		InsertPlayer(day1, player2, free_positions, chromosome, week, cur_streamers, streamable_players, true)
 
-	} else {
-		fmt.Println("No valid swap found")
 	}
 }

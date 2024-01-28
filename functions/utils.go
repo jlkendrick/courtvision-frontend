@@ -1,15 +1,39 @@
 package helper
 
 import (
-	"fmt"
-	"os"
-	"sort"
-	"reflect"
 	"encoding/json"
+	"fmt"
 	"io"
+	"os"
+	"reflect"
+	"sort"
 )
 
 var ScheduleMap map[string]GameSchedule
+
+// Function to load schedule from JSON file
+func LoadSchedule(path string) {
+
+	// Load JSON schedule file
+	json_schedule, err := os.Open(path)
+	if err != nil {
+		fmt.Println("Error opening json schedule:", err)
+	}
+	defer json_schedule.Close()
+
+	// Read the contents of the json_schedule file
+	jsonBytes, err := io.ReadAll(json_schedule)
+	if err != nil {
+		fmt.Println("Error reading json_schedule:", err)
+	}
+
+	// Unmarshal the JSON data into ScheduleMap
+	err = json.Unmarshal(jsonBytes, &ScheduleMap)
+	if err != nil {
+		fmt.Println("Error turning jsonBytes into map:", err)
+	}
+
+}
 
 // Function to get a population of chromosomes
 func HelperInitPop(size int) ([]Chromosome, int, []Player, map[int][]string, []Player, string) {
@@ -65,30 +89,6 @@ func CompareChromosomes(chromosome1 Chromosome, chromosome2 Chromosome) bool {
 	}
 
 	return true
-}
-
-// Function to load schedule from JSON file
-func LoadSchedule(path string) {
-
-	// Load JSON schedule file
-	json_schedule, err := os.Open(path)
-	if err != nil {
-		fmt.Println("Error opening json schedule:", err)
-	}
-	defer json_schedule.Close()
-
-	// Read the contents of the json_schedule file
-	jsonBytes, err := io.ReadAll(json_schedule)
-	if err != nil {
-		fmt.Println("Error reading json_schedule:", err)
-	}
-
-	// Unmarshal the JSON data into ScheduleMap
-	err = json.Unmarshal(jsonBytes, &ScheduleMap)
-	if err != nil {
-		fmt.Println("Error turning jsonBytes into map:", err)
-	}
-
 }
 
 // Function to convert players slice to map

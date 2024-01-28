@@ -11,6 +11,23 @@ import (
 
 func TestEvolutionIntegration(t *testing.T) {
 
+	LoadSchedule("../static/schedule.json")
+	roster_map := loaders.LoadRosterMap()
+	free_agents := loaders.LoadFreeAgents()
+	optimal_lineup, streamable_players := OptimizeSlotting(roster_map, "15", 34.0)
+	free_positions := GetUnusedPositions(optimal_lineup)
+	week := "15"
+	population := loaders.LoadInitPop()
+	size := len(population)
+
+	for i := 0; i < 50; i++ {
+		population = EvolvePopulation(size, population, free_agents, free_positions, streamable_players, week)
+	}
+
+	// Make sure that the initial population has (size) chromosomes
+	if len(population) != size {
+		t.Error("Initial population has incorrect size")
+	}
 }
 
 func TestCrossover(t *testing.T) {
@@ -146,7 +163,7 @@ func TestMutate(t *testing.T) {
 			}
 			if MapContainsValue(gene.Roster, changed_player.Name) != "" {
 				PrintPopulation(chromosome, free_positions)
-				fmt.Println(changed_player.Name)
+				fmt.Println(changed_player.Name, drop_day)
 				t.Error("Dropped player is in roster")
 			}
 		}
