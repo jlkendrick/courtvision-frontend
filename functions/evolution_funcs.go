@@ -1,7 +1,6 @@
 package helper
 
 import (
-	"fmt"
 	"math"
 	"math/rand"
 	"sort"
@@ -136,18 +135,30 @@ func Crossover(parent1 Chromosome, parent2 Chromosome, fas []Player, free_positi
 	// Fill genes with initial streamers
 	cur_streamers1 := make([]Player, len(streamable_players))
 	cur_streamers2 := make([]Player, len(streamable_players))
+
+	sort.Slice(streamable_players[:], func(i, j int) bool {
+		return streamable_players[i].AvgPoints > streamable_players[j].AvgPoints
+	})
+
 	InsertStreamablePlayers(streamable_players, free_positions, week, &child1, cur_streamers1)
 	InsertStreamablePlayers(streamable_players, free_positions, week, &child2, cur_streamers2)
 
-	for i := 0; i < len(parent1.Genes); i++ {
+	// PrintPopulation(child1, free_positions)
+	// PrintPopulation(child2, free_positions)
+	// fmt.Println(child1.TotalAcquisitions)
+	// fmt.Println(child2.TotalAcquisitions)
 
-		fmt.Println(cur_streamers1)
+	for i := 0; i < len(parent1.Genes); i++ {
 
 		// If before crossover point, children are same as the respective parent
 		if i < crossover_point {
 			
 			// Replicate the parent's roster
 			for _, player := range parent1.Genes[i].NewPlayers {
+
+				// if player.Name == "Duop Reath" {
+				// 	fmt.Println("Duop Reath")
+				// }
 
 				InsertPlayer(i, player, free_positions, &child1, week, cur_streamers1, streamable_players, false)
 			}
@@ -186,7 +197,7 @@ func Crossover(parent1 Chromosome, parent2 Chromosome, fas []Player, free_positi
 		}
 
 		// Decrement countdown for dropped players
-		for player_name, dropped_player := range parent1.DroppedPlayers {
+		for player_name, dropped_player := range child1.DroppedPlayers {
 			if dropped_player.Countdown > 0 {
 				dropped_player.Countdown--
 				child1.DroppedPlayers[player_name] = dropped_player
@@ -194,7 +205,7 @@ func Crossover(parent1 Chromosome, parent2 Chromosome, fas []Player, free_positi
 				delete(child1.DroppedPlayers, player_name)
 			}
 		}
-		for player_name, dropped_player := range parent2.DroppedPlayers {
+		for player_name, dropped_player := range child2.DroppedPlayers {
 			if dropped_player.Countdown > 0 {
 				dropped_player.Countdown--
 				child2.DroppedPlayers[player_name] = dropped_player

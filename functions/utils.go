@@ -24,7 +24,7 @@ func HelperInitPop(size int) ([]Chromosome, int, []Player, map[int][]string, []P
 	year := 2024
 	week := "15"
 	threshold := 34.0
-	fa_count := 125
+	fa_count := 150
 
 	roster_map, free_agents := GetPlayers(league_id, espn_s2, swid, team_name, year, fa_count)
 
@@ -40,6 +40,31 @@ func HelperInitPop(size int) ([]Chromosome, int, []Player, map[int][]string, []P
 	})
 
 	return population, size, free_agents, free_positions, streamable_players, week
+}
+
+// Helper function to compare two chromosomes
+func CompareChromosomes(chromosome1 Chromosome, chromosome2 Chromosome) bool {
+
+	CompareGenes := func(gene1 Gene, gene2 Gene) bool {
+		for key, value := range gene1.Roster {
+			if value.Name != gene2.Roster[key].Name {
+				return false
+			}
+		}
+		return true
+	}
+	
+	if len(chromosome1.Genes) != len(chromosome2.Genes) {
+		return false
+	}
+
+	for i := 0; i < len(chromosome1.Genes); i++ {
+		if !CompareGenes(chromosome1.Genes[i], chromosome2.Genes[i]) {
+			return false
+		}
+	}
+
+	return true
 }
 
 // Function to load schedule from JSON file

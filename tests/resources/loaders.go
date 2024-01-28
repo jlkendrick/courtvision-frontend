@@ -1,7 +1,7 @@
 package loaders
 
 import (
-	"main/functions"
+	helper "main/functions"
 	"encoding/json"
 	"fmt"
 	"os"

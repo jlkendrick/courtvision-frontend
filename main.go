@@ -1,8 +1,8 @@
 package main
 
 import (
-	// "fmt"
-	// "sort"
+	"fmt"
+	"sort"
 	"main/functions"
 )
 
@@ -17,7 +17,7 @@ func main() {
 	league_id := 424233486
 	team_name := "James's Scary Team"
 	year := 2024
-	week := "13"
+	week := "15"
 	fa_count := 150
 
 	// Set threshold for streamable players
@@ -36,6 +36,25 @@ func main() {
 	size := 50
 	population := make([]helper.Chromosome, size)
 	helper.CreateInitialPopulation(size, population, free_agents, free_positions, week, streamable_players)
+
+	// Score fitness of initial population and get total acquisitions
+	for i := 0; i < len(population); i++ {
+		helper.GetTotalAcquisitions(&population[i])
+		helper.ScoreFitness(&population[i], week)
+	}
+
+	// Sort population by increasing fitness score
+	sort.Slice(population, func(i, j int) bool {
+		return population[i].FitnessScore < population[j].FitnessScore
+	})
+
+	// Print fitness scores
+	total_fitness_score := 0
+	for _, chromosome := range population {
+		fmt.Println(chromosome.FitnessScore)
+		total_fitness_score += chromosome.FitnessScore
+	}
+	fmt.Println("Average fitness score:", total_fitness_score / size)
 
 	// // Evolve the population
 	// for i := 0; i < size; i++ {

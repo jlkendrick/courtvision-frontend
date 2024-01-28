@@ -290,6 +290,10 @@ func GetPosMap(player Player,
 // Function to insert initial streamable players into a chromosome
 func InsertStreamablePlayers(streamable_players []Player, free_positions map[int][]string, week string, chromosome *Chromosome, cur_streamers []Player) {
 
+	sort.Slice(streamable_players, func(i, j int) bool {
+		return streamable_players[i].AvgPoints > streamable_players[j].AvgPoints
+	})
+
 	// Insert streamable players into chromosome
 	for i, player := range streamable_players {
 

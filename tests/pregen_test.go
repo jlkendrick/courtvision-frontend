@@ -40,7 +40,7 @@ func TestAPI(t *testing.T) {
 	league_id := 424233486
 	team_name := "James's Scary Team"
 	year := 2024
-	fa_count := 100
+	fa_count := 150
 	roster_map, free_agents := GetPlayers(league_id, espn_s2, swid, team_name, year, fa_count)
 
 	// Check if roster_map is empty
@@ -105,7 +105,7 @@ func TestOptimizeSlotting(t *testing.T) {
 	roster_map := loaders.LoadRosterMap()
 
 	week := "15"
-	threshold := 35.0
+	threshold := 34.0
 
 	// Optimize slotting and get streamable players
 	optimal_lineup, _ := OptimizeSlotting(roster_map, week, threshold)

@@ -2,7 +2,7 @@ import requests
 import json
 from fastapi import FastAPI
 from pydantic import BaseModel, field_validator
-from espn_api.basketball import Player
+from utils import Player
 
 
 def get_roster(team_name, teams):
