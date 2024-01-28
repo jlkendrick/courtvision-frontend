@@ -1,14 +1,15 @@
 package tests
 
 import (
+	// "fmt"
 	"fmt"
 	. "main/functions"
 	loaders "main/tests/resources"
 	"math/rand"
 	"testing"
 	"time"
-	"encoding/json"
-	"os"
+	// "encoding/json"
+	// "os"
 )
 
 func TestInitPopIntegration(t *testing.T) {
@@ -23,12 +24,12 @@ func TestInitPopIntegration(t *testing.T) {
 		t.Error("Initial population has incorrect size")
 	}
 
-	// Save initpop to JSON file
-	population_json, err := json.Marshal(population)
-	if err != nil {
-		fmt.Println("Error marshalling roster_map:", err)
-	}
-	os.WriteFile("resources/mock_initpop.json", population_json, 0644)
+	// // Save initpop to JSON file
+	// population_json, err := json.Marshal(population)
+	// if err != nil {
+	// 	fmt.Println("Error marshalling roster_map:", err)
+	// }
+	// os.WriteFile("resources/mock_initpop.json", population_json, 0644)
 
 }
 
@@ -111,10 +112,12 @@ func TestCreateChromosome(t *testing.T) {
 
 		chromosome := CreateChromosome(streamable_players, week, free_agents, free_positions, rng)
 
-		for _, gene := range chromosome.Genes {
+		for i, gene := range chromosome.Genes {
 			// Check to see if every player in NewPlayers is in the roster
 			for _, player := range gene.NewPlayers {
 				if MapContainsValue(gene.Roster, player.Name) == "" {
+					PrintPopulation(chromosome, free_positions)
+					fmt.Println(player.Name, i)
 					t.Error("NewPlayer not in roster")
 				}
 			}
@@ -139,13 +142,11 @@ func TestCreateChromosome(t *testing.T) {
 		// Check to see if the number of streamers ever exceeds the streamable player count
 		for _, gene := range chromosome.Genes {
 			if len(gene.Roster) > len(streamable_players) {
-				fmt.Println(len(gene.Roster), len(streamable_players))
-				PrintPopulation(chromosome, free_positions)
+				// fmt.Println(len(gene.Roster), len(streamable_players))
+				// PrintPopulation(chromosome, free_positions)
 				t.Error("Streamer count exceeds streamable player count")
 			}
 		}
-
-		fmt.Println(chromosome.TotalAcquisitions)
 	}
 
 }

@@ -123,82 +123,82 @@ func TestMutate(t *testing.T) {
 	population := loaders.LoadInitPop()
 
 	// Test mutate clone drop 33 times
-	// for i := 0; i < 100; i++ {
+	for i := 0; i < 100; i++ {
 		
-	// 	parent1 := SelectFirstParent(population)
-	// 	parent2 := SelectSecondParent(population)
+		parent1 := SelectFirstParent(population)
+		parent2 := SelectSecondParent(population)
 
-	// 	chromosome, cur_streamers1, _, _, _ := Crossover(parent1, parent2, free_agents, free_positions, streamable_players, week)
-	// 	GetTotalAcquisitions(&chromosome)
-	// 	pre_aquisitions := chromosome.TotalAcquisitions
+		chromosome, cur_streamers1, _, _, _ := Crossover(parent1, parent2, free_agents, free_positions, streamable_players, week)
+		GetTotalAcquisitions(&chromosome)
+		pre_aquisitions := chromosome.TotalAcquisitions
 
-	// 	// Test mutate clone drop
-	// 	var changed_player Player
-	// 	var dummy_changed_player Player
-	// 	var dummy_swap_success bool
-	// 	var drop_day int
-	// 	MutateClone(true, false, false, &drop_day, &dummy_swap_success, &changed_player, &dummy_changed_player, &chromosome, free_agents, free_positions, cur_streamers1, week, streamable_players)
+		// Test mutate clone drop
+		var changed_player Player
+		var dummy_changed_player Player
+		var dummy_swap_success bool
+		var drop_day int
+		MutateForTest(true, false, false, &drop_day, &dummy_swap_success, &changed_player, &dummy_changed_player, &chromosome, free_agents, free_positions, cur_streamers1, week, streamable_players)
 
-	// 	// Make sure the dropped player is not in the roster after the drop
-	// 	for i, gene := range chromosome.Genes {
-	// 		if i < drop_day {
-	// 			continue
-	// 		}
-	// 		if MapContainsValue(gene.Roster, changed_player.Name) != "" {
-	// 			PrintPopulation(chromosome, free_positions)
-	// 			fmt.Println(changed_player.Name)
-	// 			t.Error("Dropped player is in roster")
-	// 		}
-	// 	}
+		// Make sure the dropped player is not in the roster after the drop
+		for i, gene := range chromosome.Genes {
+			if i < drop_day {
+				continue
+			}
+			if MapContainsValue(gene.Roster, changed_player.Name) != "" {
+				PrintPopulation(chromosome, free_positions)
+				fmt.Println(changed_player.Name)
+				t.Error("Dropped player is in roster")
+			}
+		}
 
-	// 	// Make sure the TotalAcquisitions dropped by 1
-	// 	if chromosome.TotalAcquisitions != pre_aquisitions-1 {
-	// 		fmt.Println(chromosome.TotalAcquisitions, pre_aquisitions)
-	// 		t.Error("TotalAcquisitions did not decrease by 1")
-	// 	}
-	// }
+		// Make sure the TotalAcquisitions dropped by 1
+		if chromosome.TotalAcquisitions != pre_aquisitions-1 {
+			fmt.Println(chromosome.TotalAcquisitions, pre_aquisitions)
+			t.Error("TotalAcquisitions did not decrease by 1")
+		}
+	}
 
 	// Test mutate clone add 33 times
-	// for i := 0; i < 100; i++ {
+	for i := 0; i < 100; i++ {
 		
-	// 	parent1 := SelectFirstParent(population)
-	// 	parent2 := SelectSecondParent(population)
+		parent1 := SelectFirstParent(population)
+		parent2 := SelectSecondParent(population)
 
-	// 	chromosome, cur_streamers1, _, _, _ := Crossover(parent1, parent2, free_agents, free_positions, streamable_players, week)
-	// 	GetTotalAcquisitions(&chromosome)
-	// 	pre_aquisitions := chromosome.TotalAcquisitions
+		chromosome, cur_streamers1, _, _, _ := Crossover(parent1, parent2, free_agents, free_positions, streamable_players, week)
+		GetTotalAcquisitions(&chromosome)
+		pre_aquisitions := chromosome.TotalAcquisitions
 
-	// 	var changed_player Player
-	// 	var dummy_changed_player Player
-	// 	var dummy_swap_success bool
-	// 	var dummy_drop_day int
-	// 	MutateClone(false, true, false, &dummy_drop_day, &dummy_swap_success, &changed_player, &dummy_changed_player, &chromosome, free_agents, free_positions, cur_streamers1, week, streamable_players)
+		var changed_player Player
+		var dummy_changed_player Player
+		var dummy_swap_success bool
+		var dummy_drop_day int
+		MutateForTest(false, true, false, &dummy_drop_day, &dummy_swap_success, &changed_player, &dummy_changed_player, &chromosome, free_agents, free_positions, cur_streamers1, week, streamable_players)
 
-	// 	// Make sure the added player is in the roster
-	// 	if changed_player.Name != "" {
-	// 		found := false
-	// 		for _, gene := range chromosome.Genes {
-	// 			if MapContainsValue(gene.Roster, changed_player.Name) != "" {
-	// 				found = true
-	// 				break
-	// 			}
-	// 		}
-	// 		if !found {
-	// 			t.Error("Added player is not in roster")
-	// 		}
-	// 	} else {
-	// 		t.Error("No player was added")
-	// 	}
+		// Make sure the added player is in the roster
+		if changed_player.Name != "" {
+			found := false
+			for _, gene := range chromosome.Genes {
+				if MapContainsValue(gene.Roster, changed_player.Name) != "" {
+					found = true
+					break
+				}
+			}
+			if !found {
+				t.Error("Added player is not in roster")
+			}
+		} else {
+			t.Error("No player was added")
+		}
 
-	// 	// Make sure the TotalAcquisitions increased by 1
-	// 	if chromosome.TotalAcquisitions != pre_aquisitions+1 {
-	// 		fmt.Println(chromosome.TotalAcquisitions, pre_aquisitions)
-	// 		t.Error("TotalAcquisitions did not increase by 1")
-	// 	}
-	// }
+		// Make sure the TotalAcquisitions increased by 1
+		if chromosome.TotalAcquisitions != pre_aquisitions+1 {
+			fmt.Println(chromosome.TotalAcquisitions, pre_aquisitions)
+			t.Error("TotalAcquisitions did not increase by 1")
+		}
+	}
 
 	// Test mutate clone swap 33 times
-	for i := 0; i < 33; i++ {
+	for i := 0; i < 100; i++ {
 
 		parent1 := SelectFirstParent(population)
 		parent2 := SelectSecondParent(population)
@@ -211,7 +211,7 @@ func TestMutate(t *testing.T) {
 		// PrintPopulation(chromosome, free_positions)
 		swap_success := false
 		var dummy_drop_day int
-		MutateClone(false, false, true, &dummy_drop_day, &swap_success, &changed_player1, &changed_player2, &chromosome, free_agents, free_positions, cur_streamers1, week, streamable_players)
+		MutateForTest(false, false, true, &dummy_drop_day, &swap_success, &changed_player1, &changed_player2, &chromosome, free_agents, free_positions, cur_streamers1, week, streamable_players)
 		// fmt.Println(changed_player1, changed_player2)
 		// PrintPopulation(chromosome, free_positions)
 
@@ -229,6 +229,7 @@ func TestMutate(t *testing.T) {
 					}
 				}
 				if !found1 {
+					fmt.Println(changed_player1.Name, changed_player2.Name)
 					t.Error("Swapped player1 is not in roster")
 				}
 				if !found2 {
@@ -239,7 +240,7 @@ func TestMutate(t *testing.T) {
 	}
 }
 
-func MutateClone(drop bool, add bool, swap bool, drop_day *int, swap_success *bool, changed_player1 *Player, changed_player2 *Player, chromosome *Chromosome, fas []Player, free_positions map[int][]string, cur_streamers []Player, week string, streamable_players []Player) {
+func MutateForTest(drop bool, add bool, swap bool, drop_day *int, swap_success *bool, changed_player1 *Player, changed_player2 *Player, chromosome *Chromosome, fas []Player, free_positions map[int][]string, cur_streamers []Player, week string, streamable_players []Player) {
 
 	// Get random seed
 	src := rand.NewSource(time.Now().UnixNano())
@@ -247,97 +248,120 @@ func MutateClone(drop bool, add bool, swap bool, drop_day *int, swap_success *bo
 
 	if drop {
 		// Drop a random player on a random day
-		day := 0
-		test_day := rng.Intn(len(chromosome.Genes))
-		for day == 0 {
-
-			if len(chromosome.Genes[test_day].NewPlayers) > 0 {
-				day = test_day
-				break
-			} else {
-				test_day = rng.Intn(len(chromosome.Genes))
-			}
-		}
-		*drop_day = day
-
-		new_players := make([]Player, len(chromosome.Genes[day].NewPlayers))
-		for _, player := range chromosome.Genes[day].NewPlayers {
-			new_players = append(new_players, player)
-		}
-		rand_index := rng.Intn(len(new_players))
-		*changed_player1 = new_players[rand_index]
-
-		chromosome.Genes[day].Acquisitions -= 1
-		chromosome.TotalAcquisitions -= 1
-
-		SimpleDeleteAllOccurences(chromosome, new_players[rand_index], week, day)
+		DropForTest(rng, chromosome, drop_day, changed_player1, week)
 
 	} else if add {
 		// Add a random player in a random position on a random day
-
-		check_pos := func (fa Player, rand_day int) bool {
-			for _, pos := range fa.ValidPositions {
-				if Contains(free_positions[rand_day], pos) {
-					if _, ok := chromosome.Genes[rand_day].Roster[pos]; !ok {
-						return true
-					}
-				}
-			}
-			return false
-		}
-
-		for not_found := true; not_found; {
-
-			rand_day := rng.Intn(len(chromosome.Genes))
-			rand_index := rng.Intn(len(fas))
-			fa := fas[rand_index]
-
-			// Check if the player is already on the roster or if the player is not playing on the day
-			if MapContainsValue(chromosome.Genes[rand_day].Roster, fa.Name) != "" || !Contains(ScheduleMap[week].Games[fa.Team], rand_day) || fa.Injured || !check_pos(fa, rand_day) {
-				continue
-			}
-
-			// Insert the player into the roster
-			dummy_has_match := false
-			add := false
-			matches := GetMatches(fa.ValidPositions, free_positions[rand_day], &dummy_has_match)
-			pos_map := GetPosMap(fa, chromosome, matches, free_positions, rand_day, week, cur_streamers, streamable_players, false, true, &add)
-
-			*changed_player1 = fa
-
-			for day, pos := range pos_map {
-				not_found = false
-
-				chromosome.Genes[day].Roster[pos] = fa
-			}
-
-			if !not_found {
-				chromosome.Genes[rand_day].NewPlayers[fa.Name] = fa
-				chromosome.Genes[rand_day].Acquisitions += 1
-				chromosome.TotalAcquisitions += 1
-			}
-		}
+		AddForTest(rng, free_positions, chromosome, fas, changed_player1, week, cur_streamers, streamable_players)
 
 	} else {
 		// Find a valid swap for a random player on a random day and swap them
+		SwapForTest(chromosome, free_positions, cur_streamers, streamable_players, swap_success, changed_player1, changed_player2, week)
 
-		player1, day1, player2, day2 := FindValidSwap(chromosome, free_positions, cur_streamers, week)
+	}
+}
 
-		*changed_player1 = player1
-		*changed_player2 = player2
 
-		// Delete player1 from day1
-		SimpleDeleteAllOccurences(chromosome, player1, week, day1)
-		// Delete player2 from day2
-		SimpleDeleteAllOccurences(chromosome, player2, week, day2)
+// Function to drop a random player on a random day
+func DropForTest(rng *rand.Rand, chromosome *Chromosome, drop_day *int, changed_player1 *Player, week string) {
 
-		if player1.Name != "" && player2.Name != "" {
+	// Until a day with a new player is found, keep generating random days
+	day := 0
+	test_day := rng.Intn(len(chromosome.Genes))
+	for day == 0 {
 
-			InsertPlayer(day1, player2, free_positions, chromosome, week, cur_streamers, streamable_players, true)
-			InsertPlayer(day2, player1, free_positions, chromosome, week, cur_streamers, streamable_players, true)
-			*swap_success = true
+		if len(chromosome.Genes[test_day].NewPlayers) > 0 {
+			day = test_day
+			break
 		} else {
-			fmt.Println("No valid swap found")
+			test_day = rng.Intn(len(chromosome.Genes))
 		}
+	}
+	*drop_day = day
+
+	// Turn the map of new players into a slice
+	new_players := make([]Player, len(chromosome.Genes[day].NewPlayers))
+	for _, player := range chromosome.Genes[day].NewPlayers {
+		new_players = append(new_players, player)
+	}
+	rand_index := rng.Intn(len(new_players))
+	*changed_player1 = new_players[rand_index]
+
+	// Delete the player from the roster and decrement the acquisitions
+	chromosome.Genes[day].Acquisitions -= 1
+	chromosome.TotalAcquisitions -= 1
+	SimpleDeleteAllOccurences(chromosome, new_players[rand_index], week, day)
+}
+
+// Function to add a random player in a random position on a random day
+func AddForTest(rng *rand.Rand, free_positions map[int][]string, chromosome *Chromosome, fas []Player, changed_player1 *Player, week string, cur_streamers []Player, streamable_players []Player) {
+
+	// Functon to check if a player is in a valid position on a day
+	check_pos := func (fa Player, rand_day int) bool {
+		for _, pos := range fa.ValidPositions {
+			if Contains(free_positions[rand_day], pos) {
+				if _, ok := chromosome.Genes[rand_day].Roster[pos]; !ok {
+					return true
+				}
+			}
+		}
+		return false
+	}
+
+	// Until a valid player is found, keep generating random players and days
+	for not_found := true; not_found; {
+
+		// Generate a random day and player
+		rand_day := rng.Intn(len(chromosome.Genes))
+		rand_index := rng.Intn(len(fas))
+		fa := fas[rand_index]
+
+		// Check if the player is already on the roster or if the player is not playing on the day
+		if MapContainsValue(chromosome.Genes[rand_day].Roster, fa.Name) != "" || !Contains(ScheduleMap[week].Games[fa.Team], rand_day) || fa.Injured || !check_pos(fa, rand_day) {
+			continue
+		}
+
+		// Insert the player into the roster
+		dummy_has_match := false
+		add := false
+		matches := GetMatches(fa.ValidPositions, free_positions[rand_day], &dummy_has_match)
+		pos_map := GetPosMap(fa, chromosome, matches, free_positions, rand_day, week, cur_streamers, streamable_players, false, true, &add)
+
+		*changed_player1 = fa
+
+		for day, pos := range pos_map {
+			not_found = false
+
+			chromosome.Genes[day].Roster[pos] = fa
+		}
+
+		if !not_found {
+			chromosome.Genes[rand_day].NewPlayers[fa.Name] = fa
+			chromosome.Genes[rand_day].Acquisitions += 1
+			chromosome.TotalAcquisitions += 1
+		}
+	}
+}
+
+// Function to find a valid swap for a random player on a random day and swap them
+func SwapForTest(chromosome *Chromosome, free_positions map[int][]string, cur_streamers []Player, streamable_players []Player, swap_success *bool, changed_player1 *Player, changed_player2 *Player, week string) {
+
+	player1, day1, player2, day2 := FindValidSwap(chromosome, free_positions, cur_streamers, week)
+
+	*changed_player1 = player1
+	*changed_player2 = player2
+
+	// Delete player1 from day1
+	SimpleDeleteAllOccurences(chromosome, player1, week, day1)
+	// Delete player2 from day2
+	SimpleDeleteAllOccurences(chromosome, player2, week, day2)
+
+	if player1.Name != "" && player2.Name != "" {
+
+		InsertPlayer(day2, player1, free_positions, chromosome, week, cur_streamers, streamable_players, true)
+		InsertPlayer(day1, player2, free_positions, chromosome, week, cur_streamers, streamable_players, true)
+		*swap_success = true
+	} else {
+		fmt.Println("No valid swap found")
 	}
 }

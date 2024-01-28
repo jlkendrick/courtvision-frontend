@@ -1,6 +1,7 @@
 package helper
 
 import (
+	"fmt"
 	"math"
 	"math/rand"
 	"sort"
@@ -136,17 +137,12 @@ func Crossover(parent1 Chromosome, parent2 Chromosome, fas []Player, free_positi
 	cur_streamers1 := make([]Player, len(streamable_players))
 	cur_streamers2 := make([]Player, len(streamable_players))
 
-	sort.Slice(streamable_players[:], func(i, j int) bool {
+	sort.Slice(streamable_players, func(i, j int) bool {
 		return streamable_players[i].AvgPoints > streamable_players[j].AvgPoints
 	})
 
 	InsertStreamablePlayers(streamable_players, free_positions, week, &child1, cur_streamers1)
 	InsertStreamablePlayers(streamable_players, free_positions, week, &child2, cur_streamers2)
-
-	// PrintPopulation(child1, free_positions)
-	// PrintPopulation(child2, free_positions)
-	// fmt.Println(child1.TotalAcquisitions)
-	// fmt.Println(child2.TotalAcquisitions)
 
 	for i := 0; i < len(parent1.Genes); i++ {
 
@@ -155,10 +151,6 @@ func Crossover(parent1 Chromosome, parent2 Chromosome, fas []Player, free_positi
 			
 			// Replicate the parent's roster
 			for _, player := range parent1.Genes[i].NewPlayers {
-
-				// if player.Name == "Duop Reath" {
-				// 	fmt.Println("Duop Reath")
-				// }
 
 				InsertPlayer(i, player, free_positions, &child1, week, cur_streamers1, streamable_players, false)
 			}
@@ -174,7 +166,7 @@ func Crossover(parent1 Chromosome, parent2 Chromosome, fas []Player, free_positi
 			for _, player := range parent1.Genes[i].NewPlayers {
 
 				// Check if the player is already on the child's roster or if he is still on the waiver wire
-				valid := ValidatePlayer(&parent2, player)
+				valid := ValidatePlayer(&parent2, player, i)
 
 				if valid {
 					InsertPlayer(i, player, free_positions, &child2, week, cur_streamers2, streamable_players, false)
@@ -186,7 +178,7 @@ func Crossover(parent1 Chromosome, parent2 Chromosome, fas []Player, free_positi
 			for _, player := range parent2.Genes[i].NewPlayers {
 
 				// Check if the player is already on the child's roster or if he is still on the waiver wire
-				valid := ValidatePlayer(&parent1, player)
+				valid := ValidatePlayer(&parent1, player, i)
 
 				if valid {
 					InsertPlayer(i, player, free_positions, &child1, week, cur_streamers1, streamable_players, false)
@@ -233,61 +225,18 @@ func Mutate(rate float64, chromosome *Chromosome, fas []Player, free_positions m
 		if rand_num < rate * 0.33 {
 		// Drop a random player on a random day
 
-			rand_day := rng.Intn(len(chromosome.Genes))
-			new_players := []Player{}
-			for _, player := range chromosome.Genes[rand_day].NewPlayers {
-				new_players = append(new_players, player)
-			}
-			if len(new_players) == 0 {
-				return
-			}
-			rand_index := rng.Intn(len(new_players))
-
-			chromosome.Genes[rand_day].Acquisitions -= 1
-
-			SimpleDeleteAllOccurences(chromosome, new_players[rand_index], week, rand_day)
+			Drop(rng, chromosome, week)
 
 		} else if rand_num < rate * 0.66 {
 		// Add a random player in a random position on a random day
 
-			for not_found := true; not_found; {
-
-				rand_day := rng.Intn(len(chromosome.Genes))
-				rand_index := rng.Intn(len(fas))
-				fa := fas[rand_index]
-
-				// Check if the player is already on the roster or if the player is not playing on the day
-				if MapContainsValue(chromosome.Genes[rand_day].Roster, fa.Name) != "" || !Contains(ScheduleMap[week].Games[fa.Team], rand_day) || fa.Injured {
-					continue
-				}
-				not_found = false
-
-				// Insert the player into the roster
-				dummy_has_match := false
-				add := false
-				matches := GetMatches(fa.ValidPositions, free_positions[rand_day], &dummy_has_match)
-				pos_map := GetPosMap(fa, chromosome, matches, free_positions, rand_day, week, cur_streamers, streamable_players, false, true, &add)
-				cur_streamers[len(cur_streamers) - 1] = fa
-
-				chromosome.Genes[rand_day].Acquisitions += 1
-				chromosome.TotalAcquisitions += 1
-				chromosome.Genes[rand_day].NewPlayers[fa.Name] = fa
-
-				for day, pos := range pos_map {
-
-					chromosome.Genes[day].Roster[pos] = fa
-				}
-			}
+			Add(rng, free_positions, chromosome, fas, week, cur_streamers, streamable_players)
 
 		} else {
 		// Find a valid swap for a random player on a random day and swap them
-			player1, day1, player2, day2 := FindValidSwap(chromosome, free_positions, cur_streamers, week)
+			
+			Swap(chromosome, free_positions, cur_streamers, streamable_players, week)
 
-			if player1.Name != "" && player2.Name != "" {
-				
-				InsertPlayer(day1, player2, free_positions, chromosome, week, cur_streamers, streamable_players, true)
-				InsertPlayer(day2, player1, free_positions, chromosome, week, cur_streamers, streamable_players, true)
-			}
 		}
 	}
 }
@@ -320,19 +269,33 @@ func InsertPlayer(day int, player Player, free_positions map[int][]string, child
 }
 
 // Function to validate the insertion of a player into a chromosome
-func ValidatePlayer(chromosome *Chromosome, player Player) bool {
+func ValidatePlayer(chromosome *Chromosome, player Player, day int) bool {
 
 	// Function to see if the player is in the dropped players map
-	CheckDroppedPlayers := func(player_name string) bool {
+	CheckDroppedPlayers := func(day int, player_name string) bool {
 		if _, ok := chromosome.DroppedPlayers[player_name]; ok {
 			return true
 		}
+		if day == 0 {
+			if Contains(chromosome.Genes[day].DroppedPlayers, player_name) {
+				return true
+			}
+		} else if day == 1 {
+			if Contains(chromosome.Genes[day-1].DroppedPlayers, player_name) || Contains(chromosome.Genes[day].DroppedPlayers, player_name) {
+				return true
+			}
+		} else {
+			if Contains(chromosome.Genes[day-2].DroppedPlayers, player_name) || Contains(chromosome.Genes[day-1].DroppedPlayers, player_name) || Contains(chromosome.Genes[day].DroppedPlayers, player_name) {
+				return true
+			}
+		}
+
 		return false
 	}
 
 	// Check if the player is already on the roster and he is still on the waiver wire
 	for _, gene := range chromosome.Genes {
-		if MapContainsValue(gene.Roster, player.Name) != "" && CheckDroppedPlayers(player.Name) {
+		if MapContainsValue(gene.Roster, player.Name) != "" && CheckDroppedPlayers(day, player.Name) {
 			return false
 		}
 	}
@@ -378,9 +341,9 @@ func FindValidSwap(chromosome *Chromosome, free_positions map[int][]string, stre
 
 	for trials := 0; trials < 100; trials++ {
 		// Get two random days that are not the same
-		rand_day1 := rng.Intn(len(chromosome.Genes))
+		rand_day1 := rng.Intn(len(chromosome.Genes) - 1)
 		rand_day2 := rng.Intn(len(chromosome.Genes))
-		for rand_day1 == rand_day2 {
+		for rand_day1 >= rand_day2 {
 			rand_day2 = rng.Intn(len(chromosome.Genes))
 		}
 
@@ -467,5 +430,103 @@ func SimpleDeleteAllOccurences(chromosome *Chromosome, player_to_drop Player, we
 		if key != "" {
 			delete(chromosome.Genes[day].Roster, key)
 		}
+	}
+}
+
+
+// Function to drop a random player on a random day
+func Drop(rng *rand.Rand, chromosome *Chromosome, week string) {
+
+	// Until a day with a new player is found, keep generating random days
+	day := 0
+	test_day := rng.Intn(len(chromosome.Genes))
+	for day == 0 {
+
+		if len(chromosome.Genes[test_day].NewPlayers) > 0 {
+			day = test_day
+			break
+		} else {
+			test_day = rng.Intn(len(chromosome.Genes))
+		}
+	}
+
+	// Turn the map of new players into a slice
+	new_players := make([]Player, len(chromosome.Genes[day].NewPlayers))
+	for _, player := range chromosome.Genes[day].NewPlayers {
+		new_players = append(new_players, player)
+	}
+	rand_index := rng.Intn(len(new_players))
+
+	// Delete the player from the roster and decrement the acquisitions
+	chromosome.Genes[day].Acquisitions -= 1
+	chromosome.TotalAcquisitions -= 1
+	SimpleDeleteAllOccurences(chromosome, new_players[rand_index], week, day)
+}
+
+// Function to add a random player in a random position on a random day
+func Add(rng *rand.Rand, free_positions map[int][]string, chromosome *Chromosome, fas []Player, week string, cur_streamers []Player, streamable_players []Player) {
+
+	// Functon to check if a player is in a valid position on a day
+	check_pos := func (fa Player, rand_day int) bool {
+		for _, pos := range fa.ValidPositions {
+			if Contains(free_positions[rand_day], pos) {
+				if _, ok := chromosome.Genes[rand_day].Roster[pos]; !ok {
+					return true
+				}
+			}
+		}
+		return false
+	}
+
+	// Until a valid player is found, keep generating random players and days
+	for not_found := true; not_found; {
+
+		// Generate a random day and player
+		rand_day := rng.Intn(len(chromosome.Genes))
+		rand_index := rng.Intn(len(fas))
+		fa := fas[rand_index]
+
+		// Check if the player is already on the roster or if the player is not playing on the day
+		if MapContainsValue(chromosome.Genes[rand_day].Roster, fa.Name) != "" || !Contains(ScheduleMap[week].Games[fa.Team], rand_day) || fa.Injured || !check_pos(fa, rand_day) {
+			continue
+		}
+
+		// Insert the player into the roster
+		dummy_has_match := false
+		add := false
+		matches := GetMatches(fa.ValidPositions, free_positions[rand_day], &dummy_has_match)
+		pos_map := GetPosMap(fa, chromosome, matches, free_positions, rand_day, week, cur_streamers, streamable_players, false, true, &add)
+
+		for day, pos := range pos_map {
+			not_found = false
+
+			chromosome.Genes[day].Roster[pos] = fa
+		}
+
+		if !not_found {
+			chromosome.Genes[rand_day].NewPlayers[fa.Name] = fa
+			chromosome.Genes[rand_day].Acquisitions += 1
+			chromosome.TotalAcquisitions += 1
+		}
+	}
+}
+
+// Function to find a valid swap for a random player on a random day and swap them
+func Swap(chromosome *Chromosome, free_positions map[int][]string, cur_streamers []Player, streamable_players []Player, week string) {
+
+	player1, day1, player2, day2 := FindValidSwap(chromosome, free_positions, cur_streamers, week)
+
+	// Delete player1 from day1
+	SimpleDeleteAllOccurences(chromosome, player1, week, day1)
+	// Delete player2 from day2
+	SimpleDeleteAllOccurences(chromosome, player2, week, day2)
+
+	if player1.Name != "" && player2.Name != "" {
+
+		InsertPlayer(day2, player1, free_positions, chromosome, week, cur_streamers, streamable_players, true)
+		InsertPlayer(day1, player2, free_positions, chromosome, week, cur_streamers, streamable_players, true)
+
+	} else {
+		fmt.Println("No valid swap found")
 	}
 }
