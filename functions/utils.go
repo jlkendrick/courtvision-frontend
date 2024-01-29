@@ -196,3 +196,14 @@ func PrintPopulation(chromosome Chromosome, free_positions map[int][]string) {
 		fmt.Println()
 	}
 }
+
+// Function to find the index of a player in a slice
+func SliceIndexOf(players []Player, player Player) int {
+	
+	for i, p := range players {
+		if p.Name == player.Name {
+			return i
+		}
+	}
+	return -1
+}

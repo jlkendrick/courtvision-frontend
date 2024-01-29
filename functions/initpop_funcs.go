@@ -139,7 +139,6 @@ func CreateChromosome(streamable_players []Player, week string, fas []Player, fr
 					// When added here, counts as a new player
 					if _, ok := pos_map[j]; ok && add {
 						gene.NewPlayers[fa.Name] = fa
-						gene.Acquisitions++
 					} else {
 						continue
 					}
@@ -169,6 +168,9 @@ func CreateChromosome(streamable_players []Player, week string, fas []Player, fr
 				chromosome.DroppedPlayers[name] = player
 			}
 		}
+
+		// After each day, add the length of NewPlayers to Acquisitions
+		gene.Acquisitions += len(gene.NewPlayers)
 	}
 
 	return chromosome
@@ -198,17 +200,12 @@ func GetPosMap(player Player,
 		if not_initial {
 
 			// Delete the worst bench streamer
-			sort.Slice(cur_streamers, func(i, j int) bool {
-				return cur_streamers[i].AvgPoints < cur_streamers[j].AvgPoints 
+			sort.Slice(chromosome.Genes[0].Bench, func(i, j int) bool {
+				return chromosome.Genes[0].Bench[i].AvgPoints < chromosome.Genes[0].Bench[j].AvgPoints 
 			})
 
-			for _, dropped_player := range cur_streamers {
-				if !Contains(ScheduleMap[week].Games[dropped_player.Team], 0) {
-					// Drop the worst player from the chromosome
-					DeleteAllOccurrences(chromosome, cur_streamers, player, dropped_player, week, start_day)
-					break
-				}
-			}
+			// Drop the worst player from the chromosome
+			DeleteAllOccurrences(chromosome, cur_streamers, player, chromosome.Genes[0].Bench[0], week, start_day)
 		}
 
 
@@ -306,10 +303,11 @@ func DeleteAllOccurrences(chromosome *Chromosome, cur_streamers []Player, player
 	chromosome.DroppedPlayers[player_to_drop.Name] = DroppedPlayer{Player: player_to_drop, Countdown: 3}
 	chromosome.Genes[start_day].DroppedPlayers = append(chromosome.Genes[start_day].DroppedPlayers, player_to_drop)
 
-	for _, day := range ScheduleMap[week].Games[player_to_drop.Team] {
+	for day := start_day; day <= ScheduleMap[week].GameSpan; day++ {
 
-		// If the day is before the current day, skip it
-		if day < start_day {
+		// If the player doesn't have a game on the day, skip it and remove from bench
+		if !Contains(ScheduleMap[week].Games[player_to_drop.Team], day) {
+			chromosome.Genes[day].Bench = Remove(chromosome.Genes[day].Bench, SliceIndexOf(chromosome.Genes[day].Bench, player_to_drop))
 			continue
 		}
 
@@ -319,12 +317,8 @@ func DeleteAllOccurrences(chromosome *Chromosome, cur_streamers []Player, player
 		}
 	}
 
-	// Remove player from added players
-	cur_streamers_interface := make([]interface{}, len(cur_streamers))
-	for i, v := range cur_streamers {
-		cur_streamers_interface[i] = v
-	}
-	index := IndexOf(cur_streamers_interface, player_to_drop)
+	// Remove player from added players by replacing with new player
+	index := SliceIndexOf(cur_streamers, player_to_drop)
 	cur_streamers[index] = player_to_add
 }
 

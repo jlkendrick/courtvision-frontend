@@ -58,11 +58,8 @@ func TestInsertStreamablePlayers(t *testing.T) {
 
 	InsertStreamablePlayers(streamable_players, free_positions, week, &chromosome, cur_streamers)
 
-	PrintPopulation(chromosome, free_positions)
-
-
 	// Check to see if on day 0, the roster has all the streamable players who are playing and that they are in free positions
-	for i := 0; i < 1; i++ {
+	for i := 0; i < 5; i++ {
 
 		test_chromosome := Chromosome{Genes: make([]Gene, days_in_week+1), FitnessScore: 0, TotalAcquisitions: 0, CumProbTracker: 0.0, DroppedPlayers: make(map[string]DroppedPlayer)}
 
@@ -72,7 +69,6 @@ func TestInsertStreamablePlayers(t *testing.T) {
 		}
 
 		InsertStreamablePlayers(streamable_players, free_positions, week, &test_chromosome, cur_streamers)
-		PrintPopulation(test_chromosome, free_positions)
 
 		for _, player := range streamable_players {
 			if Contains(ScheduleMap[week].Games[player.Team], 0) {
@@ -120,7 +116,7 @@ func TestCreateChromosome(t *testing.T) {
 	src := rand.NewSource(time.Now().UnixNano())
 	rng := rand.New(src)
 
-	for i := 0; i < 1; i++ {
+	for i := 0; i < 10; i++ {
 
 		chromosome := CreateChromosome(streamable_players, week, free_agents, free_positions, rng)
 
