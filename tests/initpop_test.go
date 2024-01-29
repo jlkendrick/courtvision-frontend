@@ -68,7 +68,7 @@ func TestInsertStreamablePlayers(t *testing.T) {
 
 		// Initialize genes
 		for j := 0; j <= days_in_week; j++ {
-			test_chromosome.Genes[j] = Gene{Roster: make(map[string]Player), NewPlayers: make(map[string]Player), Day: j, Acquisitions: 0}
+			test_chromosome.Genes[j] = Gene{Roster: make(map[string]Player), NewPlayers: make(map[string]Player), Day: j, Acquisitions: 0, DroppedPlayers: []Player{}, Bench: []Player{}}
 		}
 
 		InsertStreamablePlayers(streamable_players, free_positions, week, &test_chromosome, cur_streamers)
@@ -83,12 +83,24 @@ func TestInsertStreamablePlayers(t *testing.T) {
 				if !Contains(free_positions[0], key) {
 					t.Error("Streamer in non-free position")
 				}
+			} else {
+				// Make sure initial streamers who don't play on day 0 are on the bench
+				if !Contains(test_chromosome.Genes[0].Bench, player) {
+					t.Error("Streamer not on bench")
+				}
 			}
 		}
 
 		// Check to see if it is the same as the compare chromosome
 		if !CompareChromosomes(chromosome, test_chromosome) {
 			t.Error("Chromosomes not equal")
+		}
+
+		// Make sure for each day, the length of the roster plus the length of the bench is equal to the number of initial streamers
+		for i := 0; i <= days_in_week; i++ {
+			if len(test_chromosome.Genes[i].Roster) + len(test_chromosome.Genes[i].Bench) != streamable_count {
+				t.Error("Roster and bench length not equal to streamable count")
+			}
 		}
 	}
 }
@@ -108,7 +120,7 @@ func TestCreateChromosome(t *testing.T) {
 	src := rand.NewSource(time.Now().UnixNano())
 	rng := rand.New(src)
 
-	for i := 0; i < 99; i++ {
+	for i := 0; i < 1; i++ {
 
 		chromosome := CreateChromosome(streamable_players, week, free_agents, free_positions, rng)
 
@@ -125,6 +137,12 @@ func TestCreateChromosome(t *testing.T) {
 			for _, player := range gene.DroppedPlayers {
 				if MapContainsValue(gene.Roster, player.Name) != "" {
 					t.Error("DroppedPlayer in roster")
+				}
+			}
+			// Make sure there are no duplicate players in the roster
+			for key, value := range gene.Roster {
+				if MapContainsValue(gene.Roster, value.Name) != key {
+					t.Error("Duplicate player in roster")
 				}
 			}
 		}

@@ -61,6 +61,7 @@ type Gene struct {
 	Day     	   int
 	Acquisitions   int
 	DroppedPlayers []Player
+	Bench 		   []Player
 }
 
 // Struct to keep track of dropped players during the genetic algorithm

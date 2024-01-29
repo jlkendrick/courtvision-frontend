@@ -21,13 +21,14 @@ func main() {
 	fa_count := 150
 
 	// Set threshold for streamable players
-	threshold := 33.0
+	threshold := 34.0
 
 	// Retrieve team and free agent data from API
 	roster_map, free_agents := helper.GetPlayers(league_id, espn_s2, swid, team_name, year, fa_count)
 
 	// Optimize slotting and get streamable players
 	optimal_lineup, streamable_players := helper.OptimizeSlotting(roster_map, week, threshold)
+	fmt.Println(len(streamable_players), "streamable players")
 
 	// Use optimal_lineup to get the spots available for streamable players
 	free_positions := helper.GetUnusedPositions(optimal_lineup)
@@ -37,47 +38,27 @@ func main() {
 	population := make([]helper.Chromosome, size)
 	helper.CreateInitialPopulation(size, population, free_agents, free_positions, week, streamable_players)
 
-	// Score fitness of initial population and get total acquisitions
-	for i := 0; i < len(population); i++ {
-		helper.GetTotalAcquisitions(&population[i])
-		helper.ScoreFitness(&population[i], week)
+	// Run the genetic algorithm for 50 generations
+	for i := 0; i < 50; i++ {
+
+		// Score fitness of initial population and get total acquisitions
+		for i := 0; i < len(population); i++ {
+			helper.GetTotalAcquisitions(&population[i])
+			helper.ScoreFitness(&population[i], week)
+		}
+
+		// Sort population by increasing fitness score
+		sort.Slice(population, func(i, j int) bool {
+			return population[i].FitnessScore < population[j].FitnessScore
+		})
+
+		population = helper.EvolvePopulation(size, population, free_agents, free_positions, streamable_players, week)
+
+		// Print the max fitness score of the population
+		fmt.Println("Max fitness score:", population[len(population)-1].FitnessScore)
 	}
 
-	// Sort population by increasing fitness score
-	sort.Slice(population, func(i, j int) bool {
-		return population[i].FitnessScore < population[j].FitnessScore
-	})
-
-	// Print fitness scores
-	total_fitness_score := 0
-	for _, chromosome := range population {
-		fmt.Println(chromosome.FitnessScore)
-		total_fitness_score += chromosome.FitnessScore
-	}
-	fmt.Println("Average fitness score:", total_fitness_score / size)
-
-	// // Evolve the population
-	// for i := 0; i < size; i++ {
-		
-	// 	// Score fitness of initial population and get total acquisitions
-	// 	for i := 0; i < len(population); i++ {
-	// 		helper.GetTotalAcquisitions(&population[i])
-	// 		helper.ScoreFitness(&population[i], week)
-	// 	}
-
-	// 	// Sort population by increasing fitness score
-	// 	sort.Slice(population, func(i, j int) bool {
-	// 		return population[i].FitnessScore < population[j].FitnessScore
-	// 	})
-
-	// 	// Print fitness scores
-	// 	total_fitness_score := 0
-	// 	for _, chromosome := range population {
-	// 		total_fitness_score += chromosome.FitnessScore
-	// 	}
-	// 	fmt.Println("Average fitness score:", total_fitness_score / size)
-
-	// 	// Evolve population
-	// 	population = helper.EvolvePopulation(size, population, free_agents, free_positions, streamable_players, week)
-	// }
+	// Pring the best chromosome
+	fmt.Println("Best chromosome:", population[len(population)-1].TotalAcquisitions)
+	helper.PrintPopulation(population[len(population)-1], free_positions)
 }

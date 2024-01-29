@@ -184,6 +184,8 @@ func PrintPopulation(chromosome Chromosome, free_positions map[int][]string) {
 	order_to_print := []string{"PG", "SG", "SF", "PF", "C", "G", "F", "UT1", "UT2", "UT3"}
 	for _, gene := range chromosome.Genes {
 		fmt.Println("Day:", gene.Day)
+		fmt.Println("New Players:", gene.NewPlayers)
+		fmt.Println("Bench:", gene.Bench)
 		for _, pos := range order_to_print {
 			if Contains(free_positions[gene.Day], pos) {
 				fmt.Println(pos, "|", gene.Roster[pos].Name)
