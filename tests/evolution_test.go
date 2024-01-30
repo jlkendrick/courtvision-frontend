@@ -15,7 +15,7 @@ func TestEvolutionIntegration(t *testing.T) {
 	LoadSchedule("../static/schedule.json")
 	roster_map := loaders.LoadRosterMap()
 	free_agents := loaders.LoadFreeAgents()
-	optimal_lineup, streamable_players := OptimizeSlotting(roster_map, "15", 34.0)
+	optimal_lineup, streamable_players := OptimizeSlotting(roster_map, "15", 35.0)
 	free_positions := GetUnusedPositions(optimal_lineup)
 	week := "15"
 	population := loaders.LoadInitPop()
@@ -73,13 +73,37 @@ func TestPrePointCrossover(t *testing.T) {
 	roster_map := loaders.LoadRosterMap()
 	week := "15"
 
-	optimal_lineup, streamable_players := OptimizeSlotting(roster_map, week, 34.0)
+	optimal_lineup, streamable_players := OptimizeSlotting(roster_map, week, 35.0)
 	free_positions := GetUnusedPositions(optimal_lineup)
 
 	population := loaders.LoadInitPop()
 	size := len(population)
 
-	for i := 0; i < 2; i++ {
+	for i := 0; i < 15; i++ {
+
+		
+
+
+	}
+}
+
+func TestPostPointCrossover(t *testing.T) {
+
+	LoadSchedule("../static/schedule.json")
+
+	src := rand.NewSource(time.Now().UnixNano())
+	rng := rand.New(src)
+
+	roster_map := loaders.LoadRosterMap()
+	week := "15"
+
+	optimal_lineup, streamable_players := OptimizeSlotting(roster_map, week, 35.0)
+	free_positions := GetUnusedPositions(optimal_lineup)
+
+	population := loaders.LoadInitPop()
+	size := len(population)
+
+	for i := 0; i < 50; i++ {
 
 		parent1 := population[rng.Intn(size)]
 		parent2 := population[rng.Intn(size)]
@@ -96,7 +120,7 @@ func TestPrePointCrossover(t *testing.T) {
 
 		// Get random crossover point between one from the right and left
 		crossover_point := rng.Intn(len(parent1.Genes) - 1) + 1
-		
+
 		// Fill genes with initial streamers
 		cur_streamers1 := make([]Player, len(streamable_players))
 		cur_streamers2 := make([]Player, len(streamable_players))
@@ -108,22 +132,20 @@ func TestPrePointCrossover(t *testing.T) {
 		CopyUpToIndex(streamable_players, free_positions, week, &parent1, &child1, cur_streamers1, crossover_point)
 		CopyUpToIndex(streamable_players, free_positions, week, &parent2, &child2, cur_streamers2, crossover_point)
 
-		// Check that the children are the same as the parents
-		for k := 0; k < crossover_point; k++ {
-			if !CompareGenes(parent1.Genes[k], child1.Genes[k]) {
-				PrintPopulation(parent1, free_positions)
-				PrintPopulation(child1, free_positions)
-				panic("end")
-				t.Error("Parent1 and child1 not the same up until crossover point")
-			}
-			if !CompareGenes(parent2.Genes[k], child2.Genes[k]) {
-				t.Error("Parent2 and child2 not the same up until crossover point")
-			}
+		// Cross over the rest of the genes
+		for i := crossover_point; i < len(parent1.Genes); i++ {
+
+			// Cross parent2 into child1
+			CrossOverGene(parent2.Genes[i], &child1, free_positions, week, cur_streamers1, streamable_players)
+
+			// Cross parent1 into child2
+			CrossOverGene(parent1.Genes[i], &child2, free_positions, week, cur_streamers2, streamable_players)
 		}
 	}
-} 
+}
 
-func TestCrossover(t *testing.T) {
+
+func TestCrossoverIntegration(t *testing.T) {
 
 	LoadSchedule("../static/schedule.json")
 
@@ -134,7 +156,7 @@ func TestCrossover(t *testing.T) {
 	roster_map := loaders.LoadRosterMap()
 	week := "15"
 
-	optimal_lineup, streamable_players := OptimizeSlotting(roster_map, week, 34.0)
+	optimal_lineup, streamable_players := OptimizeSlotting(roster_map, week, 35.0)
 	free_positions := GetUnusedPositions(optimal_lineup)
 
 	population := loaders.LoadInitPop()
@@ -144,7 +166,7 @@ func TestCrossover(t *testing.T) {
 	fmt.Println(streamable_players)
 
 	// Check 100 sets of children
-	for i := 0; i < 2; i++ {
+	for i := 0; i < 20; i++ {
 
 		parent1 := population[rng.Intn(size)]
 		parent2 := population[rng.Intn(size)]

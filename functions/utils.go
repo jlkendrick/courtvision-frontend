@@ -89,6 +89,26 @@ func CompareGenes(gene1 Gene, gene2 Gene) bool {
 	return true
 }
 
+// Function to loosely compare two genes, not all players have to be in the same position but rather just rostered
+func LooseCompareGenes(gene1 Gene, gene2 Gene) bool {
+	for _, player := range gene1.Roster {
+		if MapContainsValue(gene2.Roster, player.Name) == ""{
+			return false
+		}
+	}
+	for _, bench_player := range gene1.Bench {
+		if !Contains(gene2.Bench, bench_player) {
+			return false
+		}
+	}
+	for _, dropped_player := range gene2.DroppedPlayers {
+		if !Contains(gene1.DroppedPlayers, dropped_player) {
+			return false
+		}
+	}
+	return true
+}
+
 // Function to convert players slice to map
 func PlayersToMap(players []Player) map[string]Player {
 

@@ -17,7 +17,7 @@ func TestInitPopIntegration(t *testing.T) {
 	roster_map := loaders.LoadRosterMap()
 	free_agents := loaders.LoadFreeAgents()
 	week := "15"
-	threshold := 35.0
+	threshold := 34.5
 	size := 50
 	population, _, _, _, _, _ := HelperInitPop(size, week, threshold, roster_map, free_agents)
 
@@ -34,7 +34,7 @@ func TestInsertStreamablePlayers(t *testing.T) {
 
 	roster_map := loaders.LoadRosterMap()
 	week := "11"
-	threshold := 34.0
+	threshold := 34.5
 
 	new_optimal_lineup, streamable_players := OptimizeSlotting(roster_map, week, threshold)
 	free_positions := GetUnusedPositions(new_optimal_lineup)
@@ -105,7 +105,7 @@ func TestCreateChromosome(t *testing.T) {
 	roster_map := loaders.LoadRosterMap()
 	free_agents := loaders.LoadFreeAgents()
 	week := "15"
-	threshold := 34.0
+	threshold := 34.5
 	
 	new_optimal_lineup, streamable_players := OptimizeSlotting(roster_map, week, threshold)
 	free_positions := GetUnusedPositions(new_optimal_lineup)

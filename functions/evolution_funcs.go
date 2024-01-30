@@ -16,30 +16,25 @@ func EvolvePopulation(size int, population []Chromosome, fas []Player, free_posi
 	next_generation := make([]Chromosome, size)
 
 	// Implement elitism
-	next_generation[size-2] = population[size-2]
 	next_generation[size-1] = population[size-1]
 	
-	for i := 0; i < (size/2)-1; i++ {
+	for i := 0; i < size-1; i++ {
 		
 		// Get parents
 		parent1 := SelectFirstParent(population)
 		parent2 := SelectSecondParent(population)
 
 		// Get children
-		child1, _, child2, _, _ := Crossover(parent1, parent2, fas, free_positions, streamable_players, week)
+		child, _ := Crossover(parent1, parent2, fas, free_positions, streamable_players, week)
 
 		// Mutate children
-		Mutate(0.10, &child1, fas, free_positions, streamable_players, week, streamable_players)
-		Mutate(0.10, &child2, fas, free_positions, streamable_players, week, streamable_players)
+		Mutate(0.10, &child, fas, free_positions, streamable_players, week, streamable_players)
 
 		// Add the total acquisitions to the children chromosomes
-		GetTotalAcquisitions(&child1)
-		GetTotalAcquisitions(&child2)
+		GetTotalAcquisitions(&child)
 
 		// Add children to evolved population
-		next_generation[i*2] = child1
-		next_generation[i*2+1] = child2
-		
+		next_generation[i] = child	
 	}
 
 	return next_generation
@@ -113,47 +108,26 @@ func SelectSecondParent(population []Chromosome) Chromosome {
 }
 
 // Function to get the children of two parents
-func Crossover(parent1 Chromosome, parent2 Chromosome, fas []Player, free_positions map[int][]string, streamable_players []Player, week string) (Chromosome, []Player, Chromosome, []Player, int) {
+func Crossover(parent1 Chromosome, parent2 Chromosome, fas []Player, free_positions map[int][]string, streamable_players []Player, week string) (Chromosome, []Player) {
 
-	// Get random seed
-	src := rand.NewSource(time.Now().UnixNano())
-	rng := rand.New(src)
-
-	// Create children
-	child1 := Chromosome{Genes: make([]Gene, ScheduleMap[week].GameSpan + 1), FitnessScore: 0, TotalAcquisitions: 0, CumProbTracker: 0.0, DroppedPlayers: make(map[string]DroppedPlayer)}
-	child2 := Chromosome{Genes: make([]Gene, ScheduleMap[week].GameSpan + 1), FitnessScore: 0, TotalAcquisitions: 0, CumProbTracker: 0.0, DroppedPlayers: make(map[string]DroppedPlayer)}
-
-	// Initialize genes
+	// Initialize child
+	child := Chromosome{Genes: make([]Gene, ScheduleMap[week].GameSpan + 1), FitnessScore: 0, TotalAcquisitions: 0, CumProbTracker: 0.0, DroppedPlayers: make(map[string]DroppedPlayer)}
 	for j := 0; j <= ScheduleMap[week].GameSpan; j++ {
-		child1.Genes[j] = Gene{Roster: make(map[string]Player), NewPlayers: make(map[string]Player), Day: j, Acquisitions: 0, DroppedPlayers: []Player{}}
-		child2.Genes[j] = Gene{Roster: make(map[string]Player), NewPlayers: make(map[string]Player), Day: j, Acquisitions: 0, DroppedPlayers: []Player{}}
+		child.Genes[j] = Gene{Roster: make(map[string]Player), NewPlayers: make(map[string]Player), Day: j, Acquisitions: 0, DroppedPlayers: []Player{}, Bench: []Player{}}
 	}
-
-	// Get random crossover point between one from the right and left
-	crossover_point := rng.Intn(len(parent1.Genes) - 1) + 1
 	
 	// Fill genes with initial streamers
 	cur_streamers1 := make([]Player, len(streamable_players))
-	cur_streamers2 := make([]Player, len(streamable_players))
-
 	sort.Slice(streamable_players, func(i, j int) bool {
-		return streamable_players[i].AvgPoints > streamable_players[j].AvgPoints
-	})
+		return streamable_players[i].AvgPoints > streamable_players[j].AvgPoints})
+	InsertStreamablePlayers(streamable_players, free_positions, week, &child, cur_streamers1)
 
-	CopyUpToIndex(streamable_players, free_positions, week, &parent1, &child1, cur_streamers1, crossover_point)
-	CopyUpToIndex(streamable_players, free_positions, week, &parent2, &child2, cur_streamers2, crossover_point)
+	for i := 0; i < len(parent1.Genes); i++ {
 
-	// Cross over the rest of the genes
-	for i := crossover_point; i < len(parent1.Genes); i++ {
-
-		// Cross parent2 into child1
-		CrossOverGene(parent2.Genes[i], &child1, free_positions, week, cur_streamers1, streamable_players)
-
-		// Cross parent1 into child2
-		CrossOverGene(parent1.Genes[i], &child2, free_positions, week, cur_streamers2, streamable_players)
+		MixGenes(parent1.Genes[i], parent2.Genes[i], &child, fas, free_positions, week, cur_streamers1, streamable_players)
 	}
 
-	return child1, cur_streamers1, child2, cur_streamers2, crossover_point
+	return child, cur_streamers1
 }
 
 // Function to mutate a chromosome
@@ -216,32 +190,12 @@ func InsertPlayer(day int, player Player, free_positions map[int][]string, child
 // Function to validate the insertion of a player into a chromosome
 func ValidatePlayer(chromosome *Chromosome, player Player, day int) bool {
 
-	// Function to see if the player is in the dropped players map
-	CheckDroppedPlayers := func(day int, player_name string) bool {
-		if _, ok := chromosome.DroppedPlayers[player_name]; ok {
-			return true
-		}
-		if day == 0 {
-			if Contains(chromosome.Genes[day].DroppedPlayers, player_name) {
-				return true
+	// If the player was in the roster or bench in the past, check to see if he was dropped before 3 days ago
+	for i := 0; i < day; i++ {
+		if MapContainsValue(chromosome.Genes[i].Roster, player.Name) != "" || Contains(chromosome.Genes[i].Bench, player) {
+			if day - i < 2 {
+				return false
 			}
-		} else if day == 1 {
-			if Contains(chromosome.Genes[day-1].DroppedPlayers, player_name) || Contains(chromosome.Genes[day].DroppedPlayers, player_name) {
-				return true
-			}
-		} else {
-			if Contains(chromosome.Genes[day-2].DroppedPlayers, player_name) || Contains(chromosome.Genes[day-1].DroppedPlayers, player_name) || Contains(chromosome.Genes[day].DroppedPlayers, player_name) {
-				return true
-			}
-		}
-
-		return false
-	}
-
-	// Check if the player is already on the roster and he is still on the waiver wire
-	for _, gene := range chromosome.Genes {
-		if MapContainsValue(gene.Roster, player.Name) != "" && CheckDroppedPlayers(day, player.Name) {
-			return false
 		}
 	}
 
@@ -513,15 +467,55 @@ func CopyUpToIndex(streamable_players []Player, free_positions map[int][]string,
 	}
 }
 
-// Function to cross over a gene from a parent into a child
-func CrossOverGene(parent_gene Gene, child *Chromosome, free_positions map[int][]string, week string, cur_streamers []Player, streamable_players []Player) {
+// // Function to cross over a gene from a parent into a child
+// func CrossOverGene(parent_gene Gene, child *Chromosome, free_positions map[int][]string, week string, cur_streamers []Player, streamable_players []Player) {
 
-	// Loop through each new player in the parent gene and try to insert them into the child
-	for _, player := range parent_gene.NewPlayers {
+// 	// Loop through each new player in the parent gene and try to insert them into the child
+// 	for _, player := range parent_gene.NewPlayers {
 
-		if ValidatePlayer(child, player, parent_gene.Day) {
+// 		if ValidatePlayer(child, player, parent_gene.Day) {
 
-			InsertPlayer(parent_gene.Day, player, free_positions, child, week, cur_streamers, streamable_players, false)
+// 			InsertPlayer(parent_gene.Day, player, free_positions, child, week, cur_streamers, streamable_players, false)
+// 		}
+// 	}
+// }
+
+// Function to mix genes from two parents into a child
+func MixGenes(parent1_gene Gene, parent2_gene Gene, child *Chromosome, fas []Player, free_positions map[int][]string, week string, cur_streamers []Player, streamable_players []Player) {
+	
+	// Get random seed
+	src := rand.NewSource(time.Now().UnixNano())
+	rng := rand.New(src)
+
+	// Create a list of all the new players in the parent genes
+	new_players := make([]Player, 0)
+	for _, player := range parent1_gene.NewPlayers {
+		new_players = append(new_players, player)
+	}
+	for _, player := range parent2_gene.NewPlayers {
+		new_players = append(new_players, player)
+	}
+
+	if len(new_players) == 0 {
+		return
+	}
+
+	// Sort the new players by their average points
+	sort.Slice(new_players, func(i, j int) bool {
+		return new_players[i].AvgPoints > new_players[j].AvgPoints
+	})
+
+	// Get a random number to determine how many players to add to the child
+	rand_num := rng.Intn(len(new_players))
+
+	// Loop through the number of players to add to the child
+	for i := 0; i < rand_num; i++ {
+
+		// Insert the player into the child
+		if ValidatePlayer(child, new_players[i], parent1_gene.Day) {
+			
+			InsertPlayer(parent1_gene.Day, new_players[i], free_positions, child, week, cur_streamers, streamable_players, false)
 		}
 	}
+
 }
