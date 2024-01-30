@@ -141,7 +141,7 @@ func GetMatches(valid_positions []string, available_positions []string, has_matc
 	// Loop through each valid position and see if it is in the available positions
 	for _, valid_position := range valid_positions {
 
-		if _, ok := available_positions_map[valid_position]; ok {
+		if val, ok := available_positions_map[valid_position]; ok && val {
 			*has_match = true
 			matches = append(matches, valid_position)
 		}
@@ -186,12 +186,29 @@ func PrintPopulation(chromosome Chromosome, free_positions map[int][]string) {
 		fmt.Println("Day:", gene.Day)
 		fmt.Println("New Players:", gene.NewPlayers)
 		fmt.Println("Bench:", gene.Bench)
+		fmt.Println("Dropped Players:", gene.DroppedPlayers)
 		for _, pos := range order_to_print {
 			if Contains(free_positions[gene.Day], pos) {
 				fmt.Println(pos, "|", gene.Roster[pos].Name)
 			} else {
 				fmt.Println(pos, gene.Roster[pos].Name)
 			}
+		}
+		fmt.Println()
+	}
+}
+
+// Function to print a population
+func PrintPopulationWOFreePos(chromosome Chromosome) {
+	
+	// Print initial population
+	order_to_print := []string{"PG", "SG", "SF", "PF", "C", "G", "F", "UT1", "UT2", "UT3"}
+	for _, gene := range chromosome.Genes {
+		fmt.Println("Day:", gene.Day)
+		fmt.Println("New Players:", gene.NewPlayers)
+		fmt.Println("Bench:", gene.Bench)
+		for _, pos := range order_to_print {
+			fmt.Println(pos, gene.Roster[pos].Name)
 		}
 		fmt.Println()
 	}
@@ -206,4 +223,21 @@ func SliceIndexOf(players []Player, player Player) int {
 		}
 	}
 	return -1
+}
+
+// Function to print a gene
+func PrintGene(gene *Gene, free_positions []string) {
+
+	order_to_print := []string{"PG", "SG", "SF", "PF", "C", "G", "F", "UT1", "UT2", "UT3"}
+	fmt.Println("Day:", gene.Day)
+	fmt.Println("New Players:", gene.NewPlayers)
+	fmt.Println("Bench:", gene.Bench)
+	for _, pos := range order_to_print {
+		if Contains(free_positions, pos) {
+			fmt.Println(pos, "|", gene.Roster[pos].Name)
+		} else {
+			fmt.Println(pos, gene.Roster[pos].Name)
+		}
+	}
+	fmt.Println()
 }

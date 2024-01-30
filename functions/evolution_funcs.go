@@ -140,70 +140,17 @@ func Crossover(parent1 Chromosome, parent2 Chromosome, fas []Player, free_positi
 		return streamable_players[i].AvgPoints > streamable_players[j].AvgPoints
 	})
 
-	InsertStreamablePlayers(streamable_players, free_positions, week, &child1, cur_streamers1)
-	InsertStreamablePlayers(streamable_players, free_positions, week, &child2, cur_streamers2)
+	CopyUpToIndex(streamable_players, free_positions, week, &parent1, &child1, cur_streamers1, crossover_point)
+	CopyUpToIndex(streamable_players, free_positions, week, &parent2, &child2, cur_streamers1, crossover_point)
 
-	for i := 0; i < len(parent1.Genes); i++ {
+	// Cross over the rest of the genes
+	for i := crossover_point; i < len(parent1.Genes); i++ {
 
-		// If before crossover point, children are same as the respective parent
-		if i < crossover_point {
-			
-			// Replicate the parent's roster
-			for _, player := range parent1.Genes[i].NewPlayers {
+		// Cross parent2 into child1
+		CrossOverGene(parent2.Genes[i], &child1, free_positions, week, cur_streamers1, streamable_players)
 
-				InsertPlayer(i, player, free_positions, &child1, week, cur_streamers1, streamable_players, false)
-			}
-
-			for _, player := range parent2.Genes[i].NewPlayers {
-				
-				InsertPlayer(i, player, free_positions, &child2, week, cur_streamers2, streamable_players, false)
-			}
-
-		} else {
-
-			// Replicate the parent's roster but into the opposite child
-			for _, player := range parent1.Genes[i].NewPlayers {
-
-				// Check if the player is already on the child's roster or if he is still on the waiver wire
-				valid := ValidatePlayer(&parent2, player, i)
-
-				if valid {
-					InsertPlayer(i, player, free_positions, &child2, week, cur_streamers2, streamable_players, false)
-				} else {
-					continue
-				}
-			}
-
-			for _, player := range parent2.Genes[i].NewPlayers {
-
-				// Check if the player is already on the child's roster or if he is still on the waiver wire
-				valid := ValidatePlayer(&parent1, player, i)
-
-				if valid {
-					InsertPlayer(i, player, free_positions, &child1, week, cur_streamers1, streamable_players, false)
-				} else {
-					continue
-				}
-			}
-		}
-
-		// Decrement countdown for dropped players
-		for player_name, dropped_player := range child1.DroppedPlayers {
-			if dropped_player.Countdown > 0 {
-				dropped_player.Countdown--
-				child1.DroppedPlayers[player_name] = dropped_player
-			} else {
-				delete(child1.DroppedPlayers, player_name)
-			}
-		}
-		for player_name, dropped_player := range child2.DroppedPlayers {
-			if dropped_player.Countdown > 0 {
-				dropped_player.Countdown--
-				child2.DroppedPlayers[player_name] = dropped_player
-			} else {
-				delete(child2.DroppedPlayers, player_name)
-			}
-		}
+		// Cross parent1 into child2
+		CrossOverGene(parent1.Genes[i], &child2, free_positions, week, cur_streamers2, streamable_players)
 	}
 
 	return child1, cur_streamers1, child2, cur_streamers2, crossover_point
@@ -250,14 +197,13 @@ func InsertPlayer(day int, player Player, free_positions map[int][]string, child
 
 	// When swapping we treat the pickups as day one initials because we should have a spot cleared out for them already, when crossing over we let things be
 	if !swap {
-		pos_map = GetPosMap(player, child, free_positions, day, week, cur_streamers, streamable_players, false, true, &add)
+		pos_map = GetPosMap(player, child, free_positions, day, week, cur_streamers, streamable_players, day==0, true, &add)
 	} else {
 		pos_map = GetPosMap(player, child, free_positions, day, week, cur_streamers, streamable_players, true, false, &add)
 	}
 
 	if _, ok := pos_map[day]; ok && add {
 		child.Genes[day].NewPlayers[player.Name] = player
-		child.Genes[day].Acquisitions++
 	} else {
 		return
 	}
@@ -537,5 +483,45 @@ func Swap(chromosome *Chromosome, free_positions map[int][]string, cur_streamers
 		InsertPlayer(day2, player1, free_positions, chromosome, week, cur_streamers, streamable_players, true)
 		InsertPlayer(day1, player2, free_positions, chromosome, week, cur_streamers, streamable_players, true)
 
+	}
+}
+
+// Function to copy another chromosome's roster up to a certain index
+func CopyUpToIndex(streamable_players []Player, free_positions map[int][]string, week string, parent *Chromosome, child *Chromosome, cur_streamers []Player, crossover_point int) {
+
+	InsertStreamablePlayers(streamable_players, free_positions, week, child, cur_streamers)
+	
+	for i := 0; i < crossover_point; i++ {
+
+		for _, player := range parent.Genes[i].NewPlayers {
+
+			InsertPlayer(i, player, free_positions, child, week, cur_streamers, streamable_players, false)
+		}
+
+		// After each day, decrement the countdown for dropped players
+		for player_name, dropped_player := range child.DroppedPlayers {
+			if dropped_player.Countdown > 0 {
+				dropped_player.Countdown--
+				child.DroppedPlayers[player_name] = dropped_player
+			} else {
+				delete(child.DroppedPlayers, player_name)
+			}
+		}
+
+		// Increment the acquisitions
+		child.Genes[i].Acquisitions += len(child.Genes[i].NewPlayers)
+	}
+}
+
+// Function to cross over a gene from a parent into a child
+func CrossOverGene(parent_gene Gene, child *Chromosome, free_positions map[int][]string, week string, cur_streamers []Player, streamable_players []Player) {
+
+	// Loop through each new player in the parent gene and try to insert them into the child
+	for _, player := range parent_gene.NewPlayers {
+
+		if ValidatePlayer(child, player, parent_gene.Day) {
+
+			InsertPlayer(parent_gene.Day, player, free_positions, child, week, cur_streamers, streamable_players, false)
+		}
 	}
 }

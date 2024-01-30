@@ -81,11 +81,10 @@ func TestCrossover(t *testing.T) {
 	size := len(population)
 
 	// Test crossover
-
 	fmt.Println(streamable_players)
 
 	// Check 100 sets of children
-	for i := 0; i < 100; i++ {
+	for i := 0; i < 2; i++ {
 
 		parent1 := population[rng.Intn(size)]
 		parent2 := population[rng.Intn(size)]

@@ -38,7 +38,7 @@ func TestInsertStreamablePlayers(t *testing.T) {
 	LoadSchedule("../static/schedule.json")
 
 	roster_map := loaders.LoadRosterMap()
-	week := "15"
+	week := "11"
 	threshold := 34.0
 
 	new_optimal_lineup, streamable_players := OptimizeSlotting(roster_map, week, threshold)
@@ -58,8 +58,10 @@ func TestInsertStreamablePlayers(t *testing.T) {
 
 	InsertStreamablePlayers(streamable_players, free_positions, week, &chromosome, cur_streamers)
 
+	PrintPopulation(chromosome, free_positions)
+
 	// Check to see if on day 0, the roster has all the streamable players who are playing and that they are in free positions
-	for i := 0; i < 5; i++ {
+	for i := 0; i < 100; i++ {
 
 		test_chromosome := Chromosome{Genes: make([]Gene, days_in_week+1), FitnessScore: 0, TotalAcquisitions: 0, CumProbTracker: 0.0, DroppedPlayers: make(map[string]DroppedPlayer)}
 
@@ -116,7 +118,7 @@ func TestCreateChromosome(t *testing.T) {
 	src := rand.NewSource(time.Now().UnixNano())
 	rng := rand.New(src)
 
-	for i := 0; i < 10; i++ {
+	for i := 0; i < 100; i++ {
 
 		chromosome := CreateChromosome(streamable_players, week, free_agents, free_positions, rng)
 
@@ -159,6 +161,14 @@ func TestCreateChromosome(t *testing.T) {
 				// fmt.Println(len(gene.Roster), len(streamable_players))
 				// PrintPopulation(chromosome, free_positions)
 				t.Error("Streamer count exceeds streamable player count")
+			}
+		}
+
+		// Make sure that the number of players in the roster plus the number of players on the bench is equal to the number of streamable players
+		for _, gene := range chromosome.Genes {
+			if len(gene.Roster) + len(gene.Bench) != len(streamable_players) {
+				PrintPopulation(chromosome, free_positions)
+				t.Error("Roster and bench length not equal to streamable count")
 			}
 		}
 	}
