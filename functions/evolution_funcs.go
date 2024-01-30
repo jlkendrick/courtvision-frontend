@@ -141,7 +141,7 @@ func Crossover(parent1 Chromosome, parent2 Chromosome, fas []Player, free_positi
 	})
 
 	CopyUpToIndex(streamable_players, free_positions, week, &parent1, &child1, cur_streamers1, crossover_point)
-	CopyUpToIndex(streamable_players, free_positions, week, &parent2, &child2, cur_streamers1, crossover_point)
+	CopyUpToIndex(streamable_players, free_positions, week, &parent2, &child2, cur_streamers2, crossover_point)
 
 	// Cross over the rest of the genes
 	for i := crossover_point; i < len(parent1.Genes); i++ {

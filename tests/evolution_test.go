@@ -63,6 +63,66 @@ func TestEvolutionIntegration(t *testing.T) {
 	}
 }
 
+func TestPrePointCrossover(t *testing.T) {
+
+	LoadSchedule("../static/schedule.json")
+
+	src := rand.NewSource(time.Now().UnixNano())
+	rng := rand.New(src)
+
+	roster_map := loaders.LoadRosterMap()
+	week := "15"
+
+	optimal_lineup, streamable_players := OptimizeSlotting(roster_map, week, 34.0)
+	free_positions := GetUnusedPositions(optimal_lineup)
+
+	population := loaders.LoadInitPop()
+	size := len(population)
+
+	for i := 0; i < 2; i++ {
+
+		parent1 := population[rng.Intn(size)]
+		parent2 := population[rng.Intn(size)]
+
+		// Create children
+		child1 := Chromosome{Genes: make([]Gene, ScheduleMap[week].GameSpan + 1), FitnessScore: 0, TotalAcquisitions: 0, CumProbTracker: 0.0, DroppedPlayers: make(map[string]DroppedPlayer)}
+		child2 := Chromosome{Genes: make([]Gene, ScheduleMap[week].GameSpan + 1), FitnessScore: 0, TotalAcquisitions: 0, CumProbTracker: 0.0, DroppedPlayers: make(map[string]DroppedPlayer)}
+
+		// Initialize genes
+		for j := 0; j <= ScheduleMap[week].GameSpan; j++ {
+			child1.Genes[j] = Gene{Roster: make(map[string]Player), NewPlayers: make(map[string]Player), Day: j, Acquisitions: 0, DroppedPlayers: []Player{}}
+			child2.Genes[j] = Gene{Roster: make(map[string]Player), NewPlayers: make(map[string]Player), Day: j, Acquisitions: 0, DroppedPlayers: []Player{}}
+		}
+
+		// Get random crossover point between one from the right and left
+		crossover_point := rng.Intn(len(parent1.Genes) - 1) + 1
+		
+		// Fill genes with initial streamers
+		cur_streamers1 := make([]Player, len(streamable_players))
+		cur_streamers2 := make([]Player, len(streamable_players))
+
+		sort.Slice(streamable_players, func(i, j int) bool {
+			return streamable_players[i].AvgPoints > streamable_players[j].AvgPoints
+		})
+
+		CopyUpToIndex(streamable_players, free_positions, week, &parent1, &child1, cur_streamers1, crossover_point)
+		CopyUpToIndex(streamable_players, free_positions, week, &parent2, &child2, cur_streamers2, crossover_point)
+
+		// Check that the children are the same as the parents
+		for k := 0; k < crossover_point; k++ {
+			if !CompareGenes(parent1.Genes[k], child1.Genes[k]) {
+				PrintPopulation(parent1, free_positions)
+				PrintPopulation(child1, free_positions)
+				panic("end")
+				t.Error("Parent1 and child1 not the same up until crossover point")
+			}
+			if !CompareGenes(parent2.Genes[k], child2.Genes[k]) {
+				t.Error("Parent2 and child2 not the same up until crossover point")
+			}
+		}
+	}
+} 
+
 func TestCrossover(t *testing.T) {
 
 	LoadSchedule("../static/schedule.json")

@@ -1,8 +1,6 @@
 package tests
 
 import (
-	"encoding/json"
-	"os"
 	"fmt"
 	"testing"
 	loaders "main/tests/resources"
@@ -81,20 +79,6 @@ func TestAPI(t *testing.T) {
 	if len(free_agents) == 0 {
 		t.Error("Free agents is empty")
 	}
-
-	// Save roster_map and free_agents to JSON files
-	roster_map_json, err := json.Marshal(roster_map)
-	if err != nil {
-		fmt.Println("Error marshalling roster_map:", err)
-	}
-	os.WriteFile("resources/mock_roster.json", roster_map_json, 0644)
-
-	free_agents_json, err := json.Marshal(free_agents)
-	if err != nil {
-		fmt.Println("Error marshalling free_agents:", err)
-	}
-	os.WriteFile("resources/mock_freeagents.json", free_agents_json, 0644)
-
 
 }
 

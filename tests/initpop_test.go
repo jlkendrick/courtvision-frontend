@@ -8,28 +8,23 @@ import (
 	"math/rand"
 	"testing"
 	"time"
-	"encoding/json"
-	"os"
 )
 
 func TestInitPopIntegration(t *testing.T) {
 
 	LoadSchedule("../static/schedule.json")
 
+	roster_map := loaders.LoadRosterMap()
+	free_agents := loaders.LoadFreeAgents()
+	week := "15"
+	threshold := 35.0
 	size := 50
-	population, _, _, _, _, _ := HelperInitPop(size)
+	population, _, _, _, _, _ := HelperInitPop(size, week, threshold, roster_map, free_agents)
 
 	// Make sure that the initial population has (size) chromosomes
 	if len(population) != size {
 		t.Error("Initial population has incorrect size")
 	}
-
-	// Save initpop to JSON file
-	population_json, err := json.Marshal(population)
-	if err != nil {
-		fmt.Println("Error marshalling roster_map:", err)
-	}
-	os.WriteFile("resources/mock_initpop.json", population_json, 0644)
 
 }
 

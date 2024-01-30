@@ -36,21 +36,9 @@ func LoadSchedule(path string) {
 }
 
 // Function to get a population of chromosomes
-func HelperInitPop(size int) ([]Chromosome, int, []Player, map[int][]string, []Player, string) {
+func HelperInitPop(size int, week string, threshold float64, roster_map map[string]Player, free_agents []Player) ([]Chromosome, int, []Player, map[int][]string, []Player, string) {
 
 	LoadSchedule("../static/schedule.json")
-
-	// Get roster and free agent data
-	league_id := 424233486
-	espn_s2 := ""
-	swid := ""
-	team_name := "James's Scary Team"
-	year := 2024
-	week := "15"
-	threshold := 34.0
-	fa_count := 150
-
-	roster_map, free_agents := GetPlayers(league_id, espn_s2, swid, team_name, year, fa_count)
 
 	new_optimal_lineup, streamable_players := OptimizeSlotting(roster_map, week, threshold)
 	free_positions := GetUnusedPositions(new_optimal_lineup)
@@ -68,15 +56,6 @@ func HelperInitPop(size int) ([]Chromosome, int, []Player, map[int][]string, []P
 
 // Helper function to compare two chromosomes
 func CompareChromosomes(chromosome1 Chromosome, chromosome2 Chromosome) bool {
-
-	CompareGenes := func(gene1 Gene, gene2 Gene) bool {
-		for key, value := range gene1.Roster {
-			if value.Name != gene2.Roster[key].Name {
-				return false
-			}
-		}
-		return true
-	}
 	
 	if len(chromosome1.Genes) != len(chromosome2.Genes) {
 		return false
@@ -88,6 +67,25 @@ func CompareChromosomes(chromosome1 Chromosome, chromosome2 Chromosome) bool {
 		}
 	}
 
+	return true
+}
+
+func CompareGenes(gene1 Gene, gene2 Gene) bool {
+	for key, value := range gene1.Roster {
+		if value.Name != gene2.Roster[key].Name {
+			return false
+		}
+	}
+	for _, bench_player := range gene1.Bench {
+		if !Contains(gene2.Bench, bench_player) {
+			return false
+		}
+	}
+	for _, dropped_player := range gene2.DroppedPlayers {
+		if !Contains(gene1.DroppedPlayers, dropped_player) {
+			return false
+		}
+	}
 	return true
 }
 
