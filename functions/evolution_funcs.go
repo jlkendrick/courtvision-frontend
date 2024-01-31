@@ -175,11 +175,12 @@ func InsertPlayer(day int, player Player, free_positions map[int][]string, child
 	} else {
 		pos_map = GetPosMap(player, child, free_positions, day, week, cur_streamers, streamable_players, true, false, &add)
 	}
-
-	if _, ok := pos_map[day]; ok && add {
-		child.Genes[day].NewPlayers[player.Name] = player
-	} else {
+	// When added here, counts as a new player
+	if _, ok := pos_map[day]; !ok{
 		return
+	}
+	if add {
+		child.Genes[day].NewPlayers[player.Name] = player
 	}
 
 	for day, pos := range pos_map {
@@ -191,7 +192,7 @@ func InsertPlayer(day int, player Player, free_positions map[int][]string, child
 func ValidatePlayer(chromosome *Chromosome, player Player, day int) bool {
 
 	// If the player was in the roster or bench in the past, check to see if he was dropped before 3 days ago
-	for i := 0; i < day; i++ {
+	for i := 0; i <= day; i++ {
 		if MapContainsValue(chromosome.Genes[i].Roster, player.Name) != "" || Contains(chromosome.Genes[i].Bench, player) {
 			if day - i < 2 {
 				return false
@@ -506,7 +507,14 @@ func MixGenes(parent1_gene Gene, parent2_gene Gene, child *Chromosome, fas []Pla
 	})
 
 	// Get a random number to determine how many players to add to the child
-	rand_num := rng.Intn(len(new_players))
+	var rand_num int
+	if len(new_players) > 1 {
+		rand_num = rng.Intn(len(new_players) - 1) + 1
+	} else {
+		rand_num = 1
+	}
+
+
 
 	// Loop through the number of players to add to the child
 	for i := 0; i < rand_num; i++ {

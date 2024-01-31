@@ -227,6 +227,10 @@ func GetPosMap(player Player,
 				return chromosome.Genes[0].Bench[i].AvgPoints < chromosome.Genes[0].Bench[j].AvgPoints 
 			})
 
+			if len(chromosome.Genes[0].Bench) == 0 {
+				return pos_map
+			}
+
 			// Drop the worst player from the chromosome
 			DeleteAllOccurrences(chromosome, cur_streamers, player, chromosome.Genes[0].Bench[0], week, start_day)
 		}
@@ -250,19 +254,19 @@ func GetPosMap(player Player,
 		worst_player := chromosome.Genes[start_day].Bench[0]
 
 		// Before dropping, make sure the player can fit into the remaining free positions
-		// has_match := false
-		// for _, free_pos := range free_positions[start_day] {
-		// 	if old_player, ok := chromosome.Genes[start_day].Roster[free_pos]; !ok || old_player.Name == "" {
-		// 		if Contains(player.ValidPositions, free_pos) {
-		// 			has_match = true
-		// 			break
-		// 		}
-		// 	}
-		// }
+		has_match := false
+		for _, free_pos := range free_positions[start_day] {
+			if old_player, ok := chromosome.Genes[start_day].Roster[free_pos]; !ok || old_player.Name == "" {
+				if Contains(player.ValidPositions, free_pos) {
+					has_match = true
+					break
+				}
+			}
+		}
 
-		// if !has_match {
-		// 	return pos_map
-		// }
+		if !has_match {
+			return pos_map
+		}
 
 		// Drop the worst player from the chromosome
 		DeleteAllOccurrences(chromosome, cur_streamers, player, worst_player, week, start_day)
@@ -290,19 +294,19 @@ func GetPosMap(player Player,
 		worst_player := cur_streamers[i]
 
 		// Before dropping, make sure the player can fit into the positions freed up by dropping the worst player or an already free position
-		// has_match := false
-		// for _, free_pos := range free_positions[start_day] {
-		// 	if old_player, ok := chromosome.Genes[start_day].Roster[free_pos]; !ok || old_player.Name == worst_player.Name {
-		// 		if Contains(player.ValidPositions, free_pos) {
-		// 			has_match = true
-		// 			break
-		// 		}
-		// 	}
-		// }
+		has_match := false
+		for _, free_pos := range free_positions[start_day] {
+			if old_player, ok := chromosome.Genes[start_day].Roster[free_pos]; !ok || old_player.Name == worst_player.Name {
+				if Contains(player.ValidPositions, free_pos) {
+					has_match = true
+					break
+				}
+			}
+		}
 
-		// if !has_match {
-		// 	return pos_map
-		// }
+		if !has_match {
+			return pos_map
+		}
 
 		DeleteAllOccurrences(chromosome, cur_streamers, player, worst_player, week, start_day)
 		// Remove player from new players

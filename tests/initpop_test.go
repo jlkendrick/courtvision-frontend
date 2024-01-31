@@ -113,7 +113,7 @@ func TestCreateChromosome(t *testing.T) {
 	src := rand.NewSource(time.Now().UnixNano())
 	rng := rand.New(src)
 
-	for i := 0; i < 100; i++ {
+	for i := 0; i < 101; i++ {
 
 		chromosome := CreateChromosome(streamable_players, week, free_agents, free_positions, rng)
 

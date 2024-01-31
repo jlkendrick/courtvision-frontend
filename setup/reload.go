@@ -14,7 +14,7 @@ func Refresh(espn_s2 string, swid string, league_id int, team_name string, year 
 	roster_map, free_agents := helper.GetPlayers(league_id, espn_s2, swid, team_name, year, fa_count)
 	size := 50
 	week := "15"
-	threshold := 35.0
+	threshold := 34.5
 
 	initial_population, _, _, _, _, _  := helper.HelperInitPop(size, week, threshold, roster_map, free_agents)
 

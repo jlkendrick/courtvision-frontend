@@ -63,89 +63,7 @@ func TestEvolutionIntegration(t *testing.T) {
 	}
 }
 
-func TestPrePointCrossover(t *testing.T) {
-
-	LoadSchedule("../static/schedule.json")
-
-	src := rand.NewSource(time.Now().UnixNano())
-	rng := rand.New(src)
-
-	roster_map := loaders.LoadRosterMap()
-	week := "15"
-
-	optimal_lineup, streamable_players := OptimizeSlotting(roster_map, week, 35.0)
-	free_positions := GetUnusedPositions(optimal_lineup)
-
-	population := loaders.LoadInitPop()
-	size := len(population)
-
-	for i := 0; i < 15; i++ {
-
-		
-
-
-	}
-}
-
-func TestPostPointCrossover(t *testing.T) {
-
-	LoadSchedule("../static/schedule.json")
-
-	src := rand.NewSource(time.Now().UnixNano())
-	rng := rand.New(src)
-
-	roster_map := loaders.LoadRosterMap()
-	week := "15"
-
-	optimal_lineup, streamable_players := OptimizeSlotting(roster_map, week, 35.0)
-	free_positions := GetUnusedPositions(optimal_lineup)
-
-	population := loaders.LoadInitPop()
-	size := len(population)
-
-	for i := 0; i < 50; i++ {
-
-		parent1 := population[rng.Intn(size)]
-		parent2 := population[rng.Intn(size)]
-
-		// Create children
-		child1 := Chromosome{Genes: make([]Gene, ScheduleMap[week].GameSpan + 1), FitnessScore: 0, TotalAcquisitions: 0, CumProbTracker: 0.0, DroppedPlayers: make(map[string]DroppedPlayer)}
-		child2 := Chromosome{Genes: make([]Gene, ScheduleMap[week].GameSpan + 1), FitnessScore: 0, TotalAcquisitions: 0, CumProbTracker: 0.0, DroppedPlayers: make(map[string]DroppedPlayer)}
-
-		// Initialize genes
-		for j := 0; j <= ScheduleMap[week].GameSpan; j++ {
-			child1.Genes[j] = Gene{Roster: make(map[string]Player), NewPlayers: make(map[string]Player), Day: j, Acquisitions: 0, DroppedPlayers: []Player{}}
-			child2.Genes[j] = Gene{Roster: make(map[string]Player), NewPlayers: make(map[string]Player), Day: j, Acquisitions: 0, DroppedPlayers: []Player{}}
-		}
-
-		// Get random crossover point between one from the right and left
-		crossover_point := rng.Intn(len(parent1.Genes) - 1) + 1
-
-		// Fill genes with initial streamers
-		cur_streamers1 := make([]Player, len(streamable_players))
-		cur_streamers2 := make([]Player, len(streamable_players))
-
-		sort.Slice(streamable_players, func(i, j int) bool {
-			return streamable_players[i].AvgPoints > streamable_players[j].AvgPoints
-		})
-
-		CopyUpToIndex(streamable_players, free_positions, week, &parent1, &child1, cur_streamers1, crossover_point)
-		CopyUpToIndex(streamable_players, free_positions, week, &parent2, &child2, cur_streamers2, crossover_point)
-
-		// Cross over the rest of the genes
-		for i := crossover_point; i < len(parent1.Genes); i++ {
-
-			// Cross parent2 into child1
-			CrossOverGene(parent2.Genes[i], &child1, free_positions, week, cur_streamers1, streamable_players)
-
-			// Cross parent1 into child2
-			CrossOverGene(parent1.Genes[i], &child2, free_positions, week, cur_streamers2, streamable_players)
-		}
-	}
-}
-
-
-func TestCrossoverIntegration(t *testing.T) {
+func TestCrossover(t *testing.T) {
 
 	LoadSchedule("../static/schedule.json")
 
@@ -156,7 +74,7 @@ func TestCrossoverIntegration(t *testing.T) {
 	roster_map := loaders.LoadRosterMap()
 	week := "15"
 
-	optimal_lineup, streamable_players := OptimizeSlotting(roster_map, week, 35.0)
+	optimal_lineup, streamable_players := OptimizeSlotting(roster_map, week, 34.5)
 	free_positions := GetUnusedPositions(optimal_lineup)
 
 	population := loaders.LoadInitPop()
@@ -166,99 +84,66 @@ func TestCrossoverIntegration(t *testing.T) {
 	fmt.Println(streamable_players)
 
 	// Check 100 sets of children
-	for i := 0; i < 20; i++ {
+	for i := 0; i < 100; i++ {
 
 		parent1 := population[rng.Intn(size)]
 		parent2 := population[rng.Intn(size)]
 
-		child1, _, child2, _, crossover_point := Crossover(parent1, parent2, free_agents, free_positions, streamable_players, week)
+		child, _ := Crossover(parent1, parent2, free_agents, free_positions, streamable_players, week)
 
 		// Make sure playing streamable players are rostered on the first day and in the same position in as the parent
 		for _, player := range streamable_players {
 			if Contains(ScheduleMap[week].Games[player.Team], 0) {
-				pos1 := MapContainsValue(child1.Genes[0].Roster, player.Name)
-				if pos1 == "" || pos1 != MapContainsValue(parent1.Genes[0].Roster, player.Name) {
-					fmt.Println(pos1, MapContainsValue(parent1.Genes[0].Roster, player.Name))
-					t.Error("Streamer not in child1 or not in same position as parent1")
-				}
-				pos2 := MapContainsValue(child2.Genes[0].Roster, player.Name)
-				if pos2 == "" || pos2 != MapContainsValue(parent2.Genes[0].Roster, player.Name) {
-					t.Error("Streamer not in child1 or not in same position as parent1")
+				pos := MapContainsValue(child.Genes[0].Roster, player.Name)
+				if pos == "" || pos != MapContainsValue(parent1.Genes[0].Roster, player.Name) {
+					fmt.Println(pos, MapContainsValue(parent1.Genes[0].Roster, player.Name), player.Name)
+					t.Error("Streamer not in child or not in same position as parent1")
 				}
 			}
 		}
 
-		// Make sure NewPlayers from original parents are in the children up to the crossover point
-		for i := 0; i < crossover_point; i++ {
-			for _, player := range parent1.Genes[i].NewPlayers {
-				if MapContainsValue(child1.Genes[i].Roster, player.Name) == "" {
-					fmt.Println("Player not found:", player.Name, "on day", i, "crossover point:", crossover_point)
-					PrintPopulation(parent1, free_positions)
-					PrintPopulation(child1, free_positions)
-					t.Error("NewPlayer not in child1")
-				}
-			}
-			for _, player := range parent2.Genes[i].NewPlayers {
-				if MapContainsValue(child2.Genes[i].Roster, player.Name) == "" {
-					fmt.Println(player.Name)
-					PrintPopulation(child1, free_positions)
-					t.Error("NewPlayer not in child1")
+		// Make sure there are not 2 of the same player in a genes roster
+		for i := 0; i < ScheduleMap[week].GameSpan+1; i++ {
+			for pos1, player1 := range child.Genes[i].Roster {
+				for pos2, player2 := range child.Genes[i].Roster {
+					if pos1 != pos2 && player1.Name == player2.Name {
+						PrintPopulation(child, free_positions)
+						t.Error("Duplicate player in child1")
+					}
 				}
 			}
 		}
 
-		// After the crossover point, make sure players in the children are in NewPlayers of the other parent
-		for i := crossover_point; i < ScheduleMap[week].GameSpan+1; i++ {
-			for _, player := range child1.Genes[i].NewPlayers {
-				if _, ok := parent2.Genes[i].NewPlayers[player.Name]; !ok {
-					t.Error("NewPlayer not in parent2")
-				}
+		// Make sure the sum of the roster and bench is equal to the number of streamable players
+		for i := 0; i < ScheduleMap[week].GameSpan+1; i++ {
+			if len(child.Genes[i].Roster) + len(child.Genes[i].Bench) != len(streamable_players) {
+				PrintPopulation(child, free_positions)
+				t.Error("Roster and bench length not equal to streamable count")
 			}
-			for _, player := range child2.Genes[i].NewPlayers {
-				if _, ok := parent1.Genes[i].NewPlayers[player.Name]; !ok {
-					t.Error("NewPlayer not in parent1")
+		}
+
+		// Make sure each NewPlayer in the child is in one of the parents' NewPlayers
+		for i := 0; i < ScheduleMap[week].GameSpan+1; i++ {
+			for _, player := range child.Genes[i].NewPlayers {
+				if MapContainsValue(parent1.Genes[i].NewPlayers, player.Name) == "" && MapContainsValue(parent2.Genes[i].NewPlayers, player.Name) == "" {
+					t.Error("NewPlayer not in parent1 or parent2")
 				}
 			}
 		}
 
-		// // Make sure there are not 2 of the same player in a genes roster
-		// for i := 0; i < ScheduleMap[week].GameSpan+1; i++ {
-		// 	for pos1, player1 := range child1.Genes[i].Roster {
-		// 		for pos2, player2 := range child1.Genes[i].Roster {
-		// 			if pos1 != pos2 && player1.Name == player2.Name {
-		// 				t.Error("Duplicate player in child1")
-		// 			}
-		// 		}
-		// 	}
-		// 	for pos1, player1 := range child2.Genes[i].Roster {
-		// 		for pos2, player2 := range child2.Genes[i].Roster {
-		// 			if pos1 != pos2 && player1.Name == player2.Name {
-		// 				t.Error("Duplicate player in child2")
-		// 			}
-		// 		}
-		// 	}
-		// }
-
-		GetTotalAcquisitions(&child1)
-		GetTotalAcquisitions(&child2)
+		GetTotalAcquisitions(&child)
 
 		// Make sure total acquisitions are correct
 		child1_acquisitions := 0
-		child2_acquisitions := 0
 		for i := 0; i < ScheduleMap[week].GameSpan+1; i++ {
-			child1_acquisitions += len(child1.Genes[i].NewPlayers)
-			child2_acquisitions += len(child2.Genes[i].NewPlayers)
+			child1_acquisitions += len(child.Genes[i].NewPlayers)
 		}
-		if child1_acquisitions != child1.TotalAcquisitions {
-			fmt.Println(child1_acquisitions, child1.TotalAcquisitions)
-			PrintPopulation(child1, free_positions)
+		if child1_acquisitions != child.TotalAcquisitions {
+			fmt.Println(child1_acquisitions, child.TotalAcquisitions)
+			PrintPopulation(child, free_positions)
 			t.Error("Incorrect child1 acquisitions")
 		}
-		if child2_acquisitions != child2.TotalAcquisitions {
-			fmt.Println(child2_acquisitions, child2.TotalAcquisitions)
-			PrintPopulation(child2, free_positions)
-			t.Error("Incorrect child2 acquisitions")
-		}
+
 	}
 
 }
@@ -272,7 +157,7 @@ func TestMutate(t *testing.T) {
 	roster_map := loaders.LoadRosterMap()
 	week := "15"
 
-	optimal_lineup, streamable_players := OptimizeSlotting(roster_map, week, 34.0)
+	optimal_lineup, streamable_players := OptimizeSlotting(roster_map, week, 34.5)
 	free_positions := GetUnusedPositions(optimal_lineup)
 
 	population := loaders.LoadInitPop()
@@ -283,7 +168,7 @@ func TestMutate(t *testing.T) {
 		parent1 := SelectFirstParent(population)
 		parent2 := SelectSecondParent(population)
 
-		chromosome, cur_streamers1, _, _, _ := Crossover(parent1, parent2, free_agents, free_positions, streamable_players, week)
+		chromosome, cur_streamers1 := Crossover(parent1, parent2, free_agents, free_positions, streamable_players, week)
 		GetTotalAcquisitions(&chromosome)
 		pre_aquisitions := chromosome.TotalAcquisitions
 
@@ -322,7 +207,7 @@ func TestMutate(t *testing.T) {
 		parent1 := SelectFirstParent(population)
 		parent2 := SelectSecondParent(population)
 
-		chromosome, cur_streamers1, _, _, _ := Crossover(parent1, parent2, free_agents, free_positions, streamable_players, week)
+		chromosome, cur_streamers1 := Crossover(parent1, parent2, free_agents, free_positions, streamable_players, week)
 		GetTotalAcquisitions(&chromosome)
 		pre_aquisitions := chromosome.TotalAcquisitions
 
@@ -387,7 +272,7 @@ func TestMutate(t *testing.T) {
 		parent1 := SelectFirstParent(population)
 		parent2 := SelectSecondParent(population)
 
-		chromosome, cur_streamers1, _, _, _ := Crossover(parent1, parent2, free_agents, free_positions, streamable_players, week)
+		chromosome, cur_streamers1 := Crossover(parent1, parent2, free_agents, free_positions, streamable_players, week)
 
 		var changed_player1 Player
 		var changed_player2 Player
