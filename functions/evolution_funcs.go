@@ -171,9 +171,9 @@ func InsertPlayer(day int, player Player, free_positions map[int][]string, child
 
 	// When swapping we treat the pickups as day one initials because we should have a spot cleared out for them already, when crossing over we let things be
 	if !swap {
-		pos_map = GetPosMap(player, child, free_positions, day, week, cur_streamers, streamable_players, day==0, true, &add)
+		pos_map = GetPosMap(player, child, free_positions, day, week, cur_streamers, streamable_players, day==0, true, &add, false)
 	} else {
-		pos_map = GetPosMap(player, child, free_positions, day, week, cur_streamers, streamable_players, true, false, &add)
+		pos_map = GetPosMap(player, child, free_positions, day, week, cur_streamers, streamable_players, true, false, &add, false)
 	}
 	// When added here, counts as a new player
 	if _, ok := pos_map[day]; !ok{
@@ -407,7 +407,7 @@ func Add(rng *rand.Rand, free_positions map[int][]string, chromosome *Chromosome
 		// dummy_has_match := false
 		add := false
 		// matches := GetMatches(fa.ValidPositions, free_positions[rand_day], &dummy_has_match)
-		pos_map := GetPosMap(fa, chromosome, free_positions, rand_day, week, cur_streamers, streamable_players, false, true, &add)
+		pos_map := GetPosMap(fa, chromosome, free_positions, rand_day, week, cur_streamers, streamable_players, false, true, &add, true)
 
 		for day, pos := range pos_map {
 			not_found = false
