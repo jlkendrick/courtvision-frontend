@@ -235,7 +235,7 @@ func GetPosMap(player Player,
 
 			// Drop the worst player from the chromosome
 			if from_mutate {
-				RetroDeleteAllOccurrences(chromosome, cur_streamers, player, chromosome.Genes[0].Bench[0], week, start_day, free_positions)
+				RetroDeleteAllOccurrences(chromosome, chromosome.Genes[0].Bench[0], week, start_day)
 			} else {
 				DeleteAllOccurrences(chromosome, cur_streamers, player, chromosome.Genes[0].Bench[0], week, start_day, free_positions)
 			}
@@ -276,7 +276,7 @@ func GetPosMap(player Player,
 
 		// Drop the worst player from the chromosome
 		if from_mutate {
-			RetroDeleteAllOccurrences(chromosome, cur_streamers, player, worst_player, week, start_day, free_positions)
+			RetroDeleteAllOccurrences(chromosome, worst_player, week, start_day)
 		} else {
 			DeleteAllOccurrences(chromosome, cur_streamers, player, worst_player, week, start_day, free_positions)
 		}
@@ -319,12 +319,11 @@ func GetPosMap(player Player,
 		}
 
 		if from_mutate {
-			RetroDeleteAllOccurrences(chromosome, cur_streamers, player, worst_player, week, start_day, free_positions)
+			RetroDeleteAllOccurrences(chromosome, worst_player, week, start_day)
 		} else {
 			DeleteAllOccurrences(chromosome, cur_streamers, player, worst_player, week, start_day, free_positions)
 		}
 		// Remove player from new players
-		delete(chromosome.Genes[start_day].NewPlayers, worst_player.Name)
 		FindBestPositions(player, chromosome, free_positions, pos_map, start_day, week, add)
 
 	}
@@ -375,6 +374,9 @@ func DeleteAllOccurrences(chromosome *Chromosome, cur_streamers []Player, player
 	chromosome.DroppedPlayers[player_to_drop.Name] = DroppedPlayer{Player: player_to_drop, Countdown: 3}
 	chromosome.Genes[start_day].DroppedPlayers = append(chromosome.Genes[start_day].DroppedPlayers, player_to_drop)
 
+	// If the player is in NewPlayers, remove him
+	delete(chromosome.Genes[start_day].NewPlayers, player_to_drop.Name)
+
 	for day := start_day; day <= ScheduleMap[week].GameSpan; day++ {
 
 		// If the player is on the bench on a given day remove him
@@ -403,9 +405,11 @@ func DeleteAllOccurrences(chromosome *Chromosome, cur_streamers []Player, player
 }
 
 // Function to delete all occurences of a value in a chromosome when not going in sequential order
-func RetroDeleteAllOccurrences(chromosome *Chromosome, cur_streamers []Player, player_to_add Player, player_to_drop Player, week string, start_day int, free_positions map[int][]string) {
+func RetroDeleteAllOccurrences(chromosome *Chromosome, player_to_drop Player, week string, start_day int) {
 
 	chromosome.Genes[start_day].DroppedPlayers = append(chromosome.Genes[start_day].DroppedPlayers, player_to_drop)
+	delete(chromosome.Genes[start_day].NewPlayers, player_to_drop.Name)
+	delete(chromosome.Genes[start_day].Roster, MapContainsValue(chromosome.Genes[start_day].Roster, player_to_drop.Name))
 
 	for day := start_day; day <= ScheduleMap[week].GameSpan; day++ {
 
@@ -461,4 +465,69 @@ func FindBestPositions(player Player, chromosome *Chromosome, free_positions map
 			chromosome.Genes[day].Bench = append(chromosome.Genes[day].Bench, player)
 		}
 	}
+}
+
+// Function to find the best position for a player who need to be dropped when the player they are swapping with gets dropped
+func FindBestPositionsForSwap(player Player, counterpart Player, chromosome *Chromosome, free_positions map[int][]string, start_day int, end_day int, week string, add *bool, first bool) map[int]string {
+
+	pos_map := make(map[int]string)
+	
+	// If we are moving the second player back, we know the end day to be where his counterpart got dropped, otherwise, we don't know the end day so we check in the first if-statement in the loop
+	var end int
+	if first {
+		end = end_day
+	} else {
+		end = ScheduleMap[week].GameSpan
+	}
+
+	fmt.Println("End day:", end)
+	// Loop through each day and find the best position for each day
+	for day := start_day; day <= end; day++ {
+
+		// If the counterpart player got dropped on this day, remove counterpart and add new player to dropped players, then break
+		if !first {
+			if Contains(chromosome.Genes[day].DroppedPlayers, counterpart) && day != start_day {
+				fmt.Println("Dropped players:", chromosome.Genes[day].DroppedPlayers)
+				fmt.Println("Counterpart", counterpart, "got dropped on day", day)
+				chromosome.Genes[day].DroppedPlayers[SliceIndexOf(chromosome.Genes[day].DroppedPlayers, counterpart)] = player
+				break
+			}
+		}
+
+		// If the player doesn't have a game on the day, skip it and add to bench
+		if !Contains(ScheduleMap[week].Games[player.Team], day) {
+			chromosome.Genes[day].Bench = append(chromosome.Genes[day].Bench, player)
+			continue
+		}
+
+		has_match := false
+		matches := GetMatches(player.ValidPositions, free_positions[day], &has_match)
+
+		// If there are no matches, skip the day and add to bench
+		if !has_match {
+			chromosome.Genes[day].Bench = append(chromosome.Genes[day].Bench, player)
+			continue
+		}
+
+		// Go through matches in decreasing restriction order and assign the player to the first match that doesn't have a player in it
+		found_for_day := false
+		for _, pos := range matches {
+			
+			// If the position doesn't have a player in it, add to pos_map and break
+			if player, ok := chromosome.Genes[day].Roster[pos]; !ok || player.Name == counterpart.Name {
+				found_for_day = true
+				*add = true
+				pos_map[day] = pos
+				break
+			}
+			
+		}
+
+		// If we got here without adding a position, add the player to the bench
+		if !found_for_day {
+			chromosome.Genes[day].Bench = append(chromosome.Genes[day].Bench, player)
+		}
+	}
+
+	return pos_map
 }

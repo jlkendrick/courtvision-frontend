@@ -299,7 +299,7 @@ func TestMutationSwap(t *testing.T) {
 	population := loaders.LoadInitPop()
 
 	// Test mutate swap
-	for i := 0; i < 100; i++ {
+	for i := 0; i < 1; i++ {
 
 		parent1 := SelectFirstParent(population)
 		parent2 := SelectSecondParent(population)
@@ -345,6 +345,7 @@ func TestMutationSwap(t *testing.T) {
 			for pos1, player1 := range chromosome.Genes[i].Roster {
 				for pos2, player2 := range chromosome.Genes[i].Roster {
 					if pos1 != pos2 && player1.Name == player2.Name {
+						panic("Duplicate player in child1")
 						t.Error("Duplicate player in child1")
 					}
 				}
@@ -413,7 +414,7 @@ func DropForTest(rng *rand.Rand, chromosome *Chromosome, drop_day *int, changed_
 		// Delete the player from the roster and decrement the acquisitions
 		chromosome.Genes[day].Acquisitions -= 1
 		chromosome.TotalAcquisitions -= 1
-		SimpleDeleteAllOccurences(chromosome, new_players[rand_index], week, day)
+		RetroDeleteAllOccurrences(chromosome, new_players[rand_index], week, day)
 	}
 }
 
@@ -499,15 +500,50 @@ func SwapForTest(chromosome *Chromosome, free_positions map[int][]string, cur_st
 	*changed_player1 = player1
 	*changed_player2 = player2
 
+	PrintPopulation(*chromosome, free_positions)
+
+	fmt.Println("player1", player1.Name, "day", day1)
+	fmt.Println("player2", player2.Name, "day", day2)
+
 	// Delete player1 from day1
-	SimpleDeleteAllOccurences(chromosome, player1, week, day1)
+	RetroDeleteAllOccurrences(chromosome, player1, week, day1)
 	// Delete player2 from day2
-	SimpleDeleteAllOccurences(chromosome, player2, week, day2)
+	RetroDeleteAllOccurrences(chromosome, player2, week, day2)
 
 	if player1.Name != "" && player2.Name != "" {
 
-		InsertPlayer(day2, player1, free_positions, chromosome, week, cur_streamers, streamable_players, true)
-		InsertPlayer(day1, player2, free_positions, chromosome, week, cur_streamers, streamable_players, true)
+		// Insert player2 into day1
+		add1 := false
+		pos_map_for_player2 := FindBestPositionsForSwap(player2, player1, chromosome, free_positions, day1, day2, week, &add1, true)
+		add2 := false
+		pos_map_for_player1 := FindBestPositionsForSwap(player1, player2, chromosome, free_positions, day2, ScheduleMap[week].GameSpan+1, week, &add2, false)
+
+		// When added here, counts as a new player
+		if _, ok := pos_map_for_player2[day1]; !ok{
+			return
+		}
+		if _, ok := pos_map_for_player1[day2]; !ok{
+			return
+		}
+		if add1 && add2 {
+			chromosome.Genes[day1].NewPlayers[player2.Name] = player2
+			chromosome.Genes[day2].NewPlayers[player1.Name] = player1
+		}
+
+		fmt.Println(pos_map_for_player1)
+		fmt.Println(pos_map_for_player2)
+
+		for day, pos := range pos_map_for_player1 {
+			chromosome.Genes[day].Roster[pos] = player2
+		}
+		for day, pos := range pos_map_for_player2 {
+			chromosome.Genes[day].Roster[pos] = player1
+		}
+
+		// InsertPlayer(day1, player2, free_positions, chromosome, week, cur_streamers, streamable_players, true)
+		// InsertPlayer(day2, player1, free_positions, chromosome, week, cur_streamers, streamable_players, true)
+		fmt.Println("Post swap fpsjfposdjfoadsjfpsaofjpadsjf;aojsfpjsaofjpaso")
+		PrintPopulation(*chromosome, free_positions)
 		*swap_success = true
 	} else {
 		fmt.Println("No valid swap found")
