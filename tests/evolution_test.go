@@ -299,7 +299,7 @@ func TestMutationSwap(t *testing.T) {
 	population := loaders.LoadInitPop()
 
 	// Test mutate swap
-	for i := 0; i < 1; i++ {
+	for i := 0; i < 100; i++ {
 
 		parent1 := SelectFirstParent(population)
 		parent2 := SelectSecondParent(population)
@@ -500,11 +500,6 @@ func SwapForTest(chromosome *Chromosome, free_positions map[int][]string, cur_st
 	*changed_player1 = player1
 	*changed_player2 = player2
 
-	PrintPopulation(*chromosome, free_positions)
-
-	fmt.Println("player1", player1.Name, "day", day1)
-	fmt.Println("player2", player2.Name, "day", day2)
-
 	// Delete player1 from day1
 	RetroDeleteAllOccurrences(chromosome, player1, week, day1)
 	// Delete player2 from day2
@@ -530,20 +525,13 @@ func SwapForTest(chromosome *Chromosome, free_positions map[int][]string, cur_st
 			chromosome.Genes[day2].NewPlayers[player1.Name] = player1
 		}
 
-		fmt.Println(pos_map_for_player1)
-		fmt.Println(pos_map_for_player2)
-
-		for day, pos := range pos_map_for_player1 {
+		for day, pos := range pos_map_for_player2 {
 			chromosome.Genes[day].Roster[pos] = player2
 		}
-		for day, pos := range pos_map_for_player2 {
+		for day, pos := range pos_map_for_player1 {
 			chromosome.Genes[day].Roster[pos] = player1
 		}
 
-		// InsertPlayer(day1, player2, free_positions, chromosome, week, cur_streamers, streamable_players, true)
-		// InsertPlayer(day2, player1, free_positions, chromosome, week, cur_streamers, streamable_players, true)
-		fmt.Println("Post swap fpsjfposdjfoadsjfpsaofjpadsjf;aojsfpjsaofjpaso")
-		PrintPopulation(*chromosome, free_positions)
 		*swap_success = true
 	} else {
 		fmt.Println("No valid swap found")

@@ -409,7 +409,8 @@ func RetroDeleteAllOccurrences(chromosome *Chromosome, player_to_drop Player, we
 
 	chromosome.Genes[start_day].DroppedPlayers = append(chromosome.Genes[start_day].DroppedPlayers, player_to_drop)
 	delete(chromosome.Genes[start_day].NewPlayers, player_to_drop.Name)
-	delete(chromosome.Genes[start_day].Roster, MapContainsValue(chromosome.Genes[start_day].Roster, player_to_drop.Name))
+	pos := MapContainsValue(chromosome.Genes[start_day].Roster, player_to_drop.Name)
+	delete(chromosome.Genes[start_day].Roster, pos)
 
 	for day := start_day; day <= ScheduleMap[week].GameSpan; day++ {
 
@@ -480,15 +481,12 @@ func FindBestPositionsForSwap(player Player, counterpart Player, chromosome *Chr
 		end = ScheduleMap[week].GameSpan
 	}
 
-	fmt.Println("End day:", end)
 	// Loop through each day and find the best position for each day
 	for day := start_day; day <= end; day++ {
 
 		// If the counterpart player got dropped on this day, remove counterpart and add new player to dropped players, then break
 		if !first {
 			if Contains(chromosome.Genes[day].DroppedPlayers, counterpart) && day != start_day {
-				fmt.Println("Dropped players:", chromosome.Genes[day].DroppedPlayers)
-				fmt.Println("Counterpart", counterpart, "got dropped on day", day)
 				chromosome.Genes[day].DroppedPlayers[SliceIndexOf(chromosome.Genes[day].DroppedPlayers, counterpart)] = player
 				break
 			}
