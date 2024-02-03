@@ -14,8 +14,8 @@ func TestInitPopIntegration(t *testing.T) {
 
 	LoadSchedule("../static/schedule.json")
 
-	roster_map := loaders.LoadRosterMap()
-	free_agents := loaders.LoadFreeAgents()
+	roster_map := loaders.LoadRosterMap("resources/mock_roster.json")
+	free_agents := loaders.LoadFreeAgents("resources/mock_freeagents.json")
 	week := "15"
 	threshold := 34.5
 	size := 50
@@ -32,7 +32,7 @@ func TestInsertStreamablePlayers(t *testing.T) {
 
 	LoadSchedule("../static/schedule.json")
 
-	roster_map := loaders.LoadRosterMap()
+	roster_map := loaders.LoadRosterMap("resources/mock_roster.json")
 	week := "11"
 	threshold := 34.5
 
@@ -102,8 +102,8 @@ func TestCreateChromosome(t *testing.T) {
 
 	LoadSchedule("../static/schedule.json")
 
-	roster_map := loaders.LoadRosterMap()
-	free_agents := loaders.LoadFreeAgents()
+	roster_map := loaders.LoadRosterMap("resources/mock_roster.json")
+	free_agents := loaders.LoadFreeAgents("resources/mock_freeagents.json")
 	week := "15"
 	threshold := 34.5
 	

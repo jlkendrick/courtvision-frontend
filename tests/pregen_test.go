@@ -16,7 +16,7 @@ func TestLoadSchedule(t *testing.T) {
 		t.Error("ScheduleMap is empty")
 	}
 
-	free_agents := loaders.LoadFreeAgents()
+	free_agents := loaders.LoadFreeAgents("resources/mock_freeagents.json")
 
 	// Check to see if every team has a schedule
 	for _, player := range free_agents {
@@ -86,7 +86,7 @@ func TestOptimizeSlotting(t *testing.T) {
 
 	LoadSchedule("../static/schedule.json")
 
-	roster_map := loaders.LoadRosterMap()
+	roster_map := loaders.LoadRosterMap("resouces/mock_roster.json")
 
 	week := "15"
 	threshold := 34.0
@@ -163,7 +163,7 @@ func TestGetUnusedPositions(t *testing.T) {
 	LoadSchedule("../static/schedule.json")
 
 	// Retrieve team and free agent data from API
-	roster_map := loaders.LoadRosterMap()
+	roster_map := loaders.LoadRosterMap("resources/mock_roster.json")
 	week := "15"
 
 	// Test different thresholds to see if the correct number of unused positions are returned

@@ -219,8 +219,6 @@ func GetPosMap(player Player,
 	if first_day {
 	// If it is the first day, either put intial streamers in or adjust for other than initial streamers
 
-		FindBestPositions(player, chromosome, free_positions, pos_map, start_day, week, add)
-
 		// After adding the initial streamers, when doing regular pickups on the first day, drop the streamer with the lowest average points
 		if not_initial {
 
@@ -241,13 +239,11 @@ func GetPosMap(player Player,
 			}
 		}
 
+		FindBestPositions(player, chromosome, free_positions, pos_map, start_day, week, add)
+
 
 	} else if len(chromosome.Genes[start_day].Bench) > 0 {
 	// If there are streamers on the bench, find best position for new player and drop the worst bench streamer
-
-		// PrintPopulation(*chromosome, free_positions)
-		// fmt.Println(start_day)
-		// fmt.Println("Not playing streamers:", not_playing_streamers)
 
 		// Get the worst player that is not playing on the day
 		sort.Slice(chromosome.Genes[start_day].Bench, func(i, j int) bool {
@@ -283,7 +279,7 @@ func GetPosMap(player Player,
 		FindBestPositions(player, chromosome, free_positions, pos_map, start_day, week, add)
 
 	} else {
-	// If there are no streamers on the bench (ie. the roster is full), drop the worst playing streamer that the fa can fit into and find best position
+	// If there are no streamers on the bench (ie. the roster is full), drop the worst playing streamer that the fa can fit into and find best positions
 
 		sort.Slice(cur_streamers, func(i, j int) bool {
 			return cur_streamers[i].AvgPoints < cur_streamers[j].AvgPoints
@@ -409,8 +405,6 @@ func RetroDeleteAllOccurrences(chromosome *Chromosome, player_to_drop Player, we
 
 	chromosome.Genes[start_day].DroppedPlayers = append(chromosome.Genes[start_day].DroppedPlayers, player_to_drop)
 	delete(chromosome.Genes[start_day].NewPlayers, player_to_drop.Name)
-	pos := MapContainsValue(chromosome.Genes[start_day].Roster, player_to_drop.Name)
-	delete(chromosome.Genes[start_day].Roster, pos)
 
 	for day := start_day; day <= ScheduleMap[week].GameSpan; day++ {
 
@@ -528,4 +522,51 @@ func FindBestPositionsForSwap(player Player, counterpart Player, chromosome *Chr
 	}
 
 	return pos_map
+}
+
+// Fuunction to find the optimal positions for a player to be added when considering the player that they are replacing in the current streamers
+func FindBestPositionsForAdd(pos_map map[int]string, player_to_add Player, player_to_drop Player, chromosome *Chromosome, free_positions map[int][]string, start_day int, week string, add *bool) {
+
+	for day := start_day; day <= ScheduleMap[week].GameSpan; day++ {
+
+		// If the player_to_drop got dropped on this day, remove worst_player and add new player to dropped players, then break
+		if Contains(chromosome.Genes[day].DroppedPlayers, player_to_drop) && day != start_day {
+			chromosome.Genes[day].DroppedPlayers[SliceIndexOf(chromosome.Genes[day].DroppedPlayers, player_to_drop)] = player_to_add
+			break
+		}
+
+		// If the player doesn't have a game on the day, skip it and add to bench
+		if !Contains(ScheduleMap[week].Games[player_to_add.Team], day) {
+			chromosome.Genes[day].Bench = append(chromosome.Genes[day].Bench, player_to_add)
+			continue
+		}
+
+		has_match := false
+		matches := GetMatches(player_to_add.ValidPositions, free_positions[day], &has_match)
+
+		// If there are no matches, skip the day and add to bench
+		if !has_match {
+			chromosome.Genes[day].Bench = append(chromosome.Genes[day].Bench, player_to_add)
+			continue
+		}
+
+		// Go through matches in decreasing restriction order and assign the player to the first match that doesn't have a player in it
+		found_for_day := false
+		for _, pos := range matches {
+			
+			// If the position doesn't have a player in it, add to pos_map and break
+			if player, ok := chromosome.Genes[day].Roster[pos]; !ok || player.Name == player_to_drop.Name {
+				found_for_day = true
+				*add = true
+				pos_map[day] = pos
+				break
+			}
+		}
+
+		// If we got here without adding a position, add the player to the bench
+		if !found_for_day {
+			chromosome.Genes[day].Bench = append(chromosome.Genes[day].Bench, player_to_add)
+		}
+	}
+
 }

@@ -8,10 +8,10 @@ import (
 )
 
 // Function to load mock roster from JSON file
-func LoadRosterMap() map[string]helper.Player {
+func LoadRosterMap(path string) map[string]helper.Player {
 
 	// Load roster from JSON file
-	data, err := os.ReadFile("resources/mock_roster.json")
+	data, err := os.ReadFile(path)
 	if err != nil {
 		fmt.Println("Error reading mock_roster.json:", err)
 	}
@@ -26,10 +26,10 @@ func LoadRosterMap() map[string]helper.Player {
 	return roster_map
 }
 
-func LoadFreeAgents() []helper.Player {
+func LoadFreeAgents(path string) []helper.Player {
 
 	// Load free agents from JSON file
-	data, err := os.ReadFile("resources/mock_freeagents.json")
+	data, err := os.ReadFile(path)
 	if err != nil {
 		fmt.Println("Error reading mock_free_gents.json:", err)
 	}
@@ -44,10 +44,10 @@ func LoadFreeAgents() []helper.Player {
 	return free_agents
 }
 
-func LoadInitPop() []helper.Chromosome {
+func LoadInitPop(path string) []helper.Chromosome {
 
 	// Load initial population from JSON file
-	data, err := os.ReadFile("resources/mock_initpop.json")
+	data, err := os.ReadFile(path)
 	if err != nil {
 		fmt.Println("Error reading mock_initpop.json:", err)
 	}

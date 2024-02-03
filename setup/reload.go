@@ -12,7 +12,7 @@ import (
 func Refresh(espn_s2 string, swid string, league_id int, team_name string, year int, fa_count int) {
 
 	roster_map, free_agents := helper.GetPlayers(league_id, espn_s2, swid, team_name, year, fa_count)
-	size := 50
+	size := 75
 	week := "15"
 	threshold := 34.5
 
