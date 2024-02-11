@@ -77,7 +77,7 @@ func CreateChromosome(streamable_players []Player, week string, fas []Player, fr
 		// Get gene for day
 		gene := &chromosome.Genes[j]
 
-		acq_count := rng.Intn(3 + rng.Intn(2))
+		acq_count := rng.Intn(3)
 
 		// Check if there are enough available positions to make acq_count moves
 		if len(free_positions_copy[j]) < acq_count {

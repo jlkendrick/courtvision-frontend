@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"sort"
-	loaders "main/tests/resources"
+	// loaders "main/tests/resources"
 	"main/functions"
 )
 
@@ -13,23 +13,19 @@ func main() {
 	helper.LoadSchedule("static/schedule.json")
 
 	// League information
-	// espn_s2 := ""
-	// swid := ""
-	// league_id := 424233486
-	// team_name := "James's Scary Team"
-	// year := 2024
-	week := "15"
-	// fa_count := 150
+	espn_s2 := ""
+	swid := ""
+	league_id := 424233486
+	team_name := "James's Scary Team"
+	year := 2024
+	week := "17"
+	fa_count := 150
 
 	// Set threshold for streamable players
-	threshold := 34.5
+	threshold := 33.1
 
 	// Retrieve team and free agent data from API
-	// roster_map, free_agents := helper.GetPlayers(league_id, espn_s2, swid, team_name, year, fa_count)
-
-	// Load team and free agent data from JSON files
-	roster_map := loaders.LoadRosterMap("tests/resources/mock_roster.json")
-	free_agents := loaders.LoadFreeAgents("tests/resources/mock_freeagents.json")
+	roster_map, free_agents := helper.GetPlayers(league_id, espn_s2, swid, team_name, year, fa_count)
 
 	// Optimize slotting and get streamable players
 	optimal_lineup, streamable_players := helper.OptimizeSlotting(roster_map, week, threshold)
@@ -43,8 +39,9 @@ func main() {
 	population := make([]helper.Chromosome, size)
 	helper.CreateInitialPopulation(size, population, free_agents, free_positions, week, streamable_players)
 
-	comapare_roster := helper.Chromosome{Genes: make([]helper.Gene, 7), FitnessScore: 0, TotalAcquisitions: 0, CumProbTracker: 0.0, DroppedPlayers: make(map[string]helper.DroppedPlayer)}
-	for i := 0; i < 7; i++ {
+
+	comapare_roster := helper.Chromosome{Genes: make([]helper.Gene, helper.ScheduleMap[week].GameSpan + 1), FitnessScore: 0, TotalAcquisitions: 0, CumProbTracker: 0.0, DroppedPlayers: make(map[string]helper.DroppedPlayer)}
+	for i := 0; i < helper.ScheduleMap[week].GameSpan + 1; i++ {
 		comapare_roster.Genes[i] = helper.Gene{Roster: make(map[string]helper.Player), NewPlayers: make(map[string]helper.Player), Day: i, Acquisitions: 0}
 	}
 	helper.InsertStreamablePlayers(streamable_players, free_positions, week, &comapare_roster, streamable_players)
@@ -56,7 +53,8 @@ func main() {
 	}
 	fmt.Println("No pickups roster fitness score:", comapare_roster.FitnessScore, "games played:", games_played)
 
-	population = loaders.LoadInitPop("tests/resources/mock_initpop.json")
+
+	// population = loaders.LoadInitPop("tests/resources/mock_initpop.json")
 
 	// Run the genetic algorithm for 50 generations
 	for i := 0; i < 10; i++ {

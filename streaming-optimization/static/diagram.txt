@@ -1,0 +1,14 @@
+
+                                                                                                    Repeat # of evolutions times {
+            Create schedule map from JSON                                                           Score each chromosome and sort from high to low
+            (main_main)                                                                             (genetic_main)
+    start ->                                      ->  Create initial population of chromosomes  ->  
+            Find streamable players and the           (genetic_initpop)                              Evolve the population by:
+            positions they can go in                                                                 - Immediately putting top 2 in next gen
+            (main_reduce)                                                                            - Selecting 1st parent by a weighted rank selection
+                                                                                                     - Selecting 2nd parent by a tournament selection
+                                                                                                     - Implementing shuffle crossover to make 2 children
+                                                                                                     - Mutating at a 10% rate, split evenly between drop, add, and swap
+                                                                                                     (genetic_evolution)
+                                                                                                     }
+
