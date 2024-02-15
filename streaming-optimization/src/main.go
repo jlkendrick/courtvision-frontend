@@ -1,29 +1,60 @@
 package main
 
 import (
+	"io"
 	"fmt"
 	"sort"
 	"net/http"
 	// loaders "main/tests/resources"
 	"main/functions"
+	"encoding/json"
 )
 
 func main() {
+
+	// Handle request
+	http.HandleFunc("/optimize", func(w http.ResponseWriter, r *http.Request) {
+		
+		// Get request body
+		var req helper.ReqBody
+	
+		// Decode request body into ReqBody struct
+		body, err := io.ReadAll(r.Body)
+		if err != nil {
+			fmt.Println("Error reading api request body:", err)
+		}
+
+		err = json.Unmarshal(body, &req)
+		if err != nil {
+			fmt.Println("Error decoding json request into ReqBody:", err)
+		}
+
+		OptimizeStreaming(req)
+
+	})
+
+	// Start server
+	if err := http.ListenAndServe(":80", nil); err != nil {
+		panic(err)
+	}
+}
+
+func OptimizeStreaming(req helper.ReqBody) {
 
 	// Load schedule from JSON file
 	helper.LoadSchedule("static/schedule.json")
 
 	// League information
-	espn_s2 := ""
-	swid := ""
-	league_id := 424233486
-	team_name := "James's Scary Team"
-	year := 2024
-	week := "17"
+	espn_s2 := req.EspnS2 // ""
+	swid := req.Swid // ""
+	league_id := req.LeagueId // 424233486
+	team_name := req.TeamName // "James's Scary Team"
+	year := req.Year // 2024
+	week := req.Week // "17"
 	fa_count := 150
 
 	// Set threshold for streamable players
-	threshold := 33.1
+	threshold := req.Threshold // 33.1
 
 	// Retrieve team and free agent data from API
 	roster_map, free_agents := helper.GetPlayers(league_id, espn_s2, swid, team_name, year, fa_count)
@@ -74,10 +105,10 @@ func main() {
 		population = helper.EvolvePopulation(size, population, free_agents, free_positions, streamable_players, week)
 
 		// Print the max fitness score of the population
-		fmt.Println("Max fitness score:", population[len(population)-1].FitnessScore)
+		// fmt.Println("Max fitness score:", population[len(population)-1].FitnessScore)
 	}
 
-	// Pring the best chromosome
+	// Print the best chromosome
 	other_games_played := 0
 	for _, gene := range population[len(population)-1].Genes {
 		other_games_played += len(gene.Roster)

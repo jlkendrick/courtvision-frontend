@@ -1,20 +1,18 @@
-FROM golang:1.22.0 as builder
+FROM golang:1.22.0-alpine3.19 AS builder
 
-WORKDIR /fbball/streaming-optimization/src
+WORKDIR /build
 
-COPY src/go.mod ./
+COPY ./src /build
 
-COPY src/ ./
-
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o stopz-server .
+RUN GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o stopz-server .
 
 FROM alpine:3.19
 
-WORKDIR /root/
-
-COPY --from=builder /fbball/streaming-optimization/src/stopz-server .
-
 EXPOSE 80
+
+WORKDIR /app
+
+COPY --from=builder /build/stopz-server /app/
 
 CMD ["./stopz-server"]
 

@@ -10,6 +10,18 @@ type PositionsResponse struct {
 	RosterMap map[string]string
 }
 
+// Struct for deserilizing the request body
+type ReqBody struct {
+	LeagueId  int     `json:"league_id"`
+	EspnS2    string  `json:"espn_s2"`
+	Swid      string  `json:"swid"`
+	TeamName  string  `json:"team_name"`
+	Year      int     `json:"year"`
+	Week      string  `json:"week"`
+	Threshold float64 `json:"threshold"`
+}
+
+
 // Struct for how necessary variables are passed to API
 type ReqMeta struct {
 	LeagueId int    `json:"league_id"`
