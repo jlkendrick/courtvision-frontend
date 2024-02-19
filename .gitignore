@@ -5,3 +5,4 @@ static/diagram.txt
 server/__pycache__
 __pycache__
 speedtests
+app/node_modules
