@@ -1,4 +1,9 @@
 
-.bg-custom {
-    background-color: #9db8d3;
+.appBackground {
+    height: 100vh;
+    background-image:
+        linear-gradient(to bottom, rgba(255, 255, 255, 0) 0%, rgb(42, 39, 37) 75%),
+        url("../public/Background2 (1).png");
+    background-size: cover;
+    background-position: center;
 }
