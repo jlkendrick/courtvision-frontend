@@ -1,0 +1,25 @@
+.wrapper {
+  position: relative;
+	display: flex;
+	justify-content: center;
+	margin: 0;
+  color: rgb(138, 150, 162);
+}
+
+.gradient-text {
+  font-size: 40px; /* Adjust the size of your text */
+  font-weight: 300; /* Makes the gradient look better */
+  text-align: center; /* Center the text (optional) */
+}
+
+.semi-transparent-box {
+  position: relative;
+	font-family: 'Work Sans', sans-serif;
+  padding: 20px; /* Spacing inside the box */
+  margin: 20px; /* Spacing outside the box */
+  border-radius: 8px; /* Rounded corners */
+  width: 1500px; /* Fixed width, you can adjust as needed */
+  text-align: center; /* Center the text */
+  background-color: rgba(59, 76, 84, 0.8); /* Semi-transparent white */
+  font-weight: 300;
+}

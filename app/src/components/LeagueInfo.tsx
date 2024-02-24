@@ -1,3 +1,5 @@
+import "../styles/LeagueInfo.css"
+
 export default function LeagueInfo() {
 	// Returns a form to input league information
 	return (

@@ -4,14 +4,16 @@ import ListFeatures from './ListFeatures'
 import Home from '../pages/Home'
 import Stoptz from '../pages/Stoptz'
 import Header from "../components/Header";
-import "../styles/App.css"
+import { CardWithForm } from './CardWithForm'
+import '../styles/global.css'
+
 
 export default function App() {
 
   return (
     <>
 
-    <div className="appBackground">
+    <div className="appBackground2">
       <Header />
       <BrowserRouter>
         <Routes>
@@ -25,6 +27,11 @@ export default function App() {
       <div>
         <ListFeatures />
       </div>
+      <div>
+      </div>
+    </div>
+    <div >
+      <CardWithForm />
     </div>
 
     </>

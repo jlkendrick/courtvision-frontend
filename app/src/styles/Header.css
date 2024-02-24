@@ -1,6 +1,7 @@
 .header {
     padding: 1rem 2rem;
     display: flex;
+    margin-bottom: -34px;
 }
 
 .logo {
@@ -11,9 +12,15 @@
 }
 
 .title {
-    font-family:'Kode Mono', monospace;
-    font-size: 2.5rem;
+    font-family: 'Work Sans', sans-serif;
+    font-weight: 450;
+    font-size: 50px;
+    /* -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent; Hide the original text color
+    background-image: linear-gradient(to right, rgb(232, 127, 34),  rgb(63, 92, 207), rgb(232, 127, 34)); 
+    -webkit-text-fill-color: transparent; */
     padding-top: 1.40%;
     display: flex;
-    color: rgb(247, 248, 249);
+    color: rgb(138, 150, 162);
 }

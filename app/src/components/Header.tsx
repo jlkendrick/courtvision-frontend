@@ -10,8 +10,7 @@ export default function Header() {
       </div>
 
       <div className="title">
-        <h2></h2> 
-        <h1>Court Visionaries</h1> 
+        Court Visionaries
       </div>
 
     </header>
