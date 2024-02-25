@@ -57,14 +57,14 @@
     --muted: 217.2 32.6% 17.5%;
     --muted-foreground: 215 20.2% 65.1%;
  
-    --accent: 217.2 32.6% 17.5%;
+    --accent: 217.2 32.6% 24.9%;
     --accent-foreground: 210 40% 98%;
  
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
  
     --card-border-color: #ea1cb3;
-    --border: rgba(10, 10, 10, 0.75);
+    --border: rgba(14, 16, 15, 0.65);
     --input: 217.2 32.6% 17.5%;
     --ring: 212.7 26.8% 83.9%;
 

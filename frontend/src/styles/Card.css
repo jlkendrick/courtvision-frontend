@@ -2,8 +2,12 @@
     margin-top: 30px;
     margin-left: 10px;
     background-color: transparent;
-    align-items: left;
     border-color: transparent !important;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+
 }
 
 .custom-hr {
@@ -22,7 +26,6 @@
 }
 
 .margin-increaser1 {
-    margin-right: -23px;
     margin-top: 20px;
     margin-bottom: -15px;
 }

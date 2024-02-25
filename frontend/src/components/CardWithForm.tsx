@@ -1,4 +1,4 @@
-
+import Collapse from "react-collapse"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -33,9 +33,27 @@ export function CardWithForm() {
     console.log(e.target.id, e.target.value)
     setFormData({ ...formData, [e.target.id]: e.target.value })
   }
+
+  const handleClear = () => {
+    console.log("Cleared")
+    setFormData({
+      leagueid: "",
+      leagueyear: "",
+      teamname: "",
+      s2: "",
+      swid: "",
+    })
+  }
+
+  const [isFormOpen, setIsFormOpen] = useState(true)
+
+  const handleToggle = () => {
+    setIsFormOpen(!isFormOpen)
+  }
   
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
+    handleToggle()
     console.log("Submitted")
   }
 
@@ -50,19 +68,22 @@ export function CardWithForm() {
         </CardHeader>
       </div>
       <CardContent>
+
+        <Collapse isOpened={isFormOpen}>
+
         <form onSubmit={handleSubmit}>
           <div className="grid w-full items-center gap-4">
             <div className="flex flex-col space-y-1.5">
               <Label htmlFor="name">League ID<span style={{ color: 'red'}}> *</span></Label>
-              <Input id="leagueid" placeholder="ID" onChange={handleChange}/>
+              <Input id="leagueid" placeholder="ID" value={formData.leagueid} onChange={handleChange}/>
             </div>
             <div className="flex flex-col space-y-1.5">
               <Label htmlFor="name">League Year<span style={{ color: 'red'}}> *</span></Label>
-              <Input id="leagueyear" placeholder="Year" onChange={handleChange}/>
+              <Input id="leagueyear" placeholder="Year" value={formData.leagueyear} onChange={handleChange}/>
             </div>
             <div className="flex flex-col space-y-1.5">
               <Label htmlFor="name">Team Name<span style={{ color: 'red'}}> *</span></Label>
-              <Input id="teamname" placeholder="Team Name" onChange={handleChange}/>
+              <Input id="teamname" placeholder="Team Name" value={formData.teamname} onChange={handleChange}/>
             </div>
             <hr className="custom-hr"></hr>
             <div className="margin-reducer1">
@@ -71,20 +92,24 @@ export function CardWithForm() {
             <div className="margin-reducer2">
               <div className="flex flex-col space-y-1.5">
                 <Label htmlFor="name">ESPN s2</Label>
-                <Input id="s2" placeholder="s2" onChange={handleChange}/>
+                <Input id="s2" placeholder="s2" value={formData.s2}onChange={handleChange}/>
               </div>
             </div>
             <div className="flex flex-col space-y-1.5">
               <Label htmlFor="name">SWID</Label>
-              <Input id="swid" placeholder="SWID" onChange={handleChange}/>
+              <Input id="swid" placeholder="SWID" value={formData.swid} onChange={handleChange}/>
             </div>
           </div>
           <div className="margin-increaser1">
-            <CardFooter className="flex items-right">
-              <Button type="submit" className="border text-white border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground" style={{ marginLeft: "auto"}}>Find Team</Button>
+            <CardFooter className="flex">
+              <Button type="button" onClick={handleClear} className="border text-white bg-border shadow-sm hover:bg-accent hover:text-accent-foreground" style={{ marginLeft: "-23px" }}>Clear</Button>
+              <Button type="submit" className="border text-white bg-border shadow-sm hover:bg-accent hover:text-accent-foreground" style={{ marginLeft: "99px" }}>Find Team</Button>
             </CardFooter>
           </div>
         </form>
+
+        </Collapse>
+
       </CardContent>
     </Card>
 
