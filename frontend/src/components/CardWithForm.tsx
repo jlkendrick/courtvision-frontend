@@ -8,10 +8,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons';
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import "../styles/Card.css"
-import { useState } from "react"
+import { useState, useRef } from "react"
 // import {
 //   Select,
 //   SelectContent,
@@ -47,8 +49,14 @@ export function CardWithForm() {
 
   const [isFormOpen, setIsFormOpen] = useState(true)
 
+  const arrowIcon = useRef<SVGSVGElement>(null)
+
   const handleToggle = () => {
     setIsFormOpen(!isFormOpen)
+
+    if (arrowIcon.current) {
+      arrowIcon.current.classList.toggle('arrow-open');
+    }
   }
   
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -109,6 +117,10 @@ export function CardWithForm() {
         </form>
 
         </Collapse>
+
+        <div className="arrow-container">
+        <FontAwesomeIcon icon={isFormOpen ? faChevronUp : faChevronDown} id="toggleFormButton" onClick={handleToggle} ref={arrowIcon} />
+        </div>
 
       </CardContent>
     </Card>
