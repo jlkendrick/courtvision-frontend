@@ -1,37 +1,30 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
-import LeagueInfo from './LeagueInfo'
-import ListFeatures from './ListFeatures'
-import Home from '../pages/Home'
 import Stoptz from '../pages/Stoptz'
 import Header from "../components/Header";
 import { CardWithForm } from './CardWithForm'
 import '../styles/global.css'
+import '../styles/App.css'
+import '../styles/Card.css'
 
 
 export default function App() {
 
   return (
     <>
-
-    <div className="appBackground2">
+    <div className="dark">
+    <div className="appBackground">
       <Header />
+
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/stoptz" element={<Stoptz />} />
+          {/* <Route path="/" element={} /> */}
+          <Route path="/streaming-optimization" element={<Stoptz />} />
         </Routes>
       </BrowserRouter>
-      <div>
-        <LeagueInfo />
-      </div>
-      <div>
-        <ListFeatures />
-      </div>
-      <div>
-      </div>
-    </div>
-    <div >
+
       <CardWithForm />
+
+    </div>
     </div>
 
     </>

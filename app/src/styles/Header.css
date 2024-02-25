@@ -22,5 +22,6 @@
     -webkit-text-fill-color: transparent; */
     padding-top: 1.40%;
     display: flex;
-    color: rgb(138, 150, 162);
+    align-items: center;
+    color: rgb(240, 243, 247);
 }
