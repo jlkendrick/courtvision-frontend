@@ -1,4 +1,4 @@
-import Collapse from "react-collapse"
+import { Collapse } from "react-collapse"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -61,6 +61,9 @@ export function CardWithForm() {
   
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
+
+    // Find the league
+
     handleToggle()
     console.log("Submitted")
   }
@@ -68,7 +71,7 @@ export function CardWithForm() {
   return (
     <div className="card-wrapper">
 
-    <Card className="w-[350px]">
+    <Card className="w-[375px]">
       <div className="margin-reducer">
         <CardHeader>
           <CardTitle>League Information</CardTitle>
@@ -111,7 +114,7 @@ export function CardWithForm() {
           <div className="margin-increaser1">
             <CardFooter className="flex">
               <Button type="button" onClick={handleClear} className="border text-white bg-border shadow-sm hover:bg-accent hover:text-accent-foreground" style={{ marginLeft: "-23px" }}>Clear</Button>
-              <Button type="submit" className="border text-white bg-border shadow-sm hover:bg-accent hover:text-accent-foreground" style={{ marginLeft: "99px" }}>Find Team</Button>
+              <Button type="submit" className="border text-white bg-border shadow-sm hover:bg-accent hover:text-accent-foreground" style={{ marginLeft: "138px" }}>Find</Button>
             </CardFooter>
           </div>
         </form>

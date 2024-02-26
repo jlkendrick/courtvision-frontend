@@ -1,6 +1,5 @@
 .card-wrapper {
     margin-top: 30px;
-    margin-left: 10px;
     background-color: transparent;
     border-color: transparent !important;
     display: flex;
@@ -11,9 +10,13 @@
 }
 
 #toggleFormButton {
-    margin-top: -20px;
-    transition: transform 0.5s ease-out; 
+    margin-top: -10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: transform 0.5s;
 }
+
 
 .arrow-open {
     transform: rotate(180deg);
@@ -25,7 +28,6 @@
     justify-content: center;
     align-items: center;
     margin-top: 10px;
-
 }
 
 
