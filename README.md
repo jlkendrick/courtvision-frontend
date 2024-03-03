@@ -1,3 +1,2 @@
-                                      Fantasy Basketball App
+                                      Court Visionaries
 
-Main goal of optimizing streaming moves but may expand later
