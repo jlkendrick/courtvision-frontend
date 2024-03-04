@@ -10,8 +10,20 @@ def get_roster(team_name, teams):
         for team in teams:
             if team_name.strip() == team['name']:
                 return team['roster']['entries']
+            
+# Defines the request body from router
+class LeagueCheckerRequest(BaseModel):
+    league_id: int
+    espn_s2: str | None
+    swid: str | None
+    team_name: str
+    year: int
 
-# Defines the request body
+class LeagueCheckerResponse(BaseModel):
+    valid: bool
+    message: str
+
+# Defines the request body from streaming-optimization
 class TeamDataRequest(BaseModel):
     league_id: int
     espn_s2: str | None
@@ -45,6 +57,30 @@ class PlayerModelResponse(BaseModel):
  
 
 app = FastAPI()
+
+
+
+# Checks if the league and team are valid
+@app.post("/check_league/")
+def check_league(req: LeagueCheckerRequest):
+    params = {
+        'view': ['mTeam', 'mRoster', 'mMatchup', 'mSettings', 'mStandings']
+    }
+
+    endpoint = f'https://fantasy.espn.com/apis/v3/games/fba/seasons/{req.year}/segments/0/leagues/{req.league_id}'
+
+    response = requests.get(endpoint, params=params)
+    try:
+        response.raise_for_status()
+    except requests.exceptions.HTTPError as e:
+        return LeagueCheckerResponse(False, f"Invalid league information {e}")
+    data = response.json()
+
+    teams = [team['name'] for team in data['teams']]
+    return LeagueCheckerResponse(True, "Team found") if req.team_name in teams else LeagueCheckerResponse(False, "Team not found")
+
+
+
 
 # Returns important data for players on a team
 @app.post("/get_roster_data/")

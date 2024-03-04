@@ -22,7 +22,7 @@ type ReqBody struct {
 }
 
 
-// Struct for how necessary variables are passed to API
+// Struct for how necessary variables are passed to espn-fantasy-server
 type ReqMeta struct {
 	LeagueId int    `json:"league_id"`
 	EspnS2   string `json:"espn_s2"`

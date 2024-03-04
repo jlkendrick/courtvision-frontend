@@ -5,9 +5,8 @@ import (
 	"fmt"
 	"sort"
 	"net/http"
-	// loaders "main/tests/resources"
-	"main/functions"
 	"encoding/json"
+	"main/functions"
 )
 
 func main() {
@@ -29,7 +28,11 @@ func main() {
 			fmt.Println("Error decoding json request into ReqBody:", err)
 		}
 
-		OptimizeStreaming(req)
+		data := OptimizeStreaming(req)
+
+		// Send response
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(data)
 
 	})
 
@@ -39,15 +42,15 @@ func main() {
 	}
 }
 
-func OptimizeStreaming(req helper.ReqBody) {
+func OptimizeStreaming(req helper.ReqBody) helper.Chromosome {
 
 	// Load schedule from JSON file
 	helper.LoadSchedule("static/schedule.json")
 
 	// League information
+	league_id := req.LeagueId // 424233486
 	espn_s2 := req.EspnS2 // ""
 	swid := req.Swid // ""
-	league_id := req.LeagueId // 424233486
 	team_name := req.TeamName // "James's Scary Team"
 	year := req.Year // 2024
 	week := req.Week // "17"
@@ -115,4 +118,6 @@ func OptimizeStreaming(req helper.ReqBody) {
 	}
 	fmt.Println("Best chromosome:", population[len(population)-1].TotalAcquisitions, "pickups", population[len(population)-1].FitnessScore, "fitness score", other_games_played, "games played")
 	helper.PrintPopulation(population[len(population)-1], free_positions)
+
+	return population[len(population)-1]
 }
