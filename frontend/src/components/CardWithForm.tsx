@@ -14,13 +14,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import "../styles/Card.css"
 import { useState, useRef } from "react"
-// import {
-//   Select,
-//   SelectContent,
-//   SelectItem,
-//   SelectTrigger,
-//   SelectValue,
-// } from "@/components/ui/select"
+import { getLeague } from "../requests/api"
 
 export function CardWithForm() {
   const [formData, setFormData] = useState({
@@ -59,13 +53,20 @@ export function CardWithForm() {
     }
   }
   
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
 
     // Find the league
+    const success = await getLeague(formData.leagueid, formData.leagueyear, formData.teamname, formData.s2, formData.swid)
+    if (!success) {
+      handleClear()
+    } else {
+      handleToggle()
+      console.log("Submitted")
+    }
 
-    handleToggle()
-    console.log("Submitted")
+    console.log("here")
+
   }
 
   return (

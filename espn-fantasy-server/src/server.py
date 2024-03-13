@@ -59,10 +59,9 @@ class PlayerModelResponse(BaseModel):
 app = FastAPI()
 
 
-
 # Checks if the league and team are valid
-@app.post("/check_league/")
-def check_league(req: LeagueCheckerRequest):
+@app.post("/validate_league/")
+async def check_league(req: LeagueCheckerRequest):
     params = {
         'view': ['mTeam', 'mRoster', 'mMatchup', 'mSettings', 'mStandings']
     }
@@ -128,3 +127,4 @@ def get_free_agents(req: TeamDataRequest):
                                 valid_positions=player.eligibleSlots,
                                 injured=player.injured,
                                 ) for player in players]
+
