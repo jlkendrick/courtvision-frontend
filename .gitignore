@@ -7,3 +7,5 @@ __pycache__
 speedtests
 app/node_modules
 frontend/node_modules
+frontend
+router
