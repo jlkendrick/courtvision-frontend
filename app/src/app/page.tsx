@@ -1,0 +1,27 @@
+import Image from "next/image";
+import Header from "../components/Header";
+import LeagueInfoForm from "../components/LeagueInfoForm";
+
+export default function Home() {
+  return (
+    <>
+
+    <main className="p-4">
+      <Header />
+    </main>
+
+    {/* <section className="py-10 flex flex-wrap justify-center gap-20"> */}
+    <section className="py-10 flex justify-center">
+      <div className="flex flex-col items-center justify-center w-1/4">
+        <LeagueInfoForm />
+      </div>
+      <div className="flex flex-col items-center justify-center w-3/4">
+        <h1 className="text-2xl">Welcome to Court Visionaries</h1>
+        <p>Advanced tools to help you win your fantasy basketball league</p>
+      </div>
+    </section>
+    
+
+    </>
+  );
+}
