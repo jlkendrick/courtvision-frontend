@@ -20,14 +20,23 @@ import {
   CardTitle,
 } from "./ui/card";
 import { Button } from "./ui/button";
+import { useState } from "react";
 
 const leagueInfoSchema = z.object({
-  leagueID: z.string(),
-  leagueYear: z.string(),
-  teamName: z.string(),
-  s2: z.string(),
-  swid: z.string(),
+  leagueID: z.string().min(1).regex(/^\d+$/, { message: 'League ID must be a number' }),
+  leagueYear: z.string().min(1).regex(/^\d+$/, { message: 'League Year must be a number' }),
+  teamName: z.string().min(1),
+  s2: z.string().optional(),
+  swid: z.string().optional(),
 });
+
+interface leagueInfoRequest {
+  league_id: number;
+  espn_s2?: string;  
+  swid?: string; 
+  team_name: string;
+  year: number;
+}
 
 export default function LeagueInfoForm() {
   const form = useForm<z.infer<typeof leagueInfoSchema>>({
@@ -41,11 +50,41 @@ export default function LeagueInfoForm() {
     },
   });
 
-  const handleSubmit = () => {};
+  const [leagueFound, setLeagueFound] = useState(false);
+
+  const handleSubmit = async (values: z.infer<typeof leagueInfoSchema>) => {
+    console.log(values);
+
+    const request: leagueInfoRequest = {
+      league_id: parseInt(values.leagueID),
+      espn_s2: values.s2,
+      swid: values.swid,
+      team_name: values.teamName,
+      year: parseInt(values.leagueYear)
+    };
+
+    const response = await fetch("http://127.0.0.1:8000/validate_league/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(request),
+    });
+
+    const data = await response.json();
+    console.log(data);
+
+    if (data.valid) {
+      setLeagueFound(true);
+    } else {
+      setLeagueFound(false);
+    }
+
+  };
 
   return (
     <div className="w-full pl-8 pr-4">
-      <Card>
+      <Card className={`border-primary ${leagueFound ? 'border-tertiary' : ''}`}>
         <CardHeader>
           <CardTitle>League Info</CardTitle>
           <CardDescription>
@@ -67,7 +106,7 @@ export default function LeagueInfoForm() {
                     <FormItem>
                       <FormLabel>League ID<span style={{ color: 'red'}}> *</span></FormLabel>
                       <FormControl>
-                        <Input placeholder="ID" {...field} />
+                        <Input className={leagueFound ? 'focus-visible:ring-tertiary' : ''} placeholder="ID" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -83,7 +122,7 @@ export default function LeagueInfoForm() {
                     <FormItem>
                       <FormLabel>League Year<span style={{ color: 'red'}}> *</span></FormLabel>
                       <FormControl>
-                        <Input placeholder="Year" {...field} />
+                        <Input className={leagueFound ? 'focus-visible:ring-tertiary' : ''} placeholder="YYYY" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -99,7 +138,7 @@ export default function LeagueInfoForm() {
                     <FormItem>
                       <FormLabel>Team Name<span style={{ color: 'red'}}> *</span></FormLabel>
                       <FormControl>
-                        <Input placeholder="Name" {...field} />
+                        <Input className={leagueFound ? 'focus-visible:ring-tertiary' : ''} placeholder="Name" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -107,7 +146,7 @@ export default function LeagueInfoForm() {
                 }}
               />
 
-							<hr className="border-primary"></hr>
+							<hr className={`border-primary ${leagueFound ? 'border-tertiary' : ''}`}></hr>
 							<CardDescription>For private leagues.</CardDescription>
 
 							<FormField
@@ -118,7 +157,7 @@ export default function LeagueInfoForm() {
 										<FormItem>
 											<FormLabel>ESPN s2</FormLabel>
 											<FormControl>
-												<Input placeholder="s2" {...field} />
+												<Input className={leagueFound ? 'focus-visible:ring-tertiary' : ''} placeholder="s2" {...field} />
 											</FormControl>
 											<FormMessage />
 										</FormItem>
@@ -134,7 +173,7 @@ export default function LeagueInfoForm() {
 										<FormItem>
 											<FormLabel>SWID</FormLabel>
 											<FormControl>
-												<Input placeholder="SWID" {...field} />
+												<Input className={leagueFound ? 'focus-visible:ring-tertiary' : ''} placeholder="SWID" {...field} />
 											</FormControl>
 											<FormMessage />
 										</FormItem>
@@ -143,10 +182,10 @@ export default function LeagueInfoForm() {
 							/>
 
               <CardFooter className="flex justify-between pl-0 pr-0">
-                <Button type="button" className="w-1/3">
+                <Button type="button" className={`w-1/3 bg-primary ${leagueFound ? 'bg-tertiary hover:bg-teriary/90' : ''}`}>
                   Clear
                 </Button>
-                <Button type="submit" className="w-1/3">
+                <Button type="submit" className={`w-1/3 bg-primary ${leagueFound ? 'bg-tertiary hover:bg-teriary/90' : ''}`}>
                   Find
                 </Button>
               </CardFooter>

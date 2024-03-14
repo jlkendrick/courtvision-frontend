@@ -3,7 +3,7 @@ import json
 from fastapi import FastAPI
 from pydantic import BaseModel, field_validator
 from utils import Player
-
+from fastapi.middleware.cors import CORSMiddleware
 
 def get_roster(team_name, teams):
         
@@ -58,6 +58,20 @@ class PlayerModelResponse(BaseModel):
 
 app = FastAPI()
 
+# Configure CORS
+origins = [
+    "http://localhost",
+    "http://localhost:3000",  # Replace with your front-end URL
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["POST", "GET", "OPTIONS", "DELETE"],
+    allow_headers=["Content-Type"],
+)
+
 
 # Checks if the league and team are valid
 @app.post("/validate_league/")
@@ -68,16 +82,14 @@ async def check_league(req: LeagueCheckerRequest):
 
     endpoint = f'https://fantasy.espn.com/apis/v3/games/fba/seasons/{req.year}/segments/0/leagues/{req.league_id}'
 
-    response = requests.get(endpoint, params=params)
     try:
+        response = requests.get(endpoint, params=params)
         response.raise_for_status()
+        data = response.json()
+        teams = [team['name'] for team in data['teams']]
+        return LeagueCheckerResponse(valid=True, message="Team found") if req.team_name in teams else LeagueCheckerResponse(valid=False, message="Team not found")
     except requests.exceptions.HTTPError as e:
-        return LeagueCheckerResponse(False, f"Invalid league information {e}")
-    data = response.json()
-
-    teams = [team['name'] for team in data['teams']]
-    return LeagueCheckerResponse(True, "Team found") if req.team_name in teams else LeagueCheckerResponse(False, "Team not found")
-
+        return LeagueCheckerResponse(valid=False, message=f"Invalid league information {e}")
 
 
 
