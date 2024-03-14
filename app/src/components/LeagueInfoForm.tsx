@@ -84,7 +84,7 @@ export default function LeagueInfoForm() {
 
   return (
     <div className="w-full pl-8 pr-4">
-      <Card className={`border-primary ${leagueFound ? 'border-tertiary' : ''}`}>
+      <Card className={` ${leagueFound ? 'border-tertiary' : ''}`}>
         <CardHeader>
           <CardTitle>League Info</CardTitle>
           <CardDescription>
@@ -146,7 +146,7 @@ export default function LeagueInfoForm() {
                 }}
               />
 
-							<hr className={`border-primary ${leagueFound ? 'border-tertiary' : ''}`}></hr>
+							<hr className={` ${leagueFound ? 'border-tertiary' : ''}`}></hr>
 							<CardDescription>For private leagues.</CardDescription>
 
 							<FormField
