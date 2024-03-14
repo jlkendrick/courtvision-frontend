@@ -20,6 +20,7 @@ import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import Image from "next/image";
 
 const stopzInput = z.object({
     threshold: z.number().min(1).max(82),
@@ -39,7 +40,7 @@ export function FeatureCard() {
     
     return (
     <Card className="w-3/4">
-        <CardHeader>
+        <CardHeader className="mb-[-1rem]">
         <CardTitle>Streaming Optimization</CardTitle>
         <CardDescription>
             Find the optimal streaming schedule for your league.
@@ -72,7 +73,7 @@ export function FeatureCard() {
 
                     <div className="flex flex-col items-center justify-end">
                         <Button className="ml-2" type="submit" variant="default" size="default">
-                            Submit
+                            <Image src="/arrow.png" alt="Search" width={30} height={30} />
                         </Button>
                     </div>
                 </section>

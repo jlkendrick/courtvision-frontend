@@ -21,6 +21,9 @@ import {
 } from "./ui/card";
 import { Button } from "./ui/button";
 import { useState } from "react";
+import Image from "next/image";
+
+
 
 const leagueInfoSchema = z.object({
   leagueID: z.string().min(1).regex(/^\d+$/, { message: 'League ID must be a number' }),
@@ -49,8 +52,17 @@ export default function LeagueInfoForm() {
       swid: "",
     },
   });
+  const reset = form.reset;
+
+  const handleClearClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+    setLeagueFound(false);
+    setIncorrectInfo(false);
+    reset();
+  };
 
   const [leagueFound, setLeagueFound] = useState(false);
+  const [incorrectInfo, setIncorrectInfo] = useState(false);
 
   const handleSubmit = async (values: z.infer<typeof leagueInfoSchema>) => {
     console.log(values);
@@ -78,6 +90,7 @@ export default function LeagueInfoForm() {
       setLeagueFound(true);
     } else {
       setLeagueFound(false);
+      setIncorrectInfo(true);
     }
 
   };
@@ -181,14 +194,20 @@ export default function LeagueInfoForm() {
 								}}
 							/>
 
-              <CardFooter className="flex justify-between pl-0 pr-0">
-                <Button type="button" className={`w-1/3 bg-primary ${leagueFound ? 'bg-tertiary hover:bg-teriary/90' : ''}`}>
-                  Clear
+              <CardFooter className="flex justify-between pl-0 pr-0 mb-[-1rem]">
+                <Button 
+                  type="button" 
+                  className={`size-sm bg-primary ${leagueFound ? 'bg-tertiary hover:bg-teriary/90' : ''}`}
+                  onClick={handleClearClick}>
+                  <Image src="/clear.png" alt="clear" width={30} height={30} fill-true />
                 </Button>
-                <Button type="submit" className={`w-1/3 bg-primary ${leagueFound ? 'bg-tertiary hover:bg-teriary/90' : ''}`}>
-                  Find
+                <Button type="submit" className={`size-sm bg-primary ${leagueFound ? 'bg-tertiary hover:bg-teriary/90' : ''}`}>
+                  <Image src="/arrow.png" alt="submit" width={30} height={30} fill-true />
                 </Button>
               </CardFooter>
+              <CardDescription className={`text-center ${incorrectInfo ? 'text-red-500' : 'hidden'}`}>Incorrect League Info</CardDescription>
+              <CardDescription className={`text-center ${leagueFound ? 'text-tertiary' : 'hidden'}`}>Found League!</CardDescription>
+
             </form>
           </Form>
         </CardContent>
