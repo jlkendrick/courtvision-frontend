@@ -30,7 +30,7 @@ const stopzInput = z.object({
     week: z.string().min(1).regex(/^\d+$/, { message: 'Week must be a number' })
   });
 
-export function FeatureCard() {
+export function FeatureCard1() {
     const form = useForm<z.infer<typeof stopzInput>>({
         resolver: zodResolver(stopzInput),
     });

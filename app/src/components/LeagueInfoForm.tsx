@@ -21,6 +21,7 @@ import {
 } from "./ui/card";
 import { Button } from "./ui/button";
 import { useState } from "react";
+import { useLeague } from "./LeagueContext";
 import Image from "next/image";
 
 
@@ -42,6 +43,8 @@ interface leagueInfoRequest {
 }
 
 export default function LeagueInfoForm() {
+  const { leagueID, leagueYear, teamName, s2, swid, foundLeague, setLeagueID, setLeagueYear, setTeamName, setS2, setSwid, setLeagueFound } = useLeague();
+
   const form = useForm<z.infer<typeof leagueInfoSchema>>({
     resolver: zodResolver(leagueInfoSchema),
     defaultValues: {
@@ -61,7 +64,6 @@ export default function LeagueInfoForm() {
     reset();
   };
 
-  const [leagueFound, setLeagueFound] = useState(false);
   const [incorrectInfo, setIncorrectInfo] = useState(false);
 
   const handleSubmit = async (values: z.infer<typeof leagueInfoSchema>) => {
@@ -89,6 +91,13 @@ export default function LeagueInfoForm() {
     if (data.valid) {
       setLeagueFound(true);
       setIncorrectInfo(false);
+
+      setLeagueID(values.leagueID);
+      setLeagueYear(values.leagueYear);
+      setTeamName(values.teamName);
+      if (values.s2) { setS2(values.s2); }
+      if (values.swid) { setSwid(values.swid); }
+
     } else {
       setLeagueFound(false);
       setIncorrectInfo(true);
@@ -98,7 +107,7 @@ export default function LeagueInfoForm() {
 
   return (
     <div className="w-full pl-8 pr-4">
-      <Card className={` ${leagueFound ? 'border-tertiary' : ''}`}>
+      <Card className={` ${foundLeague ? 'border-tertiary' : ''}`}>
         <CardHeader>
           <CardTitle>League Info</CardTitle>
           <CardDescription>
@@ -120,7 +129,7 @@ export default function LeagueInfoForm() {
                     <FormItem>
                       <FormLabel>League ID<span style={{ color: 'red'}}> *</span></FormLabel>
                       <FormControl>
-                        <Input className={leagueFound ? 'focus-visible:ring-tertiary' : ''} placeholder="ID" {...field} />
+                        <Input className={foundLeague ? 'focus-visible:ring-tertiary' : ''} placeholder="ID" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -136,7 +145,7 @@ export default function LeagueInfoForm() {
                     <FormItem>
                       <FormLabel>League Year<span style={{ color: 'red'}}> *</span></FormLabel>
                       <FormControl>
-                        <Input className={leagueFound ? 'focus-visible:ring-tertiary' : ''} placeholder="YYYY" {...field} />
+                        <Input className={foundLeague ? 'focus-visible:ring-tertiary' : ''} placeholder="YYYY" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -152,7 +161,7 @@ export default function LeagueInfoForm() {
                     <FormItem>
                       <FormLabel>Team Name<span style={{ color: 'red'}}> *</span></FormLabel>
                       <FormControl>
-                        <Input className={leagueFound ? 'focus-visible:ring-tertiary' : ''} placeholder="Name" {...field} />
+                        <Input className={foundLeague ? 'focus-visible:ring-tertiary' : ''} placeholder="Name" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -160,7 +169,7 @@ export default function LeagueInfoForm() {
                 }}
               />
 
-							<hr className={` ${leagueFound ? 'border-tertiary' : ''}`}></hr>
+							<hr className={` ${foundLeague ? 'border-tertiary' : ''}`}></hr>
 							<CardDescription>For private leagues.</CardDescription>
 
 							<FormField
@@ -171,7 +180,7 @@ export default function LeagueInfoForm() {
 										<FormItem>
 											<FormLabel>ESPN s2</FormLabel>
 											<FormControl>
-												<Input className={leagueFound ? 'focus-visible:ring-tertiary' : ''} placeholder="s2" {...field} />
+												<Input className={foundLeague ? 'focus-visible:ring-tertiary' : ''} placeholder="s2" {...field} />
 											</FormControl>
 											<FormMessage />
 										</FormItem>
@@ -187,7 +196,7 @@ export default function LeagueInfoForm() {
 										<FormItem>
 											<FormLabel>SWID</FormLabel>
 											<FormControl>
-												<Input className={leagueFound ? 'focus-visible:ring-tertiary' : ''} placeholder="SWID" {...field} />
+												<Input className={foundLeague ? 'focus-visible:ring-tertiary' : ''} placeholder="SWID" {...field} />
 											</FormControl>
 											<FormMessage />
 										</FormItem>
@@ -198,16 +207,16 @@ export default function LeagueInfoForm() {
               <CardFooter className="flex justify-between pl-0 pr-0 mb-[-1rem]">
                 <Button 
                   type="button" 
-                  className={`size-sm bg-primary ${leagueFound ? 'bg-tertiary hover:bg-teriary/90' : ''}`}
+                  className={`size-sm bg-primary ${foundLeague ? 'bg-tertiary hover:bg-teriary/90' : ''}`}
                   onClick={handleClearClick}>
                   <Image src="/clear.png" alt="clear" width={30} height={30} fill-true />
                 </Button>
-                <Button type="submit" className={`size-sm bg-primary ${leagueFound ? 'bg-tertiary hover:bg-teriary/90' : ''}`}>
+                <Button type="submit" className={`size-sm bg-primary ${foundLeague ? 'bg-tertiary hover:bg-teriary/90' : ''}`}>
                   <Image src="/arrow.png" alt="submit" width={30} height={30} fill-true />
                 </Button>
               </CardFooter>
               <CardDescription className={`text-center ${incorrectInfo ? 'text-red-500' : 'hidden'}`}>Incorrect League Info</CardDescription>
-              <CardDescription className={`text-center ${leagueFound ? 'text-tertiary' : 'hidden'}`}>Found League!</CardDescription>
+              <CardDescription className={`text-center ${foundLeague ? 'text-tertiary' : 'hidden'}`}>Found League!</CardDescription>
 
             </form>
           </Form>
