@@ -22,16 +22,17 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Image from "next/image";
 
+
 const stopzInput = z.object({
-    threshold: z.number().min(1).max(82),
+    threshold: z
+    .string()
+    .regex(/^\d+(\.\d+)?$/, 'Value must be a decimal number'),
+    week: z.string().min(1).regex(/^\d+$/, { message: 'Week must be a number' })
   });
 
 export function FeatureCard() {
     const form = useForm<z.infer<typeof stopzInput>>({
         resolver: zodResolver(stopzInput),
-        defaultValues: {
-            threshold: 30.0,
-        },
     });
 
     const handleSubmit = async (values: z.infer<typeof stopzInput>) => {
@@ -53,16 +54,34 @@ export function FeatureCard() {
             onSubmit={form.handleSubmit(handleSubmit)}>
 
                 <section className="flex justify-center">
-                    <div className="flex flex-col items-center justify-center w-full">
+                    <div className="flex flex-col items-center justify-center w-1/3 mr-2">
                         <FormField
                             control={form.control}
                             name="threshold"
                             render={({ field }) => {
                                 return (
                                     <FormItem className="w-full">
-                                        <FormLabel>Threshold for streamable players<span style={{ color: 'red'}}> *</span></FormLabel>
+                                        <FormLabel>Threshold<span style={{ color: 'red'}}> *</span></FormLabel>
                                         <FormControl>
-                                            <Input placeholder="ex. 31.0" {...field} />
+                                            <Input placeholder="ex. 30.7" {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                );
+                            }}
+                        />
+                    </div>
+
+                    <div className="flex flex-col items-center justify-center w-1/3">
+                        <FormField
+                            control={form.control}
+                            name="week"
+                            render={({ field }) => {
+                                return (
+                                    <FormItem className="w-full">
+                                        <FormLabel>Week<span style={{ color: 'red'}}> *</span></FormLabel>
+                                        <FormControl>
+                                            <Input placeholder="ex. 5" {...field} />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>

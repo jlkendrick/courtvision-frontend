@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Header from "../components/Header";
 import LeagueInfoForm from "../components/LeagueInfoForm";
-import { FeatureCard } from "../components/FeatureCard";
+import { FeatureCard } from "../components/FeatureCard1";
 import { Separator } from "../components/ui/separator";
 
 export default function Home() {

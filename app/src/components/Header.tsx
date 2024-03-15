@@ -1,6 +1,12 @@
 "use client";
 import Image from "next/image";
 import { ModeToggle } from "./ui/toggle-mode";
+import { Pacifico } from "next/font/google";
+
+const pacifico = Pacifico({ 
+    weight: "400",
+    subsets: ["latin"],
+  });
 
 export default function Header() {
   return (
@@ -18,7 +24,7 @@ export default function Header() {
           </li>
           <hr className="w-1/4 border-primary flex-shrink-1 flex-grow-1"></hr>
           {/* font-bold pb-1 border-b-4 border-primary */}
-					<li className="text-4xl font-bold flex-shrink-0">
+					<li className={`text-5xl font-bold flex-shrink-0 ${pacifico.className}`}>
             Court Visionaries
           </li>
           <hr className="w-1/4 border-primary flex-shrink-1 flex-grow-1"></hr>

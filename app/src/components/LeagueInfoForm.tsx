@@ -88,6 +88,7 @@ export default function LeagueInfoForm() {
 
     if (data.valid) {
       setLeagueFound(true);
+      setIncorrectInfo(false);
     } else {
       setLeagueFound(false);
       setIncorrectInfo(true);
