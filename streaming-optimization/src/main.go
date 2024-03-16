@@ -25,8 +25,6 @@ func main() {
 			// Handle preflight requests
 			return
 		}
-
-		fmt.Println(r.Body)
 		
 		var request helper.ReqBody
 		err := json.NewDecoder(r.Body).Decode(&request)
@@ -40,7 +38,7 @@ func main() {
 		fmt.Printf("Received request: %+v\n", request)
 
 		// Respond with a JSON-encoded message
-		response := map[string]string{"message": "Request received successfully"}
+		response := OptimizeStreaming(request)
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(response)
 

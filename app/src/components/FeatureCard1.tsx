@@ -20,6 +20,7 @@ import { Button } from "./ui/button";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useLeague } from "./LeagueContext";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 
 
@@ -41,6 +42,7 @@ const stopzInput = z.object({
   });
 
 export function FeatureCard1() {
+    const router = useRouter();
     const { leagueID, leagueYear, teamName, s2, swid, foundLeague } = useLeague();
 
     const form = useForm<z.infer<typeof stopzInput>>({
@@ -72,8 +74,11 @@ export function FeatureCard1() {
                 body: JSON.stringify(request),
             });
 
-            const data = await response.json();
-            console.log(data);
+            const json_data = await response.json();
+            const queryString = new URLSearchParams({ data: JSON.stringify(json_data) }).toString();
+            const pathWithQuery = `/streaming-optimization?${queryString}`;
+            await router.push(pathWithQuery);
+            
         } else {
             console.log('NOPE!');
         }
