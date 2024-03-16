@@ -72,6 +72,10 @@ app.add_middleware(
     allow_headers=["Content-Type"],
 )
 
+@app.get("/")
+async def root():
+    return {"message": "Hello World"}
+
 
 # Checks if the league and team are valid
 @app.post("/validate_league/")

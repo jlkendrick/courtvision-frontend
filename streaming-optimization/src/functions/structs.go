@@ -17,8 +17,8 @@ type ReqBody struct {
 	Swid      string  `json:"swid"`
 	TeamName  string  `json:"team_name"`
 	Year      int     `json:"year"`
-	Week      string  `json:"week"`
 	Threshold float64 `json:"threshold"`
+	Week      string  `json:"week"`
 }
 
 

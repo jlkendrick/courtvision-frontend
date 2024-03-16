@@ -4,7 +4,6 @@ import {
     Card,
     CardContent,
     CardDescription,
-    CardFooter,
     CardHeader,
     CardTitle,
 } from "./ui/card";
@@ -20,8 +19,19 @@ import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useLeague } from "./LeagueContext";
 import Image from "next/image";
 
+
+interface stopzRequest {
+    league_id: number;
+    espn_s2?: string;
+    swid?: string;
+    team_name: string;
+    year: number;
+    threshold: number;
+    week: string;
+}
 
 const stopzInput = z.object({
     threshold: z
@@ -31,12 +41,42 @@ const stopzInput = z.object({
   });
 
 export function FeatureCard1() {
+    const { leagueID, leagueYear, teamName, s2, swid, foundLeague } = useLeague();
+
     const form = useForm<z.infer<typeof stopzInput>>({
         resolver: zodResolver(stopzInput),
     });
 
     const handleSubmit = async (values: z.infer<typeof stopzInput>) => {
-        console.log(values);
+
+        if (foundLeague) {
+            console.log('League Found');
+            
+            const request: stopzRequest = {
+                league_id: parseInt(leagueID),
+                espn_s2: s2,
+                swid: swid,
+                team_name: teamName,
+                year: parseInt(leagueYear),
+                threshold: parseFloat(values.threshold),
+                week: values.week,
+            };
+
+            console.log(request);
+
+            const response = await fetch("http://127.0.0.1:80/optimize/", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(request),
+            });
+
+            const data = await response.json();
+            console.log(data);
+        } else {
+            console.log('NOPE!');
+        }
     };
     
     return (

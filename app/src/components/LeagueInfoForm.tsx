@@ -76,6 +76,7 @@ export default function LeagueInfoForm() {
       team_name: values.teamName,
       year: parseInt(values.leagueYear)
     };
+    
 
     const response = await fetch("http://127.0.0.1:8000/validate_league/", {
       method: "POST",

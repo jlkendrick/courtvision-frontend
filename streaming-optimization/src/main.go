@@ -1,7 +1,6 @@
 package main
 
 import (
-	"io"
 	"fmt"
 	"sort"
 	"net/http"
@@ -11,28 +10,39 @@ import (
 
 func main() {
 
+	fmt.Println("Server started on port 80")
+
 	// Handle request
-	http.HandleFunc("/optimize", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/optimize/", func(w http.ResponseWriter, r *http.Request) {
+
+		// Set CORS headers
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "POST")
+		w.Header().Set("Access-Control-Allow-Methods", "OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+
+		if r.Method == http.MethodOptions {
+			// Handle preflight requests
+			return
+		}
+
+		fmt.Println(r.Body)
 		
-		// Get request body
-		var req helper.ReqBody
-	
-		// Decode request body into ReqBody struct
-		body, err := io.ReadAll(r.Body)
+		var request helper.ReqBody
+		err := json.NewDecoder(r.Body).Decode(&request)
 		if err != nil {
-			fmt.Println("Error reading api request body:", err)
+			fmt.Println(err)
+			http.Error(w, "Failed to decode request body", http.StatusBadRequest)
+			return
 		}
 
-		err = json.Unmarshal(body, &req)
-		if err != nil {
-			fmt.Println("Error decoding json request into ReqBody:", err)
-		}
+		// Print the decoded request for debugging purposes
+		fmt.Printf("Received request: %+v\n", request)
 
-		data := OptimizeStreaming(req)
-
-		// Send response
+		// Respond with a JSON-encoded message
+		response := map[string]string{"message": "Request received successfully"}
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(data)
+		json.NewEncoder(w).Encode(response)
 
 	})
 
