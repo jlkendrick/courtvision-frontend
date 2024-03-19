@@ -38,10 +38,17 @@ func main() {
 		fmt.Printf("Received request: %+v\n", request)
 
 		// Respond with a JSON-encoded message
-		response := OptimizeStreaming(request)
+		json_data, err := json.Marshal(OptimizeStreaming(request))
+		if err != nil {
+			http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+			return
+		}
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(response)
-
+		_, err = w.Write(json_data)
+		if err != nil {
+			http.Error(w, "Failed to write response", http.StatusInternalServerError)
+			return
+		}
 	})
 
 	// Start server
@@ -50,7 +57,7 @@ func main() {
 	}
 }
 
-func OptimizeStreaming(req helper.ReqBody) []byte {
+func OptimizeStreaming(req helper.ReqBody) []helper.Gene {
 
 	// Load schedule from JSON file
 	helper.LoadSchedule("static/schedule.json")
@@ -127,15 +134,6 @@ func OptimizeStreaming(req helper.ReqBody) []byte {
 	fmt.Println("Best chromosome:", population[len(population)-1].TotalAcquisitions, "pickups", population[len(population)-1].FitnessScore, "fitness score", other_games_played, "games played")
 	helper.PrintPopulation(population[len(population)-1], free_positions)
 
-	encodeGenes := func (chromosome helper.Chromosome) ([]byte, error) {
-		json_data, err := json.Marshal(chromosome.Genes)
-		if err != nil {
-			return nil, err
-		}
-		return json_data, nil
-	}
-
-	// Return the best chromosome
-	json_data, _ := encodeGenes(population[len(population)-1])
-	return json_data	
+	// Return the best chromosome's genes
+	return population[len(population)-1].Genes	
 }
