@@ -7,9 +7,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY ./src /app
 
-EXPOSE 8000
+EXPOSE 8080
 
-CMD ["uvicorn", "server:app", "--host", "127.0.0.1", "--port", "8000"]
+CMD ["uvicorn", "server:app", "--host", "localhost", "--port", "8080"]
 
 # Build command: docker build -t fbball-server .
-# Run command: docker run -p 8000:8000 fbball-server
+# Run command: docker run -p 8080:8080 fbball-server

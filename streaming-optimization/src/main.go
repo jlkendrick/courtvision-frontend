@@ -10,7 +10,7 @@ import (
 
 func main() {
 
-	fmt.Println("Server started on port 80")
+	fmt.Println("Server started on port 8000")
 
 	// Handle request
 	http.HandleFunc("/optimize/", func(w http.ResponseWriter, r *http.Request) {
@@ -45,12 +45,12 @@ func main() {
 	})
 
 	// Start server
-	if err := http.ListenAndServe(":80", nil); err != nil {
+	if err := http.ListenAndServe(":8000", nil); err != nil {
 		panic(err)
 	}
 }
 
-func OptimizeStreaming(req helper.ReqBody) helper.Chromosome {
+func OptimizeStreaming(req helper.ReqBody) []byte {
 
 	// Load schedule from JSON file
 	helper.LoadSchedule("static/schedule.json")
@@ -127,5 +127,15 @@ func OptimizeStreaming(req helper.ReqBody) helper.Chromosome {
 	fmt.Println("Best chromosome:", population[len(population)-1].TotalAcquisitions, "pickups", population[len(population)-1].FitnessScore, "fitness score", other_games_played, "games played")
 	helper.PrintPopulation(population[len(population)-1], free_positions)
 
-	return population[len(population)-1]
+	encodeGenes := func (chromosome helper.Chromosome) ([]byte, error) {
+		json_data, err := json.Marshal(chromosome.Genes)
+		if err != nil {
+			return nil, err
+		}
+		return json_data, nil
+	}
+
+	// Return the best chromosome
+	json_data, _ := encodeGenes(population[len(population)-1])
+	return json_data	
 }

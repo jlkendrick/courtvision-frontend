@@ -43,10 +43,10 @@ type Player struct {
 
 // Struct for JSON schedule file that is used to get days a player is playing
 type GameSchedule struct {
-	StartDate string                `json:"startDate"`
-	EndDate   string                `json:"endDate"`
-	GameSpan  int                   `json:"gameSpan"`
-	Games     map[string][]int      `json:"games"`
+	StartDate string           `json:"startDate"`
+	EndDate   string           `json:"endDate"`
+	GameSpan  int              `json:"gameSpan"`
+	Games     map[string][]int `json:"games"`
 }
 
 // Struct for keeping track of state across recursive function calls to allow for early exit
@@ -59,11 +59,11 @@ type FitPlayersContext struct {
 
 // Struct for chromosome for genetic algorithm
 type Chromosome struct {
-	Genes 	     	 []Gene
-	FitnessScore	 int
+	Genes 	     	  []Gene
+	FitnessScore	  int
 	TotalAcquisitions int
-	CumProbTracker 	 float64
-	DroppedPlayers   map[string]DroppedPlayer
+	CumProbTracker 	  float64
+	DroppedPlayers    map[string]DroppedPlayer
 }
 
 // Struct for gene for genetic algorithm
