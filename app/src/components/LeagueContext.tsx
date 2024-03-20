@@ -7,12 +7,16 @@ const LeagueContext = createContext({
     teamName: "",
     s2: "",
     swid: "",
+    threshold: "",
+    week: "",
     foundLeague: false,
     setLeagueID: (leagueID: string) => {},
     setLeagueYear: (leagueYear: string) => {},
     setTeamName: (teamName: string) => {},
     setS2: (s2: string) => {},
     setSwid: (swid: string) => {},
+    setThreshold: (threshold: string) => {},
+    setWeek: (week: string) => {},
     setLeagueFound: (foundLeague: boolean) => {},
 });
 
@@ -30,6 +34,8 @@ export function LeagueProvider({
     const [teamName, setTeamName] = useState("");
     const [s2, setS2] = useState("");
     const [swid, setSwid] = useState("");
+    const [threshold, setThreshold] = useState("");
+    const [week, setWeek] = useState("");
     const [foundLeague, setLeagueFound] = useState(false);
 
     return (
@@ -40,12 +46,16 @@ export function LeagueProvider({
                 teamName,
                 s2,
                 swid,
+                threshold,
+                week,
                 foundLeague,
                 setLeagueID,
                 setLeagueYear,
                 setTeamName,
                 setS2,
                 setSwid,
+                setThreshold,
+                setWeek,
                 setLeagueFound,
             }}
         >

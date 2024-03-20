@@ -43,7 +43,7 @@ interface leagueInfoRequest {
 }
 
 export default function LeagueInfoForm() {
-  const { leagueID, leagueYear, teamName, s2, swid, foundLeague, setLeagueID, setLeagueYear, setTeamName, setS2, setSwid, setLeagueFound } = useLeague();
+  const { foundLeague, setLeagueID, setLeagueYear, setTeamName, setS2, setSwid, setLeagueFound } = useLeague();
 
   const form = useForm<z.infer<typeof leagueInfoSchema>>({
     resolver: zodResolver(leagueInfoSchema),
@@ -107,6 +107,7 @@ export default function LeagueInfoForm() {
   };
 
   return (
+    
     <div className="w-full pl-8 pr-4">
       <Card className={` ${foundLeague ? 'border-tertiary' : ''}`}>
         <CardHeader>
