@@ -131,9 +131,21 @@ func OptimizeStreaming(req helper.ReqBody) []helper.Gene {
 	for _, gene := range population[len(population)-1].Genes {
 		other_games_played += len(gene.Roster)
 	}
-	fmt.Println("Best chromosome:", population[len(population)-1].TotalAcquisitions, "pickups", population[len(population)-1].FitnessScore, "fitness score", other_games_played, "games played")
-	helper.PrintPopulation(population[len(population)-1], free_positions)
+
+	best_chromosome := population[len(population)-1]
+	
+	// Add players from optimal_lineup to the best chromosome
+	for i := 0; i < len(best_chromosome.Genes); i++ {
+		for key, value := range optimal_lineup[i] {
+			if value.Name != "" {
+				best_chromosome.Genes[i].Roster[key] = value
+			}
+		}
+	}
+
+	fmt.Println("Best chromosome:", best_chromosome.TotalAcquisitions, "pickups", best_chromosome.FitnessScore, "fitness score", other_games_played, "games played")
+	helper.PrintPopulation(best_chromosome, free_positions)
 
 	// Return the best chromosome's genes
-	return population[len(population)-1].Genes	
+	return best_chromosome.Genes	
 }

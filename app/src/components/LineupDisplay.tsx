@@ -5,7 +5,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 
 interface Player {
     name: string;
@@ -24,7 +24,8 @@ interface Player {
     Bench: Player[];
   }
 
-export default function LineupDisplay({ data }: { data: any }) {
+export default function LineupDisplay({ data }: { data: Gene[] }) {
+
   return (
     <div className="flex flex-col items-center gap-1 w-3/4">
       {data.length == 0 ? (
@@ -34,19 +35,12 @@ export default function LineupDisplay({ data }: { data: any }) {
         </h1>
       ) : (
         <div>
-          <h1 className="text-center">Optimal Lineup for Week {data.week}</h1>
-          <Carousel className="w-full max-w-xs">
+          <h1 className="text-center">Optimal Lineup for Week {}</h1>
+          <Carousel className="w-full max-w-xl mt-3">
             <CarouselContent>
               {data.map((gene: Gene, index: number) => (
                 <CarouselItem key={index}>
-                  <div className="p-1">
-                    <Card>
-                      <CardContent className="flex aspect-square items-center justify-center p-6">
-                        <span className="text-4xl font-semibold">
-                        </span>
-                      </CardContent>
-                    </Card>
-                  </div>
+                  <Lineup gene={gene} />
                 </CarouselItem>
               ))}
             </CarouselContent>
@@ -57,4 +51,33 @@ export default function LineupDisplay({ data }: { data: any }) {
       )}
     </div>
   );
+}
+
+function Lineup({ gene }: { gene: Gene}) {
+
+  const orderToDisplay = ["PG", "SG", "SF", "PF", "C", "G", "F", "UT1", "UT2", "UT3"];
+
+  return (
+    <Card>
+      <CardHeader>
+        <h1>Day {gene.Day}</h1>
+      </CardHeader>
+      <CardContent>
+        <div className="flex flex-col gap-1">
+          {orderToDisplay.map((position: string) => {
+            const player = gene.Roster[position];
+            return player ? (
+              <div className="flex justify-between">
+                <p>{position} {player.name} {player.team} {player.avg_points}</p>
+              </div>
+            ) : (
+              <div className="flex justify-between">
+                <p>{position} -</p>
+              </div>
+            );
+          })}
+        </div>
+      </CardContent>
+    </Card>
+  )
 }

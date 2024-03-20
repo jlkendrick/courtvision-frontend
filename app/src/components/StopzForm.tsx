@@ -1,5 +1,6 @@
 "use client";
 import * as z from "zod";
+import { use, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "./ui/input";
@@ -33,6 +34,7 @@ const stopzInput = z.object({
 
 export default function StopzForm({ onSubmit }: { onSubmit: () => void } ) { 
   const {
+    foundLeague,
     threshold,
     week,
     setThreshold,
@@ -55,14 +57,20 @@ export default function StopzForm({ onSubmit }: { onSubmit: () => void } ) {
   };
 
   const handleSubmit = (data: z.infer<typeof stopzInput>) => {
+    if (!foundLeague) {
+      return;
+    }
     console.log(data);
     setThreshold(data.threshold);
     setWeek(data.week);
 
-    if (typeof onSubmit === "function") {
-        onSubmit();
-    }
   }
+
+  useEffect(() => {
+    if (foundLeague && threshold !== "" && week !== "") {
+      onSubmit();
+    }
+  }, [foundLeague, threshold, week]);
 
 
   return (
@@ -148,6 +156,7 @@ export default function StopzForm({ onSubmit }: { onSubmit: () => void } ) {
                   />
                 </Button>
               </CardFooter>
+              {!foundLeague && <p className="text-red-500 text-sm">Please enter a valid league</p>}
 
             </form>
           </Form>

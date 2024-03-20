@@ -1,5 +1,4 @@
 'use client';
-import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import Header from "../../components/Header";
 import { useLeague } from "../../components/LeagueContext";
@@ -53,9 +52,8 @@ async function callStopzServer(request: stopzRequest) {
 export default function StreamingOptimizationPage() {
 
   const [genes, setGenes] = useState<Gene[]>([]);
-  const router = useRouter();
-  const searchParams = useSearchParams();
   const { leagueID, leagueYear, teamName, s2, swid, threshold, week } = useLeague();
+  const makeRequest = false;
   console.log("leagueID:", leagueID);
   console.log("threshold:", threshold);
   console.log("week:", week);
@@ -63,10 +61,6 @@ export default function StreamingOptimizationPage() {
   const handleSubmit = () => {
 
     async function fetchData() {
-      if (!searchParams) {
-        router.push("/");
-        return;
-      }
 
       const request: stopzRequest = {
         league_id: parseInt(leagueID),
@@ -89,9 +83,7 @@ export default function StreamingOptimizationPage() {
         console.error("Error fetching data:", error);
       }
     }
-
     fetchData();
-
   }
 
   console.log("genes:", genes.length);
