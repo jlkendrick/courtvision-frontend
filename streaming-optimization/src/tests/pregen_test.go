@@ -2,9 +2,9 @@ package tests
 
 import (
 	"fmt"
-	"testing"
-	loaders "main/tests/resources"
 	. "main/functions"
+	loaders "main/tests/resources"
+	"testing"
 )
 
 func TestLoadSchedule(t *testing.T) {
@@ -86,10 +86,10 @@ func TestOptimizeSlotting(t *testing.T) {
 
 	LoadSchedule("../static/schedule.json")
 
-	roster_map := loaders.LoadRosterMap("resouces/mock_roster.json")
+	roster_map := loaders.LoadRosterMap("resources/mock_roster.json")
 
-	week := "15"
-	threshold := 34.0
+	week := "10"
+	threshold := 31.0
 
 	// Optimize slotting and get streamable players
 	optimal_lineup, _ := OptimizeSlotting(roster_map, week, threshold)
@@ -154,6 +154,16 @@ func TestOptimizeSlotting(t *testing.T) {
 				}
 			}
 		}
+	}
+
+	// Print out the optimal_lineup
+	for day := 0; day < ScheduleMap[week].GameSpan + 1; day++ {
+		fmt.Println("Day:", day)
+		order_to_print := []string{"PG", "SG", "SF", "PF", "C", "G", "F", "UT1", "UT2", "UT3"}
+		for _, pos := range order_to_print {
+			fmt.Println(pos, optimal_lineup[day][pos].Name)
+		}
+		fmt.Println()
 	}
 
 }

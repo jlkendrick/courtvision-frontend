@@ -1,12 +1,10 @@
 'use client';
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Header from "../../components/Header";
 import { useLeague } from "../../components/LeagueContext";
-import { LeagueProvider } from "../../components/LeagueContext";
 import { Separator } from "../../components/ui/separator";
 import StopzForm from "@/components/StopzForm";
-import { StopzProvider } from "@/components/StopzContext";
 import LineupDisplay from "../../components/LineupDisplay";
 
 interface stopzRequest {
@@ -96,6 +94,8 @@ export default function StreamingOptimizationPage() {
 
   }
 
+  console.log("genes:", genes.length);
+  console.log(genes[0])
 
   return (
 		
