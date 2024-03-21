@@ -23,6 +23,7 @@ import { Button } from "./ui/button";
 import { useState } from "react";
 import { useLeague } from "./LeagueContext";
 import Image from "next/image";
+import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@radix-ui/react-tooltip";
 
 
 
@@ -129,7 +130,9 @@ export default function LeagueInfoForm() {
                 render={({ field }) => {
                   return (
                     <FormItem>
-                      <FormLabel>League ID<span style={{ color: 'red'}}> *</span></FormLabel>
+                      <FormLabel>League ID
+                        <span style={{ color: "red" }}> *</span>
+                      </FormLabel>
                       <FormControl>
                         <Input className={foundLeague ? 'focus-visible:ring-tertiary' : ''} placeholder="ID" {...field} />
                       </FormControl>

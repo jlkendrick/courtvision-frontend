@@ -1,6 +1,6 @@
 "use client";
 import * as z from "zod";
-import { use, useEffect } from "react";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "./ui/input";
@@ -22,6 +22,12 @@ import {
 } from "./ui/card";
 import { Button } from "./ui/button";
 import { useLeague } from "./LeagueContext";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "./ui/tooltip";
 import Image from "next/image";
 
 const stopzInput = z.object({
@@ -31,15 +37,8 @@ const stopzInput = z.object({
   week: z.string().min(1).regex(/^\d+$/, { message: "Week must be a number" }),
 });
 
-
-export default function StopzForm({ onSubmit }: { onSubmit: () => void } ) { 
-  const {
-    foundLeague,
-    threshold,
-    week,
-    setThreshold,
-    setWeek,
-  } = useLeague();
+export default function StopzForm({ onSubmit }: { onSubmit: () => void }) {
+  const { foundLeague, threshold, week, setThreshold, setWeek } = useLeague();
 
   const form = useForm<z.infer<typeof stopzInput>>({
     resolver: zodResolver(stopzInput),
@@ -63,8 +62,7 @@ export default function StopzForm({ onSubmit }: { onSubmit: () => void } ) {
     console.log(data);
     setThreshold(data.threshold);
     setWeek(data.week);
-
-  }
+  };
 
   useEffect(() => {
     if (foundLeague && threshold !== "" && week !== "") {
@@ -72,21 +70,22 @@ export default function StopzForm({ onSubmit }: { onSubmit: () => void } ) {
     }
   }, [foundLeague, threshold, week]);
 
-
   return (
-
     <div className="w-full pl-8 pr-4">
       <Card>
         <CardHeader>
           <CardTitle>Streaming Optimization</CardTitle>
           <CardDescription>
-          Get the optimal streaming schedule for your fantasy basketball team.
+            Get the optimal streaming schedule for your fantasy basketball team.
           </CardDescription>
         </CardHeader>
 
         <CardContent>
           <Form {...form}>
-            <form className="flex flex-col gap-3" onSubmit={form.handleSubmit(handleSubmit)}>
+            <form
+              className="flex flex-col gap-3"
+              onSubmit={form.handleSubmit(handleSubmit)}
+            >
               <FormField
                 control={form.control}
                 name="threshold"
@@ -94,13 +93,24 @@ export default function StopzForm({ onSubmit }: { onSubmit: () => void } ) {
                   return (
                     <FormItem>
                       <FormLabel>
-                        Threshold<span style={{ color: "red" }}> *</span>
+                        Threshold
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger>
+                              <Button className="h-5 w-5 rounded-full px-0 ml-1" variant="outline">?</Button>
+                            </TooltipTrigger>
+                            <TooltipContent className="text-center">
+                              <p>
+                                Threshold is the minimum average points per game <br />
+                                a player must have for you to be okay dropping them.
+                              </p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                        <span style={{ color: "red" }}> *</span>
                       </FormLabel>
                       <FormControl>
-                        <Input
-                          placeholder="Threshold"
-                          {...field}
-                        />
+                        <Input placeholder="Threshold" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -115,13 +125,24 @@ export default function StopzForm({ onSubmit }: { onSubmit: () => void } ) {
                   return (
                     <FormItem>
                       <FormLabel>
-                        Matchup Week<span style={{ color: "red" }}> *</span>
+                        Matchup Week
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger>
+                              <Button className="h-5 w-5 rounded-full px-0 ml-1" variant="outline">?</Button>
+                            </TooltipTrigger>
+                            <TooltipContent className="text-center">
+                              <p>
+                                Matchup week is the matchup number for which you want <br />
+                                to generate a lineup.
+                              </p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                        <span style={{ color: "red" }}> *</span>
                       </FormLabel>
                       <FormControl>
-                        <Input
-                          placeholder="Week #"
-                          {...field}
-                        />
+                        <Input placeholder="Week #" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -143,10 +164,7 @@ export default function StopzForm({ onSubmit }: { onSubmit: () => void } ) {
                     fill-true
                   />
                 </Button>
-                <Button
-                  type="submit"
-                  className="size-sm bg-primary"
-                >
+                <Button type="submit" className="size-sm bg-primary">
                   <Image
                     src="/arrow.png"
                     alt="submit"
@@ -156,8 +174,11 @@ export default function StopzForm({ onSubmit }: { onSubmit: () => void } ) {
                   />
                 </Button>
               </CardFooter>
-              {!foundLeague && <p className="text-red-500 text-sm">Please enter a valid league</p>}
-
+              {!foundLeague && (
+                <p className="text-red-500 text-sm">
+                  Please enter a valid league
+                </p>
+              )}
             </form>
           </Form>
         </CardContent>
