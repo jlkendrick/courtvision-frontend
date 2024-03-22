@@ -79,7 +79,7 @@ export default function LeagueInfoForm() {
     };
     
 
-    const response = await fetch("http://localhost:8080/validate_league/", {
+    const response = await fetch("https://espn-fantasy-server-vbtazmqmla-uc.a.run.app/validate_league/", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
