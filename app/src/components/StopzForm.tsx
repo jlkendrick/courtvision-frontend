@@ -97,7 +97,7 @@ export default function StopzForm({ onSubmit }: { onSubmit: () => void }) {
                         <TooltipProvider>
                           <Tooltip>
                             <TooltipTrigger>
-                              <Button className="h-5 w-5 rounded-full px-0 ml-1" variant="outline">?</Button>
+                              <div className="h-4 w-5 rounded-full border ml-1 text-md">?</div>
                             </TooltipTrigger>
                             <TooltipContent className="text-center">
                               <p>
@@ -129,7 +129,7 @@ export default function StopzForm({ onSubmit }: { onSubmit: () => void }) {
                         <TooltipProvider>
                           <Tooltip>
                             <TooltipTrigger>
-                              <Button className="h-5 w-5 rounded-full px-0 ml-1" variant="outline">?</Button>
+                              <div className="h-4 w-5 rounded-full border ml-1 text-md">?</div>
                             </TooltipTrigger>
                             <TooltipContent className="text-center">
                               <p>
