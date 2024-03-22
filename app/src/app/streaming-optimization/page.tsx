@@ -37,7 +37,7 @@ interface Gene {
 
 async function callStopzServer(request: stopzRequest) {
 
-  const response = await fetch("https://stopz-server-2wfwsao3zq-uc.a.run.app/optimize/", {
+  const response = await fetch("http://localhost:8080/optimize/", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -85,9 +85,6 @@ export default function StreamingOptimizationPage() {
     }
     fetchData();
   }
-
-  console.log("genes:", genes.length);
-  console.log(genes[0])
 
   return (
 		

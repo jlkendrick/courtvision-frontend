@@ -60,8 +60,8 @@ func GetPlayers(league_id int, espn_s2 string, swid string, team_name string, ye
 
 	// List of URLs to send POST requests to
 	urls := []string{
-		"http://localhost:8080/get_roster_data/",
-		"http://localhost:8080/get_freeagent_data/",
+		"https://espn-server-2wfwsao3zq-uc.a.run.app/get_roster_data/",
+		"https://espn-server-2wfwsao3zq-uc.a.run.app/get_freeagent_data/",
 	}
 
 	// Response channel to receive responses from goroutines

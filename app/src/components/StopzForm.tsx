@@ -65,10 +65,12 @@ export default function StopzForm({ onSubmit }: { onSubmit: () => void }) {
   };
 
   useEffect(() => {
+    console.log(foundLeague, threshold, week)
     if (foundLeague && threshold !== "" && week !== "") {
+      console.log("Changes detected, calling onSubmit");
       onSubmit();
     }
-  }, [foundLeague, threshold, week]);
+  }, [threshold, week]);
 
   return (
     <div className="w-full pl-8 pr-4">
