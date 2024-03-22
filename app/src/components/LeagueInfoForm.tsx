@@ -44,7 +44,7 @@ interface leagueInfoRequest {
 }
 
 export default function LeagueInfoForm() {
-  const { foundLeague, setLeagueID, setLeagueYear, setTeamName, setS2, setSwid, setLeagueFound } = useLeague();
+  const { foundLeague, threshold, week, setLeagueID, setLeagueYear, setTeamName, setS2, setSwid, setLeagueFound, setThreshold, setWeek } = useLeague();
 
   const form = useForm<z.infer<typeof leagueInfoSchema>>({
     resolver: zodResolver(leagueInfoSchema),
@@ -60,6 +60,8 @@ export default function LeagueInfoForm() {
 
   const handleClearClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
+    if (threshold) { setThreshold(""); }
+    if (week) { setWeek(""); }
     setLeagueFound(false);
     setIncorrectInfo(false);
     reset();
@@ -68,6 +70,8 @@ export default function LeagueInfoForm() {
   const [incorrectInfo, setIncorrectInfo] = useState(false);
 
   const handleSubmit = async (values: z.infer<typeof leagueInfoSchema>) => {
+    if (threshold) { setThreshold(""); }
+    if (week) { setWeek(""); }
     console.log(values);
 
     const request: leagueInfoRequest = {
