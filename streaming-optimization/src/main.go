@@ -10,7 +10,7 @@ import (
 
 func main() {
 
-	fmt.Println("Server started on port 8000")
+	fmt.Println("Server started on port 8080")
 
 	// Handle request
 	http.HandleFunc("/optimize/", func(w http.ResponseWriter, r *http.Request) {
@@ -52,7 +52,7 @@ func main() {
 	})
 
 	// Start server
-	if err := http.ListenAndServe(":8000", nil); err != nil {
+	if err := http.ListenAndServe(":8080", nil); err != nil {
 		panic(err)
 	}
 }
