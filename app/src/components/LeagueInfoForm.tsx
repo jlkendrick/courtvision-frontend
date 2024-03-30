@@ -23,7 +23,7 @@ import { Button } from "./ui/button";
 import { useState } from "react";
 import { useLeague } from "./LeagueContext";
 import Image from "next/image";
-import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@radix-ui/react-tooltip";
+import { useRouter } from "next/navigation";
 
 
 
@@ -44,6 +44,7 @@ interface leagueInfoRequest {
 }
 
 export default function LeagueInfoForm() {
+  const router = useRouter();
   const { foundLeague, threshold, week, setLeagueID, setLeagueYear, setTeamName, setS2, setSwid, setLeagueFound, setThreshold, setWeek } = useLeague();
 
   const form = useForm<z.infer<typeof leagueInfoSchema>>({
@@ -103,6 +104,8 @@ export default function LeagueInfoForm() {
       setTeamName(values.teamName);
       if (values.s2) { setS2(values.s2); }
       if (values.swid) { setSwid(values.swid); }
+
+      router.push("/dashboard")
 
     } else {
       setLeagueFound(false);

@@ -13,11 +13,11 @@ export default function Header() {
     <header>
       <nav>
         <ul className="flex items-center justify-between">
-          <li className="flex-shrink-0.5">
+          <li className="">
 						<Image
 							src="/logo.png"
 							alt="Logo"
-							width={120}
+							width={150}
 							height={100}
 							priority
 						/>

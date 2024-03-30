@@ -18,7 +18,7 @@ func TestEvolutionIntegration(t *testing.T) {
 	optimal_lineup, streamable_players := OptimizeSlotting(roster_map, "15", 34.5)
 	free_positions := GetUnusedPositions(optimal_lineup)
 	week := "15"
-	population := loaders.LoadInitPop("resources/mock_initpop")
+	population := loaders.LoadInitPop("resources/mock_initpop.json")
 	size := len(population)
 
 	for i := 0; i < 10; i++ {
@@ -84,7 +84,7 @@ func TestCrossover(t *testing.T) {
 	optimal_lineup, streamable_players := OptimizeSlotting(roster_map, week, 34.5 )
 	free_positions := GetUnusedPositions(optimal_lineup)
 
-	population := loaders.LoadInitPop("resources/mock_initpop")
+	population := loaders.LoadInitPop("resources/mock_initpop.json")
 	size := len(population)
 
 	// Test crossover
