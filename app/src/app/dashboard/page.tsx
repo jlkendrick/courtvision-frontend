@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import Link from "next/link";
 import { Dribbble, Menu, Plus } from "lucide-react";
 import Image from "next/image";
@@ -7,6 +7,8 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import YourTeam from "@/components/YourTeamDashView";
+import Home from "@/components/HomeDashView";
+import LineupGeneration from "@/components/LineupGenerationDashView";
 
 import { ModeToggle } from "@/components/ui/toggle-mode";
 import { Pacifico } from "next/font/google";
@@ -18,8 +20,7 @@ const pacifico = Pacifico({
 });
 
 export default function Dashboard() {
-  const [selectedPage, setSelectedPage] = useState("/your-team");
-
+  const [selectedPage, setSelectedPage] = useState("home");
 
   return (
     <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[200px_1fr]">
@@ -32,18 +33,29 @@ export default function Dashboard() {
             <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
               <div
                 className={`flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary cursor-pointer ${
-                  selectedPage === '/your-team' ? 'text-primary' : ''
+                  selectedPage === "home" ? "text-primary" : ""
                 }`}
-                onClick={() => setSelectedPage("/your-team")}
+                onClick={() => setSelectedPage("home")}
+              >
+                <Plus className="h-4 w-4" />
+                Home
+              </div>
+              <div
+                className={`flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary cursor-pointer ${
+                  selectedPage === "your-team" ? "text-primary" : ""
+                }`}
+                onClick={() => setSelectedPage("your-team")}
               >
                 <Plus className="h-4 w-4" />
                 Your Team
               </div>
               <div
                 className={`flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary cursor-pointer ${
-                  selectedPage === '/streaming-optimization' ? 'text-primary' : ''
+                  selectedPage === "streaming-optimization"
+                    ? "text-primary"
+                    : ""
                 }`}
-                onClick={() => setSelectedPage("/streaming-optimization")}
+                onClick={() => setSelectedPage("streaming-optimization")}
               >
                 <Plus className="h-4 w-4" />
                 Lineup Generation
@@ -107,14 +119,16 @@ export default function Dashboard() {
           </Sheet>
           <nav className="w-full">
             <ul className="flex items-center justify-between">
-							<hr className="w-1/2 border-primary flex-shrink-1 flex-grow-1"></hr>
-              <li className={`text-5xl font-bold flex-shrink-0 ${pacifico.className}`}>
+              <hr className="w-1/2 border-primary flex-shrink-1 flex-grow-1"></hr>
+              <li
+                className={`text-5xl font-bold flex-shrink-0 ${pacifico.className}`}
+              >
                 Court Visionaries
               </li>
-							<hr className="w-1/2 border-primary flex-shrink-1 flex-grow-1"></hr>
-							<li className="flex flex-col ring-primary">
+              <hr className="w-1/2 border-primary flex-shrink-1 flex-grow-1"></hr>
+              <li className="flex flex-col ring-primary">
                 <Separator orientation="vertical" />
-							</li>
+              </li>
               <li className="flex-shrink-0 mr-10">
                 <ModeToggle />
               </li>
@@ -122,7 +136,9 @@ export default function Dashboard() {
           </nav>
         </header>
         <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
-          {selectedPage === "/your-team" && <YourTeam />}
+          {selectedPage === "your-team" && <YourTeam />}
+          {selectedPage === "home" && <Home />}
+          {selectedPage === "streaming-optimization" && <LineupGeneration />}
         </main>
       </div>
     </div>
