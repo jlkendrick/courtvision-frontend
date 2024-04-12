@@ -1,0 +1,7 @@
+steps:
+- name: 'gcr.io/cloud-builders/docker'
+  script: |
+    docker build -t us-central-docker.pkg.dev/$PROJECT_ID/quickstart-docker-repo/espn-fantasy-server:tag1 .
+  automapSubstitutions: true
+images:
+- 'us-central1-docker.pkg.dev/$PROJECT_ID/quickstart-docker-repo/espn-fantasy-server:tag1'

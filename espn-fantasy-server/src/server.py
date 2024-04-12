@@ -66,7 +66,9 @@ origins = [
     "http://0.0.0.0:8000",
     "http://127.0.0.1:8000",
     "https://courtvisionaries.vercel.app",
-    "https://courtvisionaries.live",
+    "https://www.courtvisionaries.live",
+    "www.courtvisionaries.live",
+    "courtvisionaries.live",
 ]
 
 app.add_middleware(
