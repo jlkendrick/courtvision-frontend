@@ -65,7 +65,8 @@ origins = [
     "http://localhost:3000",  # Replace with your front-end URL
     "http://0.0.0.0:8000",
     "http://127.0.0.1:8000",
-    "https://courtvisionaries.vercel.app"
+    "https://courtvisionaries.vercel.app",
+    "https://courtvisionaries.live",
 ]
 
 app.add_middleware(

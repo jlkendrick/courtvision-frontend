@@ -2,7 +2,6 @@
 import Image from "next/image";
 import { ModeToggle } from "./ui/toggle-mode";
 import { Pacifico } from "next/font/google";
-import { WavyBackground } from "@/components/ui/wavy-background";
 
 const pacifico = Pacifico({ 
     weight: "400",
@@ -12,7 +11,6 @@ const pacifico = Pacifico({
 export default function Header() {
   return (
     <header>
-      <WavyBackground className="max-w-4xl mx-auto pb-40">
       <nav>
         <ul className="flex items-center justify-between">
           <li className="">
@@ -33,7 +31,6 @@ export default function Header() {
 					<li className="flex-shrink-0 mr-20"><ModeToggle /></li>
         </ul>
       </nav>
-      </WavyBackground>
     </header>
   );
 }
