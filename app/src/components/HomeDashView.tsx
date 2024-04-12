@@ -1,14 +1,5 @@
-import { cn } from "@/utils/cn";
 import React from "react";
 import { BentoGrid, BentoGridItem } from "@/components/ui/bento-grid";
-import { WavyBackground } from "@/components/ui/wavy-background";
-import {
-  IconClipboardCopy,
-  IconFileBroken,
-  IconSignature,
-  IconTableColumn,
-} from "@tabler/icons-react";
-import Image from "next/image";
 
 export default function Home() {
   return (

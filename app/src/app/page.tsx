@@ -1,9 +1,5 @@
 import Header from "../components/Header";
-import { LoginForm } from "../components/LoginForm";
 import LeagueInfoForm from "../components/LeagueInfoForm";
-import { FeatureCard1 } from "../deprecated/FeatureCard1";
-import { FeatureCard2 } from "../deprecated/FeatureCard2";
-import { Separator } from "../components/ui/separator";
 
 export default function Home() {
   return (
