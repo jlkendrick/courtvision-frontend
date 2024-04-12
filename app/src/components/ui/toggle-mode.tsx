@@ -3,6 +3,8 @@
 import * as React from "react"
 import { Moon, Sun } from "lucide-react"
 import { useTheme } from "next-themes"
+import { useContext } from "react"
+import { useLeague } from "@/components/LeagueContext";
 
 import { Button } from "@/components/ui/button"
 import {
@@ -14,7 +16,7 @@ import {
 
 export function ModeToggle() {
   const { setTheme } = useTheme()
-
+  const { ttheme, setTtheme } = useLeague();
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -25,13 +27,13 @@ export function ModeToggle() {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={() => setTheme("light")}>
+        <DropdownMenuItem onClick={() => { setTheme("light"); setTtheme("light")}}>
           Light
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme("dark")}>
+        <DropdownMenuItem onClick={() => { setTheme("dark"); setTtheme("dark")}}>
           Dark
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme("system")}>
+        <DropdownMenuItem onClick={() => { setTheme("system"); setTtheme("system")}}>
           System
         </DropdownMenuItem>
       </DropdownMenuContent>

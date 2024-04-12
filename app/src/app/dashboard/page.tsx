@@ -13,6 +13,7 @@ import LineupGeneration from "@/components/LineupGenerationDashView";
 import { ModeToggle } from "@/components/ui/toggle-mode";
 import { Pacifico } from "next/font/google";
 import { Separator } from "@/components/ui/separator";
+import { WavyBackground } from "@/components/ui/wavy-background";
 
 const pacifico = Pacifico({
   weight: "400",
@@ -136,8 +137,8 @@ export default function Dashboard() {
           </nav>
         </header>
         <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
+          {selectedPage === "home" && <Home/>}
           {selectedPage === "your-team" && <YourTeam />}
-          {selectedPage === "home" && <Home />}
           {selectedPage === "streaming-optimization" && <LineupGeneration />}
         </main>
       </div>
