@@ -16,7 +16,7 @@ import {
 
 export function ModeToggle() {
   const { setTheme } = useTheme()
-  const { ttheme, setTtheme } = useLeague();
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -27,13 +27,13 @@ export function ModeToggle() {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={() => { setTheme("light"); setTtheme("light")}}>
+        <DropdownMenuItem onClick={() => { setTheme("light"); }}>
           Light
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => { setTheme("dark"); setTtheme("dark")}}>
+        <DropdownMenuItem onClick={() => { setTheme("dark"); }}>
           Dark
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => { setTheme("system"); setTtheme("system")}}>
+        <DropdownMenuItem onClick={() => { setTheme("system"); }}>
           System
         </DropdownMenuItem>
       </DropdownMenuContent>
