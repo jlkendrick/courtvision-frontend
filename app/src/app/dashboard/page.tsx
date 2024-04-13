@@ -86,34 +86,46 @@ export default function Dashboard() {
                 <span className="sr-only">Toggle navigation menu</span>
               </Button>
             </SheetTrigger>
-            <SheetContent side="left" className="flex flex-col">
+            <SheetContent side="left" className="flex flex-col w-1/2">
               <nav className="grid gap-2 text-lg font-medium">
+                <SheetTrigger asChild>
+                  <div
+                    className={`flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary cursor-pointer ${
+                      page === "home" ? "text-primary" : ""
+                    }`}
+                    onClick={() => setPage("home")}
+                  >
+                    <Plus className="h-4 w-4" />
+                    Home
+                  </div>
+                </SheetTrigger>
+                <SheetTrigger asChild>
+                  <div
+                    className={`flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary cursor-pointer ${
+                      page === "your-team" ? "text-primary" : ""
+                    }`}
+                    onClick={() => setPage("your-team")}
+                  >
+                    <Plus className="h-4 w-4" />
+                    Your Team
+                  </div>
+                </SheetTrigger>
+                <SheetTrigger asChild>
+                  <div
+                    className={`flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary cursor-pointer ${
+                      page === "streaming-optimization" ? "text-primary" : ""
+                    }`}
+                    onClick={() => setPage("streaming-optimization")}
+                  >
+                    <Plus className="h-4 w-4" />
+                    Lineup Generation
+                  </div>
+                </SheetTrigger>
                 <Link
                   href="#"
-                  className="flex items-center gap-2 text-lg font-semibold"
+                  className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all"
                 >
-                  <Dribbble className="h-6 w-6" />
-                  <span className="">Court Visionaries</span>
-                </Link>
-                <Link
-                  href="#"
-                  className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
-                >
-                  <Plus className="h-5 w-5" />
-                  Your Team
-                </Link>
-                <Link
-                  href="#"
-                  className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
-                >
-                  <Plus className="h-5 w-5" />
-                  Lineup Generation
-                </Link>
-                <Link
-                  href="#"
-                  className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
-                >
-                  <Plus className="h-5 w-5" />
+                  <Plus className="h-4 w-4" />
                   More Coming Soon
                 </Link>
               </nav>

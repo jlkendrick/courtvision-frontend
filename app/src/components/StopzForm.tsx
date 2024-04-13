@@ -29,6 +29,7 @@ import {
   TooltipTrigger,
 } from "./ui/tooltip";
 import Image from "next/image";
+import Link from "next/link";
 
 const stopzInput = z.object({
   threshold: z
@@ -179,7 +180,7 @@ export default function StopzForm({ onSubmit }: { onSubmit: () => void }) {
               </CardFooter>
               {!foundLeague && (
                 <p className="text-red-500 text-sm">
-                  Please enter a valid league
+                  Please enter a valid league <Link href="/" className="underline">here</Link>.
                 </p>
               )}
             </form>
