@@ -151,7 +151,7 @@ export default function LeagueInfoForm() {
             <div>
               <CardTitle>League Info</CardTitle>
               <CardDescription>
-                Find your ESPN fantasy basketball league <Link href="/dashboard" className="text-blue-500 underline hover:text-blue-700 font-medium">skip</Link>.
+                Find your ESPN fantasy basketball league or <Link href="/dashboard" className="text-blue-500 underline hover:text-blue-700 font-medium">skip</Link>.
               </CardDescription>
             </div>
           </div>
