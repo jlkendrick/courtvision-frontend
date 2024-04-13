@@ -1,7 +1,17 @@
 import React from "react";
 import { BentoGrid, BentoGridItem } from "@/components/ui/bento-grid";
+import { CanvasRevealEffect } from "../ui/canvas-reveal-effect";
+import { AnimatePresence } from "framer-motion";
 
-export default function Home() {
+export default function Home({
+  onPageChange,
+}: {
+  onPageChange: (page: string) => void;
+}) {
+  const handleClick = (page: string) => {
+    onPageChange(page);
+  };
+
   return (
     <BentoGrid className="max-w-4xl mx-auto md:auto-rows-[17rem]">
       {items.map((item, i) => (
@@ -9,17 +19,37 @@ export default function Home() {
           key={i}
           title={item.title}
           description={item.description}
+          header={item.header}
           className={item.className}
           icon={item.icon}
+          onClick={() => handleClick(item.page)}
         />
       ))}
     </BentoGrid>
   );
 }
+
 const Skeleton = () => (
-  <div className="flex flex-1 w-full h-full min-h-[6rem] rounded-xl   dark:bg-dot-white/[0.2] bg-dot-black/[0.2] [mask-image:radial-gradient(ellipse_at_center,white,transparent)]  border border-transparent dark:border-white/[0.2] bg-neutral-100 dark:bg-black">
-  </div>
+  <>
+    <div className="group/canvas-card flex items-center justify-center max-w-full w-full mx-auto p-4 relative h-[30rem] relative">
+      <AnimatePresence>
+        <div className="h-full w-full absolute inset-0">
+          <CanvasRevealEffect
+            animationSpeed={3.8}
+            containerClassName="bg-white dark:bg-black"
+            colors={[
+              [252, 115, 3],
+              [34, 37, 69],
+              [203, 203, 209],
+            ]}
+            dotSize={4}
+          />
+        </div>
+      </AnimatePresence>
+    </div>
+  </>
 );
+
 const items = [
   {
     title: "Your Team",
@@ -27,6 +57,7 @@ const items = [
     header: <Skeleton />,
     className: "md:col-span-3 justify-end",
     icon: <></>,
+    page: "your-team",
   },
   {
     title: "Lineup Generation",
@@ -35,6 +66,7 @@ const items = [
     header: <Skeleton />,
     className: "md:col-span-2 justify-end",
     icon: <></>,
+    page: "streaming-optimization",
   },
   {
     title: "More Coming Soon",
@@ -42,5 +74,6 @@ const items = [
     header: <Skeleton />,
     className: "md:col-span-1 justify-end",
     icon: <></>,
+    page: "home",
   },
 ];

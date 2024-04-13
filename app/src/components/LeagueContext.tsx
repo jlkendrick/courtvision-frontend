@@ -10,7 +10,6 @@ const LeagueContext = createContext({
     threshold: "",
     week: "",
     foundLeague: false,
-    ttheme: "dark",
     setLeagueID: (leagueID: string) => {},
     setLeagueYear: (leagueYear: string) => {},
     setTeamName: (teamName: string) => {},
@@ -19,7 +18,6 @@ const LeagueContext = createContext({
     setThreshold: (threshold: string) => {},
     setWeek: (week: string) => {},
     setLeagueFound: (foundLeague: boolean) => {},
-    setTtheme: (ttheme: string) => {},
 });
 
 export function useLeague() {
@@ -39,7 +37,6 @@ export function LeagueProvider({
     const [threshold, setThreshold] = useState("");
     const [week, setWeek] = useState("");
     const [foundLeague, setLeagueFound] = useState(false);
-    const [ttheme, setTtheme] = useState("dark");
 
     return (
         <LeagueContext.Provider
@@ -52,7 +49,6 @@ export function LeagueProvider({
                 threshold,
                 week,
                 foundLeague,
-                ttheme,
                 setLeagueID,
                 setLeagueYear,
                 setTeamName,
@@ -61,7 +57,6 @@ export function LeagueProvider({
                 setThreshold,
                 setWeek,
                 setLeagueFound,
-                setTtheme,
             }}
         >
             {children}

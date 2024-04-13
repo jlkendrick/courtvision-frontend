@@ -70,8 +70,6 @@ export default function StopzForm({ onSubmit }: { onSubmit: () => void }) {
       console.log("Changes detected, calling onSubmit");
       onSubmit();
     }
-    setThreshold("");
-    setWeek("");
     reset();
   }, [threshold, week]);
 

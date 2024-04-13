@@ -15,16 +15,15 @@ func main() {
 	// Handle request
 	http.HandleFunc("/optimize/", func(w http.ResponseWriter, r *http.Request) {
 
-		// Set CORS headers
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Header().Set("Access-Control-Allow-Methods", "POST")
-		w.Header().Set("Access-Control-Allow-Methods", "OPTIONS")
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
-
-		if r.Method == http.MethodOptions {
-			// Handle preflight requests
+		if r.Method == "OPTIONS" {
+			w.Header().Set("Access-Control-Allow-Origin", "*")
+			w.Header().Set("Access-Control-Allow-Methods", "POST")
+			w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 			return
 		}
+	
+		// Set CORS headers for actual request
+		w.Header().Set("Access-Control-Allow-Origin", "*")
 		
 		var request helper.ReqBody
 		err := json.NewDecoder(r.Body).Decode(&request)

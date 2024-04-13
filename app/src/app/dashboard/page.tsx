@@ -1,19 +1,18 @@
 "use client";
 import Link from "next/link";
+import { useState } from "react";
 import { Dribbble, Menu, Plus } from "lucide-react";
 import Image from "next/image";
-import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import YourTeam from "@/components/YourTeamDashView";
-import Home from "@/components/HomeDashView";
-import LineupGeneration from "@/components/LineupGenerationDashView";
+import YourTeam from "@/components/views/YourTeamDashView";
+import Home from "@/components/views/HomeDashView";
+import LineupGeneration from "@/components/views/LineupGenerationDashView";
 
 import { ModeToggle } from "@/components/ui/toggle-mode";
 import { Pacifico } from "next/font/google";
 import { Separator } from "@/components/ui/separator";
-import { WavyBackground } from "@/components/ui/wavy-background";
 
 const pacifico = Pacifico({
   weight: "400",
@@ -21,7 +20,11 @@ const pacifico = Pacifico({
 });
 
 export default function Dashboard() {
-  const [selectedPage, setSelectedPage] = useState("home");
+  const [page, setPage] = useState("home");
+
+  const handlePageChange = (page: string) => {
+    setPage(page);
+  };
 
   return (
     <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[200px_1fr]">
@@ -34,29 +37,27 @@ export default function Dashboard() {
             <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
               <div
                 className={`flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary cursor-pointer ${
-                  selectedPage === "home" ? "text-primary" : ""
+                  page === "home" ? "text-primary" : ""
                 }`}
-                onClick={() => setSelectedPage("home")}
+                onClick={() => setPage("home")}
               >
                 <Plus className="h-4 w-4" />
                 Home
               </div>
               <div
                 className={`flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary cursor-pointer ${
-                  selectedPage === "your-team" ? "text-primary" : ""
+                  page === "your-team" ? "text-primary" : ""
                 }`}
-                onClick={() => setSelectedPage("your-team")}
+                onClick={() => setPage("your-team")}
               >
                 <Plus className="h-4 w-4" />
                 Your Team
               </div>
               <div
                 className={`flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary cursor-pointer ${
-                  selectedPage === "streaming-optimization"
-                    ? "text-primary"
-                    : ""
+                  page === "streaming-optimization" ? "text-primary" : ""
                 }`}
-                onClick={() => setSelectedPage("streaming-optimization")}
+                onClick={() => setPage("streaming-optimization")}
               >
                 <Plus className="h-4 w-4" />
                 Lineup Generation
@@ -137,9 +138,9 @@ export default function Dashboard() {
           </nav>
         </header>
         <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
-          {selectedPage === "home" && <Home/>}
-          {selectedPage === "your-team" && <YourTeam />}
-          {selectedPage === "streaming-optimization" && <LineupGeneration />}
+          {page === "home" && <Home onPageChange={handlePageChange} />}
+          {page === "your-team" && <YourTeam />}
+          {page === "streaming-optimization" && <LineupGeneration />}
         </main>
       </div>
     </div>
