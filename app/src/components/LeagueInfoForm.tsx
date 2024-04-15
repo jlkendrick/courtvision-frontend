@@ -3,6 +3,7 @@ import * as z from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "./ui/input";
+import { Skeleton } from "./ui/skeleton";
 import {
   Form,
   FormControl,
@@ -63,6 +64,7 @@ export default function LeagueInfoForm() {
     setThreshold,
     setWeek,
   } = useLeague();
+  const [submitted, setSubmitted] = useState(false);
 
   const form = useForm<z.infer<typeof leagueInfoSchema>>({
     resolver: zodResolver(leagueInfoSchema),
@@ -86,12 +88,15 @@ export default function LeagueInfoForm() {
     }
     setLeagueFound(false);
     setIncorrectInfo(false);
+    setSubmitted(false);
     reset();
   };
 
   const [incorrectInfo, setIncorrectInfo] = useState(false);
 
   const handleSubmit = async (values: z.infer<typeof leagueInfoSchema>) => {
+    setSubmitted(true);
+
     if (threshold) {
       setThreshold("");
     }
@@ -121,6 +126,8 @@ export default function LeagueInfoForm() {
 
     const data = await response.json();
     console.log(data);
+
+    setSubmitted(false);
 
     if (data.valid) {
       setLeagueFound(true);
@@ -328,6 +335,11 @@ export default function LeagueInfoForm() {
               >
                 Found League!
               </CardDescription>
+              <div className="text-center justify-center items-center">
+                <Skeleton className={` ${
+                  submitted ? "h-4 w-full justify-center items-center" : "hidden"
+                }`}></Skeleton>
+              </div>
             </form>
           </Form>
         </CardContent>

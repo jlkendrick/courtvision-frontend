@@ -1,10 +1,22 @@
 "use client";
 import { useState } from "react";
-import Header from "@/components/Header";
 import { useLeague } from "@/components/LeagueContext";
 import { Separator } from "@/components/ui/separator";
+import { Skeleton } from "@/components/ui/skeleton";
 import StopzForm from "@/components/StopzForm";
 import LineupDisplay from "@/components/LineupDisplay";
+
+function SkeletonCard() {
+  return (
+    <div className="flex flex-col space-y-3">
+      <Skeleton className="h-[125px] w-[250px] rounded-xl" />
+      <div className="space-y-2">
+        <Skeleton className="h-4 w-[250px]" />
+        <Skeleton className="h-4 w-[200px]" />
+      </div>
+    </div>
+  )
+}
 
 interface stopzRequest {
   [key: string]: string | number | undefined;
@@ -52,6 +64,7 @@ async function callStopzServer(request: stopzRequest) {
 export default function LineupGeneration() {
 
   const [genes, setGenes] = useState<Gene[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
   const { leagueID, leagueYear, teamName, s2, swid, threshold, week } = useLeague();
   const makeRequest = false;
   console.log("leagueID:", leagueID);
@@ -59,6 +72,7 @@ export default function LineupGeneration() {
   console.log("week:", week);
 
   const handleSubmit = () => {
+    setIsLoading(true);
 
     async function fetchData() {
 
@@ -81,8 +95,11 @@ export default function LineupGeneration() {
         setGenes(response);
       } catch (error) {
         console.error("Error fetching data:", error);
+      } finally {
+        setIsLoading(false);
       }
     }
+
     fetchData();
   }
 
@@ -98,8 +115,13 @@ export default function LineupGeneration() {
         <div className="flex flex-col items-center">
 
           <Separator orientation="horizontal" className="w-3/4 my-4 bg-primary" />
-
-          <LineupDisplay data={genes} />
+          {isLoading ? (
+            <>
+            <SkeletonCard />
+            </>
+          ) :(
+            <LineupDisplay data={genes} />
+          )}
         </div>
     </section>
 
