@@ -105,8 +105,8 @@ export default function StopzForm({ onSubmit }: { onSubmit: () => void }) {
                             </TooltipTrigger>
                             <TooltipContent className="text-center">
                               <p>
-                                Threshold is the minimum average points per game <br />
-                                a player must have for you to be okay dropping them.
+                                &quot;I am okay dorpping any player under (threshold) average <br />
+                                fantasy points per game&quot;
                               </p>
                             </TooltipContent>
                           </Tooltip>
