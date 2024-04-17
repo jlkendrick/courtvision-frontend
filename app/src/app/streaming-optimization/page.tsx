@@ -1,4 +1,5 @@
 "use client";
+import Head from "next/head";
 import { useState } from "react";
 import Header from "../../components/Header";
 import { useLeague } from "../../components/LeagueContext";
@@ -89,6 +90,19 @@ export default function StreamingOptimizationPage() {
   return (
 		
     <>
+    <Head>
+      <title>Court Visionaries - Streaming Optimization</title>
+      <meta
+        name="description"
+        content="Court Visionaries provides advanced tools to help you win your fantasy basketball league."
+      />
+      <meta
+        name="keywords"
+        content="fantasy basketball, fantasy sports, lineup optimization, fantasy streaming, fantasy dashboard, streaming optimization"
+      />
+      <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    </Head>
+
     <main className="p-4">
       <Header />
     </main>

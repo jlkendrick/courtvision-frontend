@@ -1,7 +1,8 @@
 "use client";
+import Head from "next/head";
 import Link from "next/link";
 import { useState } from "react";
-import { Dribbble, Menu, Plus } from "lucide-react";
+import { Menu, Plus } from "lucide-react";
 import Image from "next/image";
 
 import { Button } from "@/components/ui/button";
@@ -27,6 +28,21 @@ export default function Dashboard() {
   };
 
   return (
+    <>
+
+    <Head>
+      <title>Court Visionaries - Dashboard</title>
+      <meta
+        name="description"
+        content="Court Visionaries provides advanced tools to help you win your fantasy basketball league."
+      />
+      <meta
+        name="keywords"
+        content="fantasy basketball, fantasy sports, lineup optimization, fantasy streaming, fantasy dashboard"
+      />
+      <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    </Head>
+
     <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[200px_1fr]">
       <div className="hidden border-r bg-muted/40 md:block">
         <div className="flex h-full max-h-screen flex-col gap-2 items-center">
@@ -156,5 +172,7 @@ export default function Dashboard() {
         </main>
       </div>
     </div>
+
+    </>
   );
 }
