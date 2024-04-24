@@ -1,11 +1,11 @@
 "use client";
 import Head from "next/head";
 import { useState } from "react";
-import Header from "../../components/Header";
-import { useLeague } from "../../components/LeagueContext";
-import { Separator } from "../../components/ui/separator";
+import Header from "@/components/Header";
+import { useLeague } from "@/components/LeagueContext";
+import { Separator } from "@/components/ui/separator";
 import StopzForm from "@/components/StopzForm";
-import LineupDisplay from "../../components/LineupDisplay";
+import LineupDisplay from "@/components/LineupDisplay";
 
 interface stopzRequest {
   [key: string]: string | number | undefined;
