@@ -5,3 +5,4 @@ server/__pycache__
 app/node_modules
 app/.next
 app/src/deprecated
+app/src/components/ui
