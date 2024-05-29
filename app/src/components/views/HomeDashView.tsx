@@ -52,8 +52,8 @@ const Skeleton = () => (
 
 const items = [
   {
-    title: "Your Team",
-    description: "View Your Team.",
+    title: "Your Teams",
+    description: "View Your Teams.",
     header: <Skeleton />,
     className: "md:col-span-3 justify-end",
     icon: <></>,

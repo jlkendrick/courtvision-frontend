@@ -1,11 +1,10 @@
 "use client";
 import Image from "next/image";
 import { ModeToggle } from "./ui/toggle-mode";
-import { Pacifico } from "next/font/google";
+import { Sansita_Swashed } from "next/font/google";
 
-const pacifico = Pacifico({ 
+const pacifico = Sansita_Swashed({ 
     weight: "400",
-    subsets: ["latin"],
   });
 
 export default function Header() {

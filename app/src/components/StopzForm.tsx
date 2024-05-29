@@ -1,4 +1,4 @@
-"use client";
+// "use client";
 import * as z from "zod";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
@@ -75,7 +75,7 @@ export default function StopzForm({ onSubmit }: { onSubmit: () => void }) {
   }, [threshold, week]);
 
   return (
-    <div className="w-full pl-8 pr-4">
+    <div className="w-full pl-4 pr-4">
       <Card>
         <CardHeader>
           <CardTitle>Streaming Optimization</CardTitle>
@@ -85,7 +85,10 @@ export default function StopzForm({ onSubmit }: { onSubmit: () => void }) {
         </CardHeader>
 
         <CardContent>
-          <Form {...form}>
+          <CardDescription>
+            Select a team or enter a new one
+          </CardDescription>
+          {/* <Form {...form}>
             <form
               className="flex flex-col gap-3"
               onSubmit={form.handleSubmit(handleSubmit)}
@@ -184,7 +187,7 @@ export default function StopzForm({ onSubmit }: { onSubmit: () => void }) {
                 </p>
               )}
             </form>
-          </Form>
+          </Form> */}
         </CardContent>
       </Card>
     </div>

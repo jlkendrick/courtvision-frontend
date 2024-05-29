@@ -67,9 +67,6 @@ export default function LineupGeneration() {
   const [isLoading, setIsLoading] = useState(false);
   const { leagueID, leagueYear, teamName, s2, swid, threshold, week } = useLeague();
   const makeRequest = false;
-  console.log("leagueID:", leagueID);
-  console.log("threshold:", threshold);
-  console.log("week:", week);
 
   const handleSubmit = () => {
     setIsLoading(true);
