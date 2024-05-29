@@ -91,9 +91,9 @@ export default function Dashboard() {
                 </div>
                 <div
                   className={`flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary cursor-pointer ${
-                    page === "streaming-optimization" ? "text-primary" : ""
+                    page === "lineup-generation" ? "text-primary" : ""
                   }`}
-                  onClick={() => setPage("streaming-optimization")}
+                  onClick={() => setPage("lineup-generation")}
                 >
                   <Plus className="h-4 w-4" />
                   Lineup Generation
@@ -125,9 +125,7 @@ export default function Dashboard() {
               <SheetContent side="left" className="flex flex-col w-1/2">
                 <div className="flex flex-row gap-2 px-4 py-2">
                   { !loggedIn && 
-                  <Button>
-                    Sign In
-                  </Button>}
+                  <AccountDrawer />}
                   { loggedIn && 
                   <Select>
                     <SelectTrigger className="w-[170px] hover:border-primary">
@@ -194,7 +192,7 @@ export default function Dashboard() {
             </Sheet>
             <div className="flex w-full justify-between items-center">
               <div
-                className={`text-6xl w-full text-center font-bold pb-3 ${sansita_swashed.className}`}
+                className={`text-4xl md:text-5xl lg:text-6xl w-full text-center font-bold pb-3 ${sansita_swashed.className}`}
               >
                 Court Visionaries
               </div>
@@ -225,7 +223,7 @@ export default function Dashboard() {
           <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
             {page === "home" && <Home onPageChange={handlePageChange} />}
             {page === "your-team" && <YourTeam />}
-            {page === "streaming-optimization" && <LineupGeneration />}
+            {page === "lineup-generation" && <LineupGeneration />}
           </main>
         </div>
       </div>
