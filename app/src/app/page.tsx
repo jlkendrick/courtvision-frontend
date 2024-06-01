@@ -1,21 +1,15 @@
-'use client';
+"use client";
+
+import { cn } from "@/lib/utils";
 
 import Head from "next/head";
 import Link from "next/link";
 import { useState } from "react";
-import {
-  Menu,
-  Plus,
-} from "lucide-react";
+import { Menu, Plus } from "lucide-react";
 import Image from "next/image";
 
 import { Button } from "@/components/ui/button";
-import {
-  Sheet,
-  SheetContent,
-  SheetFooter,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import YourTeam from "@/components/views/YourTeamDashView";
 import Home from "@/components/views/HomeDashView";
 import LineupGeneration from "@/components/views/LineupGenerationDashView";
@@ -33,6 +27,18 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+import {
+  Command,
+  CommandDialog,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+  CommandSeparator,
+  CommandShortcut,
+} from "@/components/ui/command";
+
 import AccountDrawer from "@/components/AccountDrawer";
 
 const sansita_swashed = Sansita_Swashed({
@@ -42,7 +48,7 @@ const sansita_swashed = Sansita_Swashed({
 
 export default function Dashboard() {
   const [page, setPage] = useState("home");
-  const [loggedIn, setLoggedIn] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const handlePageChange = (page: string) => {
     setPage(page);
@@ -111,6 +117,7 @@ export default function Dashboard() {
         </div>
         <div className="flex flex-col">
           <header className="flex h-14 items-center border-b bg-muted/40 px-4 md:h-[120px] lg:h-[120px] lg:px-6">
+            {/* This is the nav bar that pops over on mobile or when the viewport gets small enough */}
             <Sheet>
               <SheetTrigger asChild>
                 <Button
@@ -124,24 +131,26 @@ export default function Dashboard() {
               </SheetTrigger>
               <SheetContent side="left" className="flex flex-col w-1/2">
                 <div className="flex flex-row gap-2 px-4 py-2">
-                  { !loggedIn && 
-                  <AccountDrawer />}
-                  { loggedIn && 
-                  <Select>
-                    <SelectTrigger className="w-[170px] hover:border-primary">
-                      <SelectValue placeholder="Sign in or Create Account" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectGroup>
-                        <SelectLabel>Your Teams</SelectLabel>
-                        <SelectItem value="apple">Apple</SelectItem>
-                        <SelectItem value="banana">Banana</SelectItem>
-                        <SelectItem value="blueberry">Blueberry</SelectItem>
-                        <SelectItem value="grapes">Grapes</SelectItem>
-                        <SelectItem value="pineapple">Pineapple</SelectItem>
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>}
+                  {!isLoggedIn && (
+                    <AccountDrawer setIsLoggedIn={setIsLoggedIn} />
+                  )}
+                  {isLoggedIn && (
+                    <Select>
+                      <SelectTrigger className="w-[170px] hover:border-primary">
+                        <SelectValue placeholder="Sign in or Create Account" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectGroup>
+                          <SelectLabel>Your Teams</SelectLabel>
+                          <SelectItem value="apple">Apple</SelectItem>
+                          <SelectItem value="banana">Banana</SelectItem>
+                          <SelectItem value="blueberry">Blueberry</SelectItem>
+                          <SelectItem value="grapes">Grapes</SelectItem>
+                          <SelectItem value="pineapple">Pineapple</SelectItem>
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
+                  )}
                 </div>
                 <nav className="grid gap-2 text-lg font-medium">
                   <SheetTrigger asChild>
@@ -190,6 +199,8 @@ export default function Dashboard() {
                 </div>
               </SheetContent>
             </Sheet>
+
+            {/* This is the header that is visible when the viewport is at a regular size */}
             <div className="flex w-full justify-between items-center">
               <div
                 className={`text-4xl md:text-5xl lg:text-6xl w-full text-center font-bold pb-3 ${sansita_swashed.className}`}
@@ -198,24 +209,35 @@ export default function Dashboard() {
               </div>
 
               <div className="hidden md:flex">
-                { !loggedIn &&
-                <AccountDrawer />}
-                { loggedIn && 
-                <Select>
-                  <SelectTrigger className="w-[190px] text-xs hover:border-primary">
-                    <SelectValue placeholder="Select a Team" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectGroup>
-                      <SelectLabel>Your Teams</SelectLabel>
-                      <SelectItem value="apple">Apple</SelectItem>
-                      <SelectItem value="banana">Banana</SelectItem>
-                      <SelectItem value="blueberry">Blueberry</SelectItem>
-                      <SelectItem value="grapes">Grapes</SelectItem>
-                      <SelectItem value="pineapple">Pineapple</SelectItem>
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>}
+                {!isLoggedIn && <AccountDrawer setIsLoggedIn={setIsLoggedIn} />}
+                {isLoggedIn && (
+                  <Select>
+                    <SelectTrigger className="w-[190px] text-xs hover:border-primary">
+                      <SelectValue placeholder="Select a Team" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        <Command className="w-[180px]">
+                          <CommandInput placeholder="Search..." />
+                          <CommandList>
+                            <CommandEmpty>No results found.</CommandEmpty>
+                            <CommandGroup className="font-gray-400 font-medium" heading="Options">
+                              <CommandItem>Add Team</CommandItem>
+                              <CommandItem>Remove Team</CommandItem>
+                              <CommandItem>Modify Info</CommandItem>
+                            </CommandGroup>
+                            <CommandSeparator />
+                            <CommandGroup className="font-gray-400 font-medium" heading="Teams">
+                              <CommandItem>Team 1</CommandItem>
+                              <CommandItem>Team 2</CommandItem>
+                              <CommandItem>Team 3</CommandItem>
+                            </CommandGroup>
+                          </CommandList>
+                        </Command>
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                )}
                 <ModeToggle />
               </div>
             </div>

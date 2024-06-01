@@ -7,10 +7,18 @@ import { cn } from "@/lib/utils"
 
 const Drawer = ({
   shouldScaleBackground = true,
+  isOpen,
+  onClose,
   ...props
-}: React.ComponentProps<typeof DrawerPrimitive.Root>) => (
+}: React.ComponentProps<typeof DrawerPrimitive.Root> & { isOpen: boolean }) => (
   <DrawerPrimitive.Root
     shouldScaleBackground={shouldScaleBackground}
+    open={isOpen}
+    onOpenChange={(open) => {
+      if (!open) {
+        onClose!()
+      }
+    }}
     {...props}
   />
 )
