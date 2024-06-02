@@ -36,6 +36,7 @@ export default function Dashboard() {
     incorrectLoginInfo: false,
     emailInUse: false,
     notMatchingPasswords: false,
+    internalServerError: false,
   })
 
   useEffect(() => {
@@ -47,12 +48,15 @@ export default function Dashboard() {
       toast.error("Email is already in use. Please try again.");
     } else if (loginErrors.notMatchingPasswords) {
       toast.error("Passwords do not match. Please try again.");
+    } else if (loginErrors.internalServerError) {
+      toast.error("Internal server error. Please try again later.");
     }
     // Reset the login errors
     setLoginErrors({
       incorrectLoginInfo: false,
       emailInUse: false,
       notMatchingPasswords: false,
+      internalServerError: false,
     });
   }, [isLoggedIn, loginErrors.incorrectLoginInfo, loginErrors.emailInUse, loginErrors.notMatchingPasswords]);
 

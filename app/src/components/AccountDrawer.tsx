@@ -12,13 +12,15 @@ import {
   DrawerFooter,
   DrawerTrigger,
 } from "@/components/ui/drawer";
+import { set } from "zod";
 
 export default function AccountDrawer({ setIsLoggedIn, loginErrors, setLoginErrors } : 
   { setIsLoggedIn: (isLoggedIn: boolean) => void, 
     loginErrors: { incorrectLoginInfo: boolean, 
                    emailInUse: boolean, 
-                   notMatchingPasswords: boolean }, 
-    setLoginErrors: (loginErrors: { incorrectLoginInfo: boolean, emailInUse: boolean, notMatchingPasswords: boolean }) => void }) {
+                   notMatchingPasswords: boolean 
+                   internalServerError: boolean }, 
+    setLoginErrors: (loginErrors: { incorrectLoginInfo: boolean, emailInUse: boolean, notMatchingPasswords: boolean, internalServerError: boolean }) => void }) {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -76,6 +78,7 @@ export default function AccountDrawer({ setIsLoggedIn, loginErrors, setLoginErro
         }
 
       } catch (error) {
+        setLoginErrors({ ...loginErrors, internalServerError: true });
         console.error(error);
       }
 
@@ -106,6 +109,7 @@ export default function AccountDrawer({ setIsLoggedIn, loginErrors, setLoginErro
         }
 
       } catch (error) {
+        setLoginErrors({ ...loginErrors, internalServerError: true });
         console.error(error);
       }
     }
