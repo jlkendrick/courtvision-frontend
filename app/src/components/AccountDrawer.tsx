@@ -13,15 +13,18 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer";
 
-export default function AccountDrawer({ setIsLoggedIn } : { setIsLoggedIn: (isLoggedIn: boolean) => void }) {
+export default function AccountDrawer({ setIsLoggedIn, loginErrors, setLoginErrors } : 
+  { setIsLoggedIn: (isLoggedIn: boolean) => void, 
+    loginErrors: { incorrectLoginInfo: boolean, 
+                   emailInUse: boolean, 
+                   notMatchingPasswords: boolean }, 
+    setLoginErrors: (loginErrors: { incorrectLoginInfo: boolean, emailInUse: boolean, notMatchingPasswords: boolean }) => void }) {
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isHydrated, setIsHydrated] = useState(false);
-  const [failedLogin, setFailedLogin] = useState(false);
-  const [notMatchingPasswords, setNotMatchingPasswords] = useState(false);
-  const [alreadyExists, setAlreadyExists] = useState(false);
 
   // Hydration check to ensure the drawer trigger button matches between server and client
   useEffect(() => {
@@ -33,11 +36,8 @@ export default function AccountDrawer({ setIsLoggedIn } : { setIsLoggedIn: (isLo
       setEmail("");
       setPassword("");
       setConfirmPassword("");
-      setFailedLogin(false);
-      setNotMatchingPasswords(false);
-      setAlreadyExists(false);
     }
-  });
+  }, [isDrawerOpen]);
   
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,7 +47,7 @@ export default function AccountDrawer({ setIsLoggedIn } : { setIsLoggedIn: (isLo
     if (confirmPassword) {
       try {
         if (password !== confirmPassword) {
-          setNotMatchingPasswords(true);
+          setLoginErrors({ ...loginErrors, notMatchingPasswords: true });
           return;
         }
         // API call to create account
@@ -72,7 +72,7 @@ export default function AccountDrawer({ setIsLoggedIn } : { setIsLoggedIn: (isLo
         } else {
           // Account already exists
           console.log("Account already exists.");
-          setAlreadyExists(true);
+          setLoginErrors({ ...loginErrors, emailInUse: true });
         }
 
       } catch (error) {
@@ -102,7 +102,7 @@ export default function AccountDrawer({ setIsLoggedIn } : { setIsLoggedIn: (isLo
         } else {
           // Login failed
           console.log("Login failed.");
-          setFailedLogin(true);
+          setLoginErrors({ ...loginErrors, incorrectLoginInfo: true });
         }
 
       } catch (error) {
@@ -128,9 +128,7 @@ export default function AccountDrawer({ setIsLoggedIn } : { setIsLoggedIn: (isLo
             setEmail={setEmail}
             setPassword={setPassword}
             setConfirmPassword={setConfirmPassword}
-            failedLogin={failedLogin}
-            notMatchingPasswords={notMatchingPasswords}
-            alreadyExists={alreadyExists}
+
           />
           <DrawerFooter>
             <Button type="submit">Submit</Button>

@@ -14,16 +14,10 @@ export default function UserLoginOrCreate({
   setEmail,
   setPassword,
 	setConfirmPassword,
-  failedLogin,
-  notMatchingPasswords,
-  alreadyExists,
 }: {
   setEmail: (email: string) => void;
   setPassword: (password: string) => void;
 	setConfirmPassword: (confirmPassword: string) => void;
-  failedLogin: boolean;
-  notMatchingPasswords: boolean;
-  alreadyExists: boolean;
 }) {
 
   const handleTabChange = () => {
@@ -71,9 +65,6 @@ export default function UserLoginOrCreate({
                     required
                   />
                 </div>
-                {failedLogin && (
-                  <p className="text-red-500 text-center">Invalid email or password.</p>
-                )}
               </CardContent>
             </Card>
           </div>
@@ -118,12 +109,6 @@ export default function UserLoginOrCreate({
                     required
                   />
                 </div>
-                {notMatchingPasswords && (
-                  <p className="text-red-500 text-center">Passwords do not match.</p>
-                )}
-                {alreadyExists && (
-                  <p className="text-red-500 text-center">Account already exists with this email.</p>
-                )}
               </CardContent>
             </Card>
           </div>
