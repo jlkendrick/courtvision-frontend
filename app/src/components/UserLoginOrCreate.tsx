@@ -37,7 +37,7 @@ export default function UserLoginOrCreate({
         </div>
         <TabsContent value="login">
           <div className="flex justify-center">
-            <Card className="w-full max-w-sm">
+            <Card className="w-full max-w-md">
               <CardHeader>
                 <CardTitle className="text-2xl">Login</CardTitle>
                 <CardDescription>
@@ -71,11 +71,11 @@ export default function UserLoginOrCreate({
         </TabsContent>
         <TabsContent value="create">
           <div className="flex justify-center">
-            <Card className="w-full max-w-sm">
+            <Card className="w-full max-w-md">
               <CardHeader>
                 <CardTitle className="text-2xl">Signup</CardTitle>
                 <CardDescription>
-                  Enter an email and password to create your account.
+                  Enter an email and matching passwords to create your account.
                 </CardDescription>
               </CardHeader>
               <CardContent className="grid gap-4">

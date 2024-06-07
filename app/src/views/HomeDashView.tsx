@@ -1,6 +1,6 @@
 import React from "react";
 import { BentoGrid, BentoGridItem } from "@/components/ui/bento-grid";
-import { CanvasRevealEffect } from "../ui/canvas-reveal-effect";
+import { CanvasRevealEffect } from "@/components/ui/canvas-reveal-effect";
 import { AnimatePresence } from "framer-motion";
 
 export default function Home({

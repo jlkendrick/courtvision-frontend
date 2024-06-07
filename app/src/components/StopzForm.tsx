@@ -78,7 +78,7 @@ export default function StopzForm({ onSubmit }: { onSubmit: () => void }) {
     <div className="w-full pl-4 pr-4">
       <Card>
         <CardHeader>
-          <CardTitle>Streaming Optimization</CardTitle>
+          <CardTitle>Lineup Generation</CardTitle>
           <CardDescription>
             Get the optimal streaming schedule for your fantasy basketball team.
           </CardDescription>

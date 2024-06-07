@@ -12,7 +12,7 @@ import {
   DrawerFooter,
   DrawerTrigger,
 } from "@/components/ui/drawer";
-import { set } from "zod";
+
 
 export default function AccountDrawer({ setIsLoggedIn, loginErrors, setLoginErrors } : 
   { setIsLoggedIn: (isLoggedIn: boolean) => void, 
@@ -109,6 +109,7 @@ export default function AccountDrawer({ setIsLoggedIn, loginErrors, setLoginErro
         }
 
       } catch (error) {
+        console.log("Internal server error.");
         setLoginErrors({ ...loginErrors, internalServerError: true });
         console.error(error);
       }
