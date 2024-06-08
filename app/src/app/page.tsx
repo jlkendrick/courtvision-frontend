@@ -1,11 +1,13 @@
 "use client";
 
+import { useAuth } from "@/app/context/AuthContext";
+import { useGeneral } from "@/app/context/GeneralContext";
+
 import Head from "next/head";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Menu, Plus, User, Minus } from "lucide-react";
 import Image from "next/image";
-import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -18,7 +20,6 @@ import ManageTeams from "@/views/ManageTeamsDashView";
 
 import { ModeToggle } from "@/components/ui/toggle-mode";
 import { Separator } from "@/components/ui/separator";
-import TextGradient from "@/components/ui/text-gradient";
 
 import { Sansita_Swashed } from "next/font/google";
 import { TeamDropdown } from "@/components/ManageTeamsComponents";
@@ -30,20 +31,16 @@ const sansita_swashed = Sansita_Swashed({
 
 export default function Dashboard() {
   // This is the state that keeps track of which page the user is on and what to display
-  const [page, setPage] = useState("home");
+  const { page, setPage } = useGeneral();
 
-  // This is the state that is passed to the Account component when logging in
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  // This is the state that is used by the Account component when logging in
+  const { isLoggedIn } = useAuth();
 
-  // This is the state that is passed to the ManageTeam component to keep track of the selected team and the teams and their effects
+  // This is the state that is used by the ManageTeam component to keep track of the selected team and the teams and their effects
   const [manageTeamsState, setManageTeamsState] = useState({
     selectedTeam: "",
     teams: [],
     clickManageTeams: false,
-  });
-  const [manageTeamsErrors, setManageTeamsErrors] = useState({
-    incorrectInfo: false,
-    internalServerError: false,
   });
   useEffect(() => {
     if (manageTeamsState.clickManageTeams) {
@@ -54,25 +51,7 @@ export default function Dashboard() {
       });
     }
   }, [manageTeamsState.clickManageTeams]);
-  useEffect(() => {
-    switch (true) {
-      case manageTeamsErrors.incorrectInfo:
-        toast.error("Incorrect information. Please try again.");
-        break;
-      case manageTeamsErrors.internalServerError:
-        toast.error("Internal server error. Please try again later.");
-        break;
-    }
-    // Reset the manage teams errors
-    setManageTeamsErrors({
-      incorrectInfo: false,
-      internalServerError: false,
-    });
-  }, [manageTeamsErrors.incorrectInfo, manageTeamsErrors.internalServerError]);
 
-  const handlePageChange = (page: string) => {
-    setPage(page);
-  };
 
   return (
     <>
@@ -234,9 +213,9 @@ export default function Dashboard() {
             {/* This is the header that is visible when the viewport is at a regular size */}
             <div className="flex w-full items-center">
               <div
-                className={`px-1 text-4xl md:text-5xl lg:text-6xl lg:ml-[12.25rem] w-full text-center font-bold pb-3 ${sansita_swashed.className}`}
+                className={`text-4xl ml-[-0.5rem] md:text-5xl lg:text-6xl lg:ml-[12.5%] w-full text-center font-bold pb-3 ${sansita_swashed.className}`}
               >
-                <TextGradient text="Court Visionaries" />
+                Court Visionaries
               </div>
               <div className="px-2 flex-col gap-1 hidden md:flex">
                 <div className="flex gap-1 justify-center">
@@ -269,15 +248,11 @@ export default function Dashboard() {
             </div>
           </header>
           <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
-            {page === "home" && <Home onPageChange={handlePageChange} />}
+            {page === "home" && <Home onPageChange={() => setPage("home")} />}
             {page === "your-team" && <YourTeam />}
             {page === "lineup-generation" && <LineupGeneration />}
-            {page === "account" && (
-              <Account
-                setIsLoggedIn={setIsLoggedIn}
-              />
-            )}
-            {page == "manage-teams" && <ManageTeams manageTeamsErrors={manageTeamsErrors} setManageTeamsErrors={setManageTeamsErrors} />}
+            {page === "account" && (<Account />)}
+            {page === "manage-teams" && <ManageTeams />}
           </main>
         </div>
       </div>

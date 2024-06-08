@@ -21,7 +21,7 @@ import {
   CardTitle,
 } from "./ui/card";
 import { Button } from "./ui/button";
-import { useLeague } from "./LeagueContext";
+import { useLeague } from "../deprecated/LeagueContext";
 import {
   Tooltip,
   TooltipContent,
@@ -66,7 +66,7 @@ export default function StopzForm({ onSubmit }: { onSubmit: () => void }) {
   };
 
   useEffect(() => {
-    console.log(foundLeague, threshold, week)
+    console.log(foundLeague, threshold, week);
     if (foundLeague && threshold !== "" && week !== "") {
       console.log("Changes detected, calling onSubmit");
       onSubmit();
@@ -85,9 +85,7 @@ export default function StopzForm({ onSubmit }: { onSubmit: () => void }) {
         </CardHeader>
 
         <CardContent>
-          <CardDescription>
-            Select a team or enter a new one
-          </CardDescription>
+          <CardDescription>Select a team or enter a new one</CardDescription>
           {/* <Form {...form}>
             <form
               className="flex flex-col gap-3"

@@ -1,3 +1,4 @@
+import { ESPN_FANTASY_API_ENDPOINT } from "@/endpoints";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -65,6 +66,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useState } from "react";
+import { toast } from "sonner";
 
 type ManageTeamsProps = {
   manageTeamsState: any;
@@ -76,6 +78,31 @@ type ManageTeamsProps = {
     }>
   >;
 };
+
+
+const teams_info = [
+  {
+    team_id: "1",
+    team_name: "James's Scary Team",
+    league_name: "San Antonio H2H Points",
+    league_id: "424233486",
+    year: "2024",
+  },
+  {
+    team_id: "2",
+    team_name: "Lvl. 3 Goblins",
+    league_name: "Austin H2H Points",
+    league_id: "424233487",
+    year: "2024",
+  },
+  {
+    team_id: "3",
+    team_name: "The Big Dippers",
+    league_name: "Dallas H2H 8Cat",
+    league_id: "424233488",
+    year: "2024",
+  },
+];
 
 export function TeamDropdown({
   manageTeamsState,
@@ -111,9 +138,9 @@ export function TeamDropdown({
                   className="font-gray-400 font-medium"
                   heading="Teams"
                 >
-                  <CommandItem>Team 1</CommandItem>
-                  <CommandItem>Team 2</CommandItem>
-                  <CommandItem>Team 3</CommandItem>
+                  {teams_info.map((team) => (
+                  <CommandItem>{team.team_name}</CommandItem>
+                  ))}
                 </CommandGroup>
               </CommandList>
             </Command>
@@ -169,30 +196,6 @@ export function TeamDropdown({
 //     </Drawer>
 //   );
 // }
-
-const teams_info = [
-  {
-    team_id: "1",
-    team_name: "James's Scary Team",
-    league_name: "San Antonio H2H Points",
-    league_id: "424233486",
-    year: "2024",
-  },
-  {
-    team_id: "2",
-    team_name: "Lvl. 3 Goblins",
-    league_name: "Austin H2H Points",
-    league_id: "424233487",
-    year: "2024",
-  },
-  {
-    team_id: "3",
-    team_name: "The Big Dippers",
-    league_name: "Dallas H2H 8Cat",
-    league_id: "424233488",
-    year: "2024",
-  },
-];
 
 export function ManageTeamsTable() {
   return (
@@ -293,7 +296,7 @@ function EditTeamMenubar() {
   );
 }
 
-export function AddTeamForm() {
+function AddTeamForm() {
   const leagueInfoSchema = z.object({
     leagueID: z
       .string()
@@ -333,7 +336,6 @@ export function AddTeamForm() {
     reset();
   };
 
-  const [incorrectInfo, setIncorrectInfo] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
   const handleSubmit = async (values: z.infer<typeof leagueInfoSchema>) => {
@@ -349,24 +351,32 @@ export function AddTeamForm() {
       year: parseInt(values.leagueYear),
     };
 
-    const response = await fetch(
-      "https://espn-fantasy-server-2wfwsao3zq-uc.a.run.app/validate_league/",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(request),
+    try {
+      const response = await fetch(
+        `${ESPN_FANTASY_API_ENDPOINT}/validate_league/`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(request),
+        }
+      );
+
+      setSubmitted(false);
+
+      const data = await response.json();
+      console.log(data);
+
+      if (data.valid) {
+        toast.success("Team found.");
+      } else {
+        toast.error("Invalid league information. Please try again.");
       }
-    );
+    } catch (error) {
 
-    const data = await response.json();
-    console.log(data);
-
-    setSubmitted(false);
-
-    if (data.valid) {
-    } else {
+      toast.error("Internal server error. Please try again later.");
+      setSubmitted(false);
     }
   };
 
@@ -507,18 +517,11 @@ export function AddTeamForm() {
                 />
               </Button>
             </div>
-            <DialogDescription
-              className={`text-center ${
-                incorrectInfo ? "text-red-500" : "hidden"
-              }`}
-            >
-              Incorrect League Info
-            </DialogDescription>
             <div className="text-center justify-center items-center">
               <Skeleton
                 className={` ${
                   submitted
-                    ? "h-4 w-full justify-center items-center"
+                    ? "h-4 mt-5 w-full justify-center items-center"
                     : "hidden"
                 }`}
               ></Skeleton>

@@ -6,7 +6,7 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { useLeague } from "@/components/LeagueContext";
+// import { useLeague } from "@/components/LeagueContext";
 import { Skeleton } from "@/components/ui/skeleton";
 
 interface Player {
@@ -27,7 +27,7 @@ interface Gene {
 }
 
 export default function LineupDisplay({ data }: { data: Gene[] }) {
-  const { week } = useLeague();
+  // const { week } = useLeague();
 
   return (
     <div className="flex flex-col items-center gap-1 w-3/4">
@@ -38,7 +38,7 @@ export default function LineupDisplay({ data }: { data: Gene[] }) {
         </h2>
       ) : (
         <div>
-          <h1 className="text-center">Optimal Lineup for Week {week}</h1>
+          <h1 className="text-center">Optimal Lineup for Week {}</h1>
           <Carousel className="w-full max-w-xl mt-3">
             <CarouselContent>
               {data.map((gene: Gene, index: number) => (

@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { useLeague } from "@/components/LeagueContext";
+// import { useLeague } from "@/components/LeagueContext";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import StopzForm from "@/components/StopzForm";
@@ -65,7 +65,7 @@ export default function LineupGeneration() {
 
   const [genes, setGenes] = useState<Gene[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const { leagueID, leagueYear, teamName, s2, swid, threshold, week } = useLeague();
+  // const { leagueID, leagueYear, teamName, s2, swid, threshold, week } = useLeague();
   const makeRequest = false;
 
   const handleSubmit = () => {
@@ -73,23 +73,23 @@ export default function LineupGeneration() {
 
     async function fetchData() {
 
-      const request: stopzRequest = {
-        league_id: parseInt(leagueID),
-        espn_s2: s2,
-        swid: swid,
-        team_name: teamName,
-        year: parseInt(leagueYear),
-        threshold: parseInt(threshold),
-        week: week,
-      };
+      // const request: stopzRequest = {
+      //   league_id: parseInt(leagueID),
+      //   espn_s2: s2,
+      //   swid: swid,
+      //   team_name: teamName,
+      //   year: parseInt(leagueYear),
+      //   threshold: parseInt(threshold),
+      //   week: week,
+      // };
 
       try {
         console.log("Making request");
         // console.log("threshold:", threshold);
         // console.log("week:", week);
-        console.log(request);
-        const response = await callStopzServer(request);
-        setGenes(response);
+        // console.log(request);
+        // const response = await callStopzServer(request);
+        // setGenes(response);
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {

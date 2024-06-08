@@ -22,7 +22,7 @@ import {
 } from "./ui/card";
 import { Button } from "./ui/button";
 import { useState } from "react";
-import { useLeague } from "./LeagueContext";
+import { useLeague } from "../deprecated/LeagueContext";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -158,7 +158,14 @@ export default function LeagueInfoForm() {
             <div>
               <CardTitle>League Info</CardTitle>
               <CardDescription>
-                Find your ESPN fantasy basketball league or <Link href="/dashboard" className="text-blue-500 underline hover:text-blue-700 font-medium">skip</Link>.
+                Find your ESPN fantasy basketball league or{" "}
+                <Link
+                  href="/dashboard"
+                  className="text-blue-500 underline hover:text-blue-700 font-medium"
+                >
+                  skip
+                </Link>
+                .
               </CardDescription>
             </div>
           </div>
@@ -336,9 +343,13 @@ export default function LeagueInfoForm() {
                 Found League!
               </CardDescription>
               <div className="text-center justify-center items-center">
-                <Skeleton className={` ${
-                  submitted ? "h-4 w-full justify-center items-center" : "hidden"
-                }`}></Skeleton>
+                <Skeleton
+                  className={` ${
+                    submitted
+                      ? "h-4 w-full justify-center items-center"
+                      : "hidden"
+                  }`}
+                ></Skeleton>
               </div>
             </form>
           </Form>

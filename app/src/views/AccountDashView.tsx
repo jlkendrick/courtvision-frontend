@@ -1,102 +1,74 @@
 import { useState } from "react";
-import { toast } from "sonner"
 
-import UserLoginOrCreate from "@/components/UserLoginOrCreate";
+import UAuthForm from "@/components/UserLoginOrCreate";
+import { useAuth } from "@/app/context/AuthContext";
 
 import { Button } from "@/components/ui/button";
 
-export default function Account({ setIsLoggedIn } : { setIsLoggedIn: (isLoggedIn: boolean) => void } ) {
-	
+export default function Account() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-
+  const { isLoggedIn, login, logout } = useAuth();
 
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     console.log(email, password, confirmPassword);
 
-    // Create account
-    if (confirmPassword) {
-      try {
-        if (password !== confirmPassword) {
-          // Passwords do not match
-          toast.error("Passwords do not match. Please try again.");
-          return;
-        }
-        // API call to create account
-        const response = await fetch("/api/users/create", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ email, password })
-        })
-        if (!response.ok) {
-          throw new Error("Failed to create account.");
-        }
-        const data = await response.json();
-
-        // Set logged in state
-        if (!data.already_exists) {
-          setIsLoggedIn(true);
-
-        } else {
-          // Account already exists
-          toast.error("Email already in use. Please login.");
-        }
-
-      } catch (error) {
-        toast.error("Internal server error. Please try again later.")
-      }
-
-    } else {
-      // Login to account
-      try {
-        // API call to login
-        const response = await fetch("/api/users/login", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ email, password })
-        })
-        if (!response.ok) {
-          throw new Error("Failed to login.");
-        }
-        const data = await response.json();
-        console.log(data);
-
-        if (data.success) {
-          setIsLoggedIn(true);
-        } else {
-          // Login failed
-          toast.error("Incorrect email or password. Please try again.");
-        }
-
-      } catch (error) {
-        toast.error("Internal server error. Please try again later.")
-      }
-    }
-  }
+    login(email, password, confirmPassword);
+  };
 
   return (
     <>
-      <div className="flex-col items-center">
-        <UserLoginOrCreate
-          setEmail={setEmail}
-          setPassword={setPassword}
-          setConfirmPassword={setConfirmPassword}
-        />
-        <div className="flex mt-2 justify-center">
-          <Button
-						className="w-full max-w-md"
-            onClick={handleFormSubmit}
-          >
-            Submit
-          </Button>
+      {!isLoggedIn ? (
+        <>
+          <div className="flex items-center">
+            <h1 className="text-lg font-semibold md:text-2xl">Your Account</h1>
+          </div>
+          <div className="flex flex-1 items-start justify-center rounded-lg border border-dashed shadow-sm">
+            <div className="flex flex-col items-center gap-1">
+              <div className="flex-col items-center">
+                <UAuthForm
+                  setEmail={setEmail}
+                  setPassword={setPassword}
+                  setConfirmPassword={setConfirmPassword}
+                />
+                <div className="flex mt-2 justify-center">
+                  <Button
+                    className="w-full max-w-md"
+                    onClick={handleFormSubmit}
+                  >
+                    Submit
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </>
+      ) : (
+        <>
+        <div className="flex items-center">
+          <h1 className="text-lg font-semibold md:text-2xl">Your Account</h1>
         </div>
-      </div>
+        <div className="flex flex-1 items-start justify-center rounded-lg border border-dashed shadow-sm">
+          <div className="flex flex-col items-center gap-1">
+            <div className="flex-col items-center">
+              <div className="flex flex-col gap-1">
+                <h3 className="text-2xl font-bold tracking-tight">
+                  You are logged in.
+                </h3>
+                <Button
+                  className="w-full max-w-md"
+                  onClick={() => logout()}
+                >
+                  Logout
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </>
+      )}
     </>
   );
 }
