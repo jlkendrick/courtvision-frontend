@@ -1,21 +1,36 @@
 "use client";
 import { createContext, useContext, useState, useEffect } from "react";
 import { toast } from "sonner";
+import { jwtDecode } from "jwt-decode";
 
 const AuthContext = createContext({
   isLoggedIn: false,
 	setIsLoggedIn: (isLoggedIn: boolean) => {},
+  userId: -1,
+  setUserId: (userId: number) => {},
+  authEmail: "",
+  setAuthEmail: (email: string) => {},
   login: (email: string, password: string, confirmPassword: string) => {},
   logout: () => {},
 });
 
+interface JwtPaylaod {
+  sub: number;
+  email: string;
+}
+
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userId, setUserId] = useState(-1);
+  const [authEmail, setAuthEmail] = useState("");
 
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
       setIsLoggedIn(true);
+      const decoded = jwtDecode<JwtPaylaod>(token);
+      setUserId(decoded.sub);
+      setAuthEmail(decoded.email);
     }
   }, []);
 
@@ -51,8 +66,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 				} else {
 					// Account created successfully
 					toast.success("Account created successfully.");
-					const { access_token } = data;
-					localStorage.setItem("token", access_token);
+
+          const { access_token } = data;
+          localStorage.setItem("token", access_token);
+					const decoded = jwtDecode<JwtPaylaod>(access_token);
+          setUserId(decoded.sub);
+          setAuthEmail(decoded.email);
+
 					setIsLoggedIn(true);
 				}
 
@@ -75,12 +95,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           throw new Error("Failed to login.");
         }
         const data = await response.json();
-        console.log(data);
 
         if (data.success) {
           // Login successful
           const { access_token } = data;
           localStorage.setItem("token", access_token);
+          const decoded = jwtDecode<JwtPaylaod>(access_token);
+          setUserId(decoded.sub);
+          setAuthEmail(decoded.email);
+
           setIsLoggedIn(true);
 
           toast.success("Logged in successfully.");
@@ -100,7 +123,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ isLoggedIn, setIsLoggedIn, login, logout }}>
+    <AuthContext.Provider value={{ isLoggedIn, setIsLoggedIn, userId, setUserId, authEmail, setAuthEmail, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

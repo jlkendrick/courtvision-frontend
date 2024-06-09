@@ -6,6 +6,7 @@ import { Inter } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
 import { AuthProvider } from "./context/AuthContext";
 import { GeneralProvider } from "./context/GeneralContext";
+import { TeamsProvider } from "./context/TeamsContext";
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
@@ -26,9 +27,11 @@ export default function RootLayout({
       <body className={inter.className}>
         <GeneralProvider>
         <AuthProvider>
+        <TeamsProvider>
         <ThemeProvider attribute="class" defaultTheme="dark">{children}
           <Toaster richColors/>
         </ThemeProvider>
+        </TeamsProvider>
         </AuthProvider>
         </GeneralProvider>
         <Analytics />

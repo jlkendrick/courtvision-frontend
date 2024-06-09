@@ -9,11 +9,10 @@ export default function Account() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const { isLoggedIn, login, logout } = useAuth();
+  const { isLoggedIn, userId, authEmail, login, logout } = useAuth();
 
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log(email, password, confirmPassword);
 
     login(email, password, confirmPassword);
   };
@@ -55,7 +54,7 @@ export default function Account() {
             <div className="flex-col items-center">
               <div className="flex flex-col gap-1">
                 <h3 className="text-2xl font-bold tracking-tight">
-                  You are logged in.
+                  Welcome, {authEmail}, you are the {userId}th user!
                 </h3>
                 <Button
                   className="w-full max-w-md"

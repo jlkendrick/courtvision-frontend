@@ -1,4 +1,3 @@
-import { ESPN_FANTASY_API_ENDPOINT } from "@/endpoints";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -66,7 +65,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useState } from "react";
-import { toast } from "sonner";
+import { useTeams } from "@/app/context/TeamsContext";
 
 type ManageTeamsProps = {
   manageTeamsState: any;
@@ -297,6 +296,8 @@ function EditTeamMenubar() {
 }
 
 function AddTeamForm() {
+  const { addTeam } = useTeams();
+
   const leagueInfoSchema = z.object({
     leagueID: z
       .string()
@@ -333,6 +334,7 @@ function AddTeamForm() {
 
   const handleClearClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
+    setSubmitted(false);
     reset();
   };
 
@@ -342,42 +344,14 @@ function AddTeamForm() {
     setSubmitted(true);
 
     console.log(values);
-
-    const request: leagueInfoRequest = {
-      league_id: parseInt(values.leagueID),
-      espn_s2: values.s2,
-      swid: values.swid,
-      team_name: values.teamName,
-      year: parseInt(values.leagueYear),
-    };
-
-    try {
-      const response = await fetch(
-        `${ESPN_FANTASY_API_ENDPOINT}/validate_league/`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(request),
-        }
-      );
-
-      setSubmitted(false);
-
-      const data = await response.json();
-      console.log(data);
-
-      if (data.valid) {
-        toast.success("Team found.");
-      } else {
-        toast.error("Invalid league information. Please try again.");
-      }
-    } catch (error) {
-
-      toast.error("Internal server error. Please try again later.");
-      setSubmitted(false);
-    }
+    const response = await addTeam(
+      values.leagueID,
+      values.teamName,
+      values.leagueYear,
+      values.s2,
+      values.swid
+    );
+    setSubmitted(false);
   };
 
   return (
@@ -507,7 +481,10 @@ function AddTeamForm() {
                   fill-true
                 />
               </Button>
-              <Button type="submit" className="size-sm bg-primary">
+              <Button 
+                type="submit" 
+                className="size-sm bg-primary"
+              >
                 <Image
                   src="/arrow.png"
                   alt="submit"

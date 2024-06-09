@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { DATABSE_API_ENDPOPINT } from "@/endpoints";
 
-import { toast } from "sonner";
-
 // API route to create a new user account
 export async function POST(request: NextRequest): Promise<NextResponse> {
   const { email, password } = await request.json();
