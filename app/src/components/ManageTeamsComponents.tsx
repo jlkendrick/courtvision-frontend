@@ -139,7 +139,7 @@ export function TeamDropdown({
                   heading="Teams"
                 >
                   {teams_info.map((team) => (
-                  <CommandItem>{team.team_name}</CommandItem>
+                  <CommandItem key={team.team_id}>{team.team_name}</CommandItem>
                   ))}
                 </CommandGroup>
               </CommandList>

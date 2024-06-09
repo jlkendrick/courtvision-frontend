@@ -213,7 +213,7 @@ export default function Dashboard() {
             {/* This is the header that is visible when the viewport is at a regular size */}
             <div className="flex w-full items-center">
               <div
-                className={`text-4xl ml-[-0.5rem] md:text-5xl lg:text-6xl lg:ml-[12.5%] w-full text-center font-bold pb-3 ${sansita_swashed.className}`}
+                className={`text-4xl ml-[-2%] md:text-5xl lg:text-6xl lg:ml-[7%] w-full text-center font-bold pb-3 ${sansita_swashed.className}`}
               >
                 Court Visionaries
               </div>

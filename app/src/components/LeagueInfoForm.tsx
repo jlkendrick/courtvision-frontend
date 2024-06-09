@@ -22,7 +22,7 @@ import {
 } from "./ui/card";
 import { Button } from "./ui/button";
 import { useState } from "react";
-import { useLeague } from "../deprecated/LeagueContext";
+import { useLeague } from "../app/context/LeagueContext";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import Link from "next/link";

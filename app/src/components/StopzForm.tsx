@@ -21,7 +21,7 @@ import {
   CardTitle,
 } from "./ui/card";
 import { Button } from "./ui/button";
-import { useLeague } from "../deprecated/LeagueContext";
+import { useLeague } from "@/app/context/LeagueContext";
 import {
   Tooltip,
   TooltipContent,
