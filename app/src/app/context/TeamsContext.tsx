@@ -34,7 +34,25 @@ export const TeamsProvider = ({ children }: { children: React.ReactNode }) => {
   const [teams, setTeams] = useState<string[]>([] as string[]);
   const { userId } = useAuth();
 
-  const fetchTeams = async () => {};
+  const fetchTeams = async () => {
+    const url = new URL("/api/data/teams", window.location.origin);
+    url.searchParams.append("userId", `${userId}`);
+    try {
+      const response = await fetch(url.toString(), {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      if (!response.ok) {
+        throw new Error("Failed to fetch teams.");
+      }
+      const data = await response.json();
+      setTeams(data);
+    } catch (error) {
+      toast.error("Internal server error. Please try again later.");
+    }
+  };
 
   const addTeam = async (league_id: string,  team_name: string, year: string, espn_s2?: string, swid?: string) => {
     console.log("Adding team");
