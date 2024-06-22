@@ -1,7 +1,6 @@
 "use client";
 
 import { useAuth } from "@/app/context/AuthContext";
-import { useGeneral } from "@/app/context/GeneralContext";
 
 import Head from "next/head";
 import Link from "next/link";
@@ -23,6 +22,7 @@ import { Separator } from "@/components/ui/separator";
 
 import { Sansita_Swashed } from "next/font/google";
 import { TeamDropdown } from "@/components/ManageTeamsComponents";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const sansita_swashed = Sansita_Swashed({
   weight: "600",
@@ -30,11 +30,7 @@ const sansita_swashed = Sansita_Swashed({
 });
 
 export default function Dashboard() {
-  // This is the state that keeps track of which page the user is on and what to display
-  const { page, setPage } = useGeneral();
-
-  // This is the state that is used by the Account component when logging in
-  const { isLoggedIn } = useAuth();
+ const { page, setPage, isLoggedIn, loading } = useAuth();
 
   // This is the state that is used by the ManageTeam component to keep track of the selected team and the teams and their effects
   const [manageTeamsState, setManageTeamsState] = useState({
@@ -156,10 +152,7 @@ export default function Dashboard() {
                     </Button>
                   )}
                   {isLoggedIn && (
-                    <TeamDropdown
-                      manageTeamsState={manageTeamsState}
-                      setManageTeamsState={setManageTeamsState}
-                    />
+                    <TeamDropdown />
                   )}
                 </div>
                 <nav className="grid gap-2 text-lg font-medium">
@@ -239,20 +232,18 @@ export default function Dashboard() {
                   </Button>
                 )}
                 {isLoggedIn && (
-                  <TeamDropdown
-                    manageTeamsState={manageTeamsState}
-                    setManageTeamsState={setManageTeamsState}
-                  />
+                  <TeamDropdown />
                 )}
               </div>
             </div>
           </header>
           <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
-            {page === "home" && <Home onPageChange={() => setPage("home")} />}
-            {page === "your-team" && <YourTeam />}
-            {page === "lineup-generation" && <LineupGeneration />}
-            {page === "account" && (<Account />)}
-            {page === "manage-teams" && <ManageTeams />}
+            {!loading && <div>Loading....</div>}
+            {loading && page === "home" && <Home onPageChange={() => setPage("home")} />}
+            {!loading && page === "your-team" && <YourTeam />}
+            {!loading && page === "lineup-generation" && <LineupGeneration />}
+            {!loading && page === "account" && (<Account />)}
+            {loading && page === "manage-teams" && <ManageTeams />}
           </main>
         </div>
       </div>

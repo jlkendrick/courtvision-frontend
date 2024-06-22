@@ -4,12 +4,15 @@ import { toast } from "sonner";
 import { jwtDecode } from "jwt-decode";
 
 const AuthContext = createContext({
+  token: "",
   isLoggedIn: false,
 	setIsLoggedIn: (isLoggedIn: boolean) => {},
-  userId: -1,
-  setUserId: (userId: number) => {},
   authEmail: "",
+  loading: true,
+  setLoading: (loading: boolean) => {},
   setAuthEmail: (email: string) => {},
+  page: "home",
+  setPage: (page: string) => {},
   login: (email: string, password: string, confirmPassword: string) => {},
   logout: () => {},
 });
@@ -20,16 +23,20 @@ interface JwtPaylaod {
 }
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+  const [loading, setLoading] = useState(true);
+  const [token, setToken] = useState<string>("");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userId, setUserId] = useState(-1);
   const [authEmail, setAuthEmail] = useState("");
+  const [page, setPage] = useState("home");
 
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
+      console.log("Token found");
       setIsLoggedIn(true);
+      setToken(token);
+
       const decoded = jwtDecode<JwtPaylaod>(token);
-      setUserId(decoded.sub);
       setAuthEmail(decoded.email);
     }
   }, []);
@@ -70,7 +77,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           const { access_token } = data;
           localStorage.setItem("token", access_token);
 					const decoded = jwtDecode<JwtPaylaod>(access_token);
-          setUserId(decoded.sub);
           setAuthEmail(decoded.email);
 
 					setIsLoggedIn(true);
@@ -101,7 +107,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           const { access_token } = data;
           localStorage.setItem("token", access_token);
           const decoded = jwtDecode<JwtPaylaod>(access_token);
-          setUserId(decoded.sub);
           setAuthEmail(decoded.email);
 
           setIsLoggedIn(true);
@@ -112,6 +117,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           toast.error("Incorrect email or password. Please try again.");
         }
       } catch (error) {
+        console.log(error);
         toast.error("Internal server error. Please try again later.");
       }
     }
@@ -123,7 +129,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ isLoggedIn, setIsLoggedIn, userId, setUserId, authEmail, setAuthEmail, login, logout }}>
+    <AuthContext.Provider value={{ token, isLoggedIn, setIsLoggedIn, loading, setLoading, authEmail, setAuthEmail, page, setPage, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

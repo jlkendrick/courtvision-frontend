@@ -6,17 +6,32 @@ import { useAuth } from "@/app/context/AuthContext";
 interface TeamsContextType {
   selectedTeam: string;
   setSelectedTeam: (team: string) => void;
-  teams: string[];
-  setTeams: Dispatch<SetStateAction<string[]>>;
+  teams: Team[];
+  setTeams: Dispatch<SetStateAction<Team[]>>;
+  handleManageTeamsClick: () => void;
   fetchTeams: () => void;
   addTeam: (league_id: string, team_name: string, year: string, espn_s2?: string, swid?: string, ) => void;
 }
+
+interface TeamInfo {
+  team_name: string,
+  league_id: number,
+  year: number,
+  espn_s2?: string,
+  swid?: string,
+}
+
+interface Team {
+  team_id: number,
+  team_info: TeamInfo
+};
 
 const TeamsContext = createContext<TeamsContextType>({
   selectedTeam: "",
   setSelectedTeam: (team: string) => {},
   teams: [],
   setTeams: () => {},
+  handleManageTeamsClick: () => {},
   fetchTeams: () => {},
   addTeam: (league_id: string, team_name: string, year: string, espn_s2?: string, swid?: string, ) => {},
 });
@@ -31,16 +46,21 @@ interface leagueInfoRequest {
 
 export const TeamsProvider = ({ children }: { children: React.ReactNode }) => {
   const [selectedTeam, setSelectedTeam] = useState("");
-  const [teams, setTeams] = useState<string[]>([] as string[]);
-  const { userId } = useAuth();
+  const [teams, setTeams] = useState<Team[]>([]);
+  const { isLoggedIn, setLoading, setPage } = useAuth();
+
+  const handleManageTeamsClick = () => {
+    setPage("manage-teams");
+  }
 
   const fetchTeams = async () => {
-    const url = new URL("/api/data/teams", window.location.origin);
-    url.searchParams.append("userId", `${userId}`);
+    const token = localStorage.getItem("token");
     try {
-      const response = await fetch(url.toString(), {
+      console.log("Making request to fetch teams with headers: ", token)
+      const response = await fetch("/api/data/teams", {
         method: "GET",
         headers: {
+          "Authorization": `Bearer ${token}`,
           "Content-Type": "application/json",
         },
       });
@@ -48,24 +68,26 @@ export const TeamsProvider = ({ children }: { children: React.ReactNode }) => {
         throw new Error("Failed to fetch teams.");
       }
       const data = await response.json();
-      setTeams(data);
+      setTeams(data.teams);
     } catch (error) {
+      console.log(error)
       toast.error("Internal server error. Please try again later.");
     }
   };
 
   const addTeam = async (league_id: string,  team_name: string, year: string, espn_s2?: string, swid?: string) => {
     console.log("Adding team");
+    const token = localStorage.getItem("token");
     const leagueInfo: leagueInfoRequest = { league_id: parseInt(league_id), espn_s2: espn_s2, swid: swid, team_name: team_name, year: parseInt(year) };
     try {
       // API call to add team
-      console.log("HEREEEEE")
       const response = await fetch("/api/data/teams", {
         method: "POST",
         headers: {
+          "Authorization": `Bearer ${token}`,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ userId, leagueInfo }),
+        body: JSON.stringify({ leagueInfo }),
       });
       if (!response.ok) {
         throw new Error("Failed to login.");
@@ -87,9 +109,21 @@ export const TeamsProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }
 
+  useEffect(() => {
+    if (isLoggedIn) {
+      setLoading(true);
+      fetchTeams().then(() => setLoading(true));
+    }
+  }, [isLoggedIn]);
+
+  useEffect(() => {
+    if (teams.length > 0) {
+      setSelectedTeam(teams[0].team_info.team_name);
+    }
+  }, [teams]);
 
   return (
-    <TeamsContext.Provider value={{ selectedTeam, setSelectedTeam, teams, setTeams, fetchTeams, addTeam }}>
+    <TeamsContext.Provider value={{ selectedTeam, setSelectedTeam, teams, setTeams, handleManageTeamsClick, fetchTeams, addTeam }}>
       {children}
     </TeamsContext.Provider>
   );

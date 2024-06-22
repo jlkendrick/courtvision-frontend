@@ -5,7 +5,6 @@ import { Analytics } from '@vercel/analytics/react'
 import { Inter } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
 import { AuthProvider } from "./context/AuthContext";
-import { GeneralProvider } from "./context/GeneralContext";
 import { TeamsProvider } from "./context/TeamsContext";
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
@@ -25,7 +24,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <GeneralProvider>
+        
         <AuthProvider>
         <TeamsProvider>
         <ThemeProvider attribute="class" defaultTheme="dark">{children}
@@ -33,7 +32,7 @@ export default function RootLayout({
         </ThemeProvider>
         </TeamsProvider>
         </AuthProvider>
-        </GeneralProvider>
+        
         <Analytics />
       </body>
     </html>

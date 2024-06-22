@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/dialog";
 import {
   Select,
+  SelectItem,
   SelectTrigger,
   SelectContent,
   SelectGroup,
@@ -67,56 +68,34 @@ import * as z from "zod";
 import { useState } from "react";
 import { useTeams } from "@/app/context/TeamsContext";
 
-type ManageTeamsProps = {
-  manageTeamsState: any;
-  setManageTeamsState: React.Dispatch<
-    React.SetStateAction<{
-      selectedTeam: string;
-      teams: never[];
-      clickManageTeams: boolean;
-    }>
-  >;
-};
+// type ManageTeamsProps = {
+//   manageTeamsState: any;
+//   setManageTeamsState: React.Dispatch<
+//     React.SetStateAction<{
+//       selectedTeam: string;
+//       teams: never[];
+//       clickManageTeams: boolean;
+//     }>
+//   >;
+// };
 
+export function TeamDropdown() {
 
-const teams_info = [
-  {
-    team_id: "1",
-    team_name: "James's Scary Team",
-    league_name: "San Antonio H2H Points",
-    league_id: "424233486",
-    year: "2024",
-  },
-  {
-    team_id: "2",
-    team_name: "Lvl. 3 Goblins",
-    league_name: "Austin H2H Points",
-    league_id: "424233487",
-    year: "2024",
-  },
-  {
-    team_id: "3",
-    team_name: "The Big Dippers",
-    league_name: "Dallas H2H 8Cat",
-    league_id: "424233488",
-    year: "2024",
-  },
-];
+  const { teams, handleManageTeamsClick } = useTeams();
 
-export function TeamDropdown({
-  manageTeamsState,
-  setManageTeamsState,
-}: ManageTeamsProps) {
-  const handleManageTeamsClick = () => {
-    setManageTeamsState({ ...manageTeamsState, clickManageTeams: true });
-    console.log("Manage Teams clicked" + manageTeamsState.clickManageTeams);
-  };
+  // if (teams.length === 0) {
+  //   return <Skeleton className="w-[190px] h-[30px]" />;
+  // }
 
   return (
     <>
       <Select>
         <SelectTrigger className="w-[190px] text-xs hover:border-primary">
-          <SelectValue placeholder="Select a Team" />
+          <SelectValue
+            placeholder={`${
+              teams.length ? teams[0].team_info.team_name : "No teams"
+            }`}
+          />
         </SelectTrigger>
         <SelectContent>
           <SelectGroup>
@@ -137,8 +116,10 @@ export function TeamDropdown({
                   className="font-gray-400 font-medium"
                   heading="Teams"
                 >
-                  {teams_info.map((team) => (
-                  <CommandItem key={team.team_id}>{team.team_name}</CommandItem>
+                  {teams.map((team) => (
+                    <SelectItem value={team.team_info.team_name}>
+                      {team.team_info.team_name}
+                    </SelectItem>
                   ))}
                 </CommandGroup>
               </CommandList>
@@ -197,6 +178,8 @@ export function TeamDropdown({
 // }
 
 export function ManageTeamsTable() {
+  const { teams } = useTeams();
+
   return (
     <Table>
       <TableCaption>Add, delete, or edit teams.</TableCaption>
@@ -210,14 +193,16 @@ export function ManageTeamsTable() {
         </TableRow>
       </TableHeader>
       <TableBody>
-        {teams_info.map((team) => (
+        {teams.map((team) => (
           <TableRow key={team.team_id}>
-            <TableCell className="font-medium">{team.team_name}</TableCell>
-            <TableCell>{team.league_name}</TableCell>
-            <TableCell>{team.league_id}</TableCell>
-            <TableCell className="text-right">{team.year}</TableCell>
+            <TableCell className="font-medium">
+              {team.team_info.team_name}
+            </TableCell>
+            <TableCell>{"N/A"}</TableCell>
+            <TableCell>{team.team_info.league_id}</TableCell>
+            <TableCell className="text-right">{team.team_info.year}</TableCell>
             <TableCell>
-              <EditTeamMenubar />
+              <EditTeamMenubar team_id={team.team_id} />
             </TableCell>
           </TableRow>
         ))}
@@ -232,66 +217,56 @@ export function ManageTeamsTable() {
 }
 
 // This is part of the ManageTeamsTable component, no need to export
-function EditTeamMenubar() {
+function EditTeamMenubar({ team_id }: { team_id: number }) {
+
   return (
     <Menubar>
       <MenubarMenu>
-        <MenubarTrigger>
-          <Pencil size={20} />
-        </MenubarTrigger>
-        <MenubarContent>
-          <MenubarItem>
-            New Tab <MenubarShortcut>⌘T</MenubarShortcut>
-          </MenubarItem>
-          <MenubarItem>
-            New Window <MenubarShortcut>⌘N</MenubarShortcut>
-          </MenubarItem>
-          <MenubarItem disabled>New Incognito Window</MenubarItem>
-          <MenubarSeparator />
-          <MenubarSub>
-            <MenubarSubTrigger>Share</MenubarSubTrigger>
-            <MenubarSubContent>
-              <MenubarItem>Email link</MenubarItem>
-              <MenubarItem>Messages</MenubarItem>
-              <MenubarItem>Notes</MenubarItem>
-            </MenubarSubContent>
-          </MenubarSub>
-          <MenubarSeparator />
-          <MenubarItem>
-            Print... <MenubarShortcut>⌘P</MenubarShortcut>
-          </MenubarItem>
-        </MenubarContent>
-      </MenubarMenu>
-
-      <MenubarMenu>
-        <MenubarTrigger>
-          <Trash2 size={20} />
-        </MenubarTrigger>
-        <MenubarContent>
-          <MenubarItem>
-            Undo <MenubarShortcut>⌘Z</MenubarShortcut>
-          </MenubarItem>
-          <MenubarItem>
-            Redo <MenubarShortcut>⇧⌘Z</MenubarShortcut>
-          </MenubarItem>
-          <MenubarSeparator />
-          <MenubarSub>
-            <MenubarSubTrigger>Find</MenubarSubTrigger>
-            <MenubarSubContent>
-              <MenubarItem>Search the web</MenubarItem>
-              <MenubarSeparator />
-              <MenubarItem>Find...</MenubarItem>
-              <MenubarItem>Find Next</MenubarItem>
-              <MenubarItem>Find Previous</MenubarItem>
-            </MenubarSubContent>
-          </MenubarSub>
-          <MenubarSeparator />
-          <MenubarItem>Cut</MenubarItem>
-          <MenubarItem>Copy</MenubarItem>
-          <MenubarItem>Paste</MenubarItem>
-        </MenubarContent>
+        <EditTeamForm />
+        <DeleteTeamConfirmation />
       </MenubarMenu>
     </Menubar>
+  );
+}
+
+function EditTeamForm() {
+  return (
+    <Dialog>
+      <DialogTrigger>
+        <Button variant="ghost" className="hover:bg-input ml-[-5px]">
+          <Pencil size={20} />
+        </Button>
+      </DialogTrigger>
+      
+      
+    </Dialog>
+  );
+}
+
+function DeleteTeamConfirmation() {
+
+  return (
+    <Dialog>
+      <DialogTrigger>
+        <Button variant="ghost" className="hover:bg-input mr-[-5px]">
+          <Trash2 size={20} />
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Delete Team</DialogTitle>
+          <DialogDescription>
+            Are you sure you want to delete this team?
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter>
+          <Button variant="outline" className="mr-2">
+            Cancel
+          </Button>
+          <Button variant="default">Delete</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
 
@@ -481,10 +456,7 @@ function AddTeamForm() {
                   fill-true
                 />
               </Button>
-              <Button 
-                type="submit" 
-                className="size-sm bg-primary"
-              >
+              <Button type="submit" className="size-sm bg-primary">
                 <Image
                   src="/arrow.png"
                   alt="submit"

@@ -1,19 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
 import { DATABSE_API_ENDPOPINT } from "@/endpoints";
-import { error } from "console";
 
 // API route to GET all a user's teams
 export async function GET(request: NextRequest): Promise<NextResponse> {
-  const { searchParams } = new URL(request.url);
-  const userId = searchParams.get("userId");
+  console.log("GET request to /api/data/teams");
+  const token = request.headers.get("Authorization")?.split(" ")[1];
 
-  if (!userId) {
-    return NextResponse.json({ error: "User ID is required." }, { status: 400 });
+  if (!token) {
+    console.log("No authorization token");
+    return NextResponse.json({ error: "No authorization token" }, { status: 400 });
   }
 
-  const response = await fetch(`${DATABSE_API_ENDPOPINT}/teams?userId=${userId}`, {
+  console.log("Token:", token)
+
+  const response = await fetch(`${DATABSE_API_ENDPOPINT}/teams`, {
     method: "GET",
     headers: {
+      "Authorization": `Bearer ${token}`,
       "Content-Type": "application/json",
     },
   });
@@ -26,7 +29,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
 // API route to POST a new team to the user's account
 export async function POST(request: NextRequest): Promise<NextResponse> {
-		console.log("Adding team again");
+    console.log("POST request to /api/data/teams");
     const { userId, leagueInfo } = await request.json();
     const response = await fetch(`${DATABSE_API_ENDPOPINT}/teams/add`, {
       method: "POST",
