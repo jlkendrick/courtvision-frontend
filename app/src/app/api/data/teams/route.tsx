@@ -11,8 +11,6 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     return NextResponse.json({ error: "No authorization token" }, { status: 400 });
   }
 
-  console.log("Token:", token)
-
   const response = await fetch(`${DATABSE_API_ENDPOPINT}/teams`, {
     method: "GET",
     headers: {
@@ -30,13 +28,21 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 // API route to POST a new team to the user's account
 export async function POST(request: NextRequest): Promise<NextResponse> {
     console.log("POST request to /api/data/teams");
-    const { userId, leagueInfo } = await request.json();
+    const token = request.headers.get("Authorization")?.split(" ")[1];
+
+    if (!token) {
+      console.log("No authorization token");
+      return NextResponse.json({ error: "No authorization token" }, { status: 400 });
+    }
+
+    const { leagueInfo } = await request.json();
     const response = await fetch(`${DATABSE_API_ENDPOPINT}/teams/add`, {
       method: "POST",
       headers: {
+        "Authorization": `Bearer ${token}`,
         "Content-Type": "application/json",
       },
-    	body: JSON.stringify({ user_id: userId, league_info: leagueInfo }),
+    	body: JSON.stringify({ league_info: leagueInfo }),
     });
 		if (!response.ok) {
 			throw new Error("Failed to create team in api layer.");

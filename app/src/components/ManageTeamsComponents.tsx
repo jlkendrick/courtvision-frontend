@@ -81,7 +81,7 @@ import { useTeams } from "@/app/context/TeamsContext";
 
 export function TeamDropdown() {
 
-  const { teams, handleManageTeamsClick } = useTeams();
+  const { teams, setSelectedTeam, handleManageTeamsClick } = useTeams();
 
   // if (teams.length === 0) {
   //   return <Skeleton className="w-[190px] h-[30px]" />;
@@ -117,7 +117,7 @@ export function TeamDropdown() {
                   heading="Teams"
                 >
                   {teams.map((team) => (
-                    <SelectItem value={team.team_info.team_name}>
+                    <SelectItem onClick={() => setSelectedTeam(team.team_id)} value={team.team_info.team_name}>
                       {team.team_info.team_name}
                     </SelectItem>
                   ))}
@@ -181,7 +181,7 @@ export function ManageTeamsTable() {
   const { teams } = useTeams();
 
   return (
-    <Table>
+    <Table className="w-full">
       <TableCaption>Add, delete, or edit teams.</TableCaption>
       <TableHeader>
         <TableRow>

@@ -19,6 +19,7 @@ const AuthContext = createContext({
 
 interface JwtPaylaod {
   sub: number;
+  exp: number;
   email: string;
 }
 
@@ -31,12 +32,20 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     const token = localStorage.getItem("token");
+    
     if (token) {
+      const decoded = jwtDecode<JwtPaylaod>(token);
+      const exp = decoded.exp;
+      const currentTime = Date.now() / 1000;
+      if (exp < currentTime) {
+        console.log("Token expired");
+        logout();
+        return;
+      }
       console.log("Token found");
       setIsLoggedIn(true);
       setToken(token);
 
-      const decoded = jwtDecode<JwtPaylaod>(token);
       setAuthEmail(decoded.email);
     }
   }, []);

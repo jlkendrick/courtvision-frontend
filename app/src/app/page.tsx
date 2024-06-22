@@ -16,6 +16,7 @@ import Home from "@/views/HomeDashView";
 import LineupGeneration from "@/views/LineupGenerationDashView";
 import Account from "@/views/AccountDashView";
 import ManageTeams from "@/views/ManageTeamsDashView";
+import { SkeletonCard } from "@/views/LoadingView";
 
 import { ModeToggle } from "@/components/ui/toggle-mode";
 import { Separator } from "@/components/ui/separator";
@@ -216,6 +217,7 @@ export default function Dashboard() {
                     className="hover:border-primary"
                     variant="outline"
                     size="icon"
+                    onClick={() => setPage("account")}
                   >
                     <User className="h-5 w-5" />
                   </Button>
@@ -238,12 +240,12 @@ export default function Dashboard() {
             </div>
           </header>
           <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
-            {!loading && <div>Loading....</div>}
-            {loading && page === "home" && <Home onPageChange={() => setPage("home")} />}
+            {loading && <SkeletonCard />}
+            {!loading && page === "home" && <Home onPageChange={() => setPage("home")} />}
             {!loading && page === "your-team" && <YourTeam />}
             {!loading && page === "lineup-generation" && <LineupGeneration />}
             {!loading && page === "account" && (<Account />)}
-            {loading && page === "manage-teams" && <ManageTeams />}
+            {!loading && page === "manage-teams" && <ManageTeams />}
           </main>
         </div>
       </div>

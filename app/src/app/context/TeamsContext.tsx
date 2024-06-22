@@ -4,8 +4,8 @@ import { toast } from "sonner";
 import { useAuth } from "@/app/context/AuthContext";
 
 interface TeamsContextType {
-  selectedTeam: string;
-  setSelectedTeam: (team: string) => void;
+  selectedTeam: number;
+  setSelectedTeam: (team_id: number) => void;
   teams: Team[];
   setTeams: Dispatch<SetStateAction<Team[]>>;
   handleManageTeamsClick: () => void;
@@ -27,8 +27,8 @@ interface Team {
 };
 
 const TeamsContext = createContext<TeamsContextType>({
-  selectedTeam: "",
-  setSelectedTeam: (team: string) => {},
+  selectedTeam: 0,
+  setSelectedTeam: (team_id: number) => {},
   teams: [],
   setTeams: () => {},
   handleManageTeamsClick: () => {},
@@ -45,7 +45,7 @@ interface leagueInfoRequest {
 }
 
 export const TeamsProvider = ({ children }: { children: React.ReactNode }) => {
-  const [selectedTeam, setSelectedTeam] = useState("");
+  const [selectedTeam, setSelectedTeam] = useState(0);
   const [teams, setTeams] = useState<Team[]>([]);
   const { isLoggedIn, setLoading, setPage } = useAuth();
 
@@ -97,6 +97,7 @@ export const TeamsProvider = ({ children }: { children: React.ReactNode }) => {
       if (data.team_id) {
         // Add team successful
         toast.success("Team added successfully.");
+        fetchTeams();
 
       } else if (data.already_exists) {
         // Team already exists under user
@@ -112,15 +113,19 @@ export const TeamsProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     if (isLoggedIn) {
       setLoading(true);
-      fetchTeams().then(() => setLoading(true));
+      fetchTeams().then(() => setLoading(false));
     }
   }, [isLoggedIn]);
 
   useEffect(() => {
     if (teams.length > 0) {
-      setSelectedTeam(teams[0].team_info.team_name);
+      setSelectedTeam(teams[0].team_id);
     }
   }, [teams]);
+
+  useEffect(() => {
+    console.log("Selected team: ", selectedTeam);
+  }, [selectedTeam]);
 
   return (
     <TeamsContext.Provider value={{ selectedTeam, setSelectedTeam, teams, setTeams, handleManageTeamsClick, fetchTeams, addTeam }}>

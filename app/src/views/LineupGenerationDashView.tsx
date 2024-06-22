@@ -15,7 +15,7 @@ function SkeletonCard() {
         <Skeleton className="h-4 w-[200px]" />
       </div>
     </div>
-  )
+  );
 }
 
 interface stopzRequest {
@@ -46,23 +46,23 @@ interface Gene {
   Bench: Player[];
 }
 
-
 async function callStopzServer(request: stopzRequest) {
-
-  const response = await fetch("https://stopz-server-2wfwsao3zq-uc.a.run.app/optimize/", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
+  const response = await fetch(
+    "https://stopz-server-2wfwsao3zq-uc.a.run.app/optimize/",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
       body: JSON.stringify(request),
-    });
+    }
+  );
 
   const genes: Gene[] = await response.json();
   return genes;
 }
 
 export default function LineupGeneration() {
-
   const [genes, setGenes] = useState<Gene[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   // const { leagueID, leagueYear, teamName, s2, swid, threshold, week } = useLeague();
@@ -72,7 +72,6 @@ export default function LineupGeneration() {
     setIsLoading(true);
 
     async function fetchData() {
-
       // const request: stopzRequest = {
       //   league_id: parseInt(leagueID),
       //   espn_s2: s2,
@@ -98,31 +97,36 @@ export default function LineupGeneration() {
     }
 
     fetchData();
-  }
+  };
 
   return (
-		
     <>
-
-    <section className="py-5 flex-row items-center justify-center gap-3">
-        <div>
-          <StopzForm onSubmit={handleSubmit}/>
+      <>
+        <div className="flex items-center">
+          <h1 className="text-lg font-semibold md:text-2xl">Lineup Generation</h1>
         </div>
+        <div className="flex flex-1 justify-center rounded-lg border border-dashed shadow-sm">
+          <section className="py-5 flex-row gap-3">
+            <div>
+              <StopzForm onSubmit={handleSubmit} />
+            </div>
 
-        <div className="flex flex-col items-center">
-
-          <Separator orientation="horizontal" className="w-3/4 my-4 bg-primary" />
-          {isLoading ? (
-            <>
-            <SkeletonCard />
-            </>
-          ) :(
-            <LineupDisplay data={genes} />
-          )}
+            <div className="flex flex-col items-center">
+              <Separator
+                orientation="horizontal"
+                className="w-3/4 my-4 bg-primary"
+              />
+              {isLoading ? (
+                <>
+                  <SkeletonCard />
+                </>
+              ) : (
+                <LineupDisplay data={genes} />
+              )}
+            </div>
+          </section>
         </div>
-    </section>
-
+      </>
     </>
-		
   );
 }

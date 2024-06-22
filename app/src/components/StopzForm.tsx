@@ -86,7 +86,7 @@ export default function StopzForm({ onSubmit }: { onSubmit: () => void }) {
 
         <CardContent>
           <CardDescription>Select a team or enter a new one</CardDescription>
-          {/* <Form {...form}>
+          <Form {...form}>
             <form
               className="flex flex-col gap-3"
               onSubmit={form.handleSubmit(handleSubmit)}
@@ -185,7 +185,7 @@ export default function StopzForm({ onSubmit }: { onSubmit: () => void }) {
                 </p>
               )}
             </form>
-          </Form> */}
+          </Form>
         </CardContent>
       </Card>
     </div>
