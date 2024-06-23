@@ -36,9 +36,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     if (token) {
       const decoded = jwtDecode<JwtPaylaod>(token);
       const exp = decoded.exp;
-      console.log("Token expires at: ", exp);
       const currentTime = Date.now() / 1000;
-      console.log("Current time: ", currentTime);
       if (exp < currentTime) {
         console.log("Token expired");
         logout();

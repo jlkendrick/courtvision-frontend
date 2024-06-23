@@ -3,9 +3,12 @@ import type { Metadata } from "next";
 import { Analytics } from '@vercel/analytics/react'
 
 import { Inter } from "next/font/google";
+
 import { ThemeProvider } from "@/components/theme-provider";
 import { AuthProvider } from "./context/AuthContext";
 import { TeamsProvider } from "./context/TeamsContext";
+import { LineupProvider } from "./context/LineupContext";
+
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
@@ -27,9 +30,11 @@ export default function RootLayout({
         
         <AuthProvider>
         <TeamsProvider>
+        <LineupProvider>
         <ThemeProvider attribute="class" defaultTheme="dark">{children}
           <Toaster richColors/>
         </ThemeProvider>
+        </LineupProvider>
         </TeamsProvider>
         </AuthProvider>
         

@@ -1,6 +1,6 @@
 // "use client";
 import * as z from "zod";
-import { useEffect } from "react";
+import { useLineup } from "@/app/context/LineupContext";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "./ui/input";
@@ -21,7 +21,6 @@ import {
   CardTitle,
 } from "./ui/card";
 import { Button } from "./ui/button";
-import { useLeague } from "@/app/context/LeagueContext";
 import {
   Tooltip,
   TooltipContent,
@@ -29,7 +28,6 @@ import {
   TooltipTrigger,
 } from "./ui/tooltip";
 import Image from "next/image";
-import Link from "next/link";
 
 const stopzInput = z.object({
   threshold: z
@@ -38,8 +36,8 @@ const stopzInput = z.object({
   week: z.string().min(1).regex(/^\d+$/, { message: "Week must be a number" }),
 });
 
-export default function StopzForm({ onSubmit }: { onSubmit: () => void }) {
-  const { foundLeague, threshold, week, setThreshold, setWeek } = useLeague();
+export default function StopzForm() {
+  const { generateLineup } = useLineup();
 
   const form = useForm<z.infer<typeof stopzInput>>({
     resolver: zodResolver(stopzInput),
@@ -48,6 +46,7 @@ export default function StopzForm({ onSubmit }: { onSubmit: () => void }) {
       week: "",
     },
   });
+
   const reset = form.reset;
 
   const handleClearClick = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -57,22 +56,8 @@ export default function StopzForm({ onSubmit }: { onSubmit: () => void }) {
   };
 
   const handleSubmit = (data: z.infer<typeof stopzInput>) => {
-    if (!foundLeague) {
-      return;
-    }
-    console.log(data);
-    setThreshold(data.threshold);
-    setWeek(data.week);
+    generateLineup(data.threshold, data.week);
   };
-
-  useEffect(() => {
-    console.log(foundLeague, threshold, week);
-    if (foundLeague && threshold !== "" && week !== "") {
-      console.log("Changes detected, calling onSubmit");
-      onSubmit();
-    }
-    reset();
-  }, [threshold, week]);
 
   return (
     <div className="w-full pl-4 pr-4">
@@ -106,7 +91,7 @@ export default function StopzForm({ onSubmit }: { onSubmit: () => void }) {
                             </TooltipTrigger>
                             <TooltipContent className="text-center">
                               <p>
-                                &quot;I am okay dorpping any player under (threshold) average <br />
+                                &quot;I am okay dropping any player under (threshold) average <br />
                                 fantasy points per game&quot;
                               </p>
                             </TooltipContent>
@@ -179,11 +164,6 @@ export default function StopzForm({ onSubmit }: { onSubmit: () => void }) {
                   />
                 </Button>
               </CardFooter>
-              {!foundLeague && (
-                <p className="text-red-500 text-sm">
-                  Please enter a valid league <Link href="/" className="underline">here</Link>.
-                </p>
-              )}
             </form>
           </Form>
         </CardContent>
