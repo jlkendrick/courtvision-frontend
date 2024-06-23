@@ -118,7 +118,7 @@ export function TeamDropdown() {
                   heading="Teams"
                 >
                   {teams.map((team) => (
-                    <SelectItem onClick={() => setSelectedTeam(team.team_id)} value={team.team_info.team_name}>
+                    <SelectItem key={team.team_id} onClick={() => setSelectedTeam(team.team_id)} value={team.team_info.team_name}>
                       {team.team_info.team_name}
                     </SelectItem>
                   ))}
