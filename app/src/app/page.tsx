@@ -29,7 +29,7 @@ const sansita_swashed = Sansita_Swashed({
 });
 
 export default function Dashboard() {
- const { page, setPage, isLoggedIn, loading } = useAuth();
+  const { page, setPage, isLoggedIn, loading } = useAuth();
 
   return (
     <>
@@ -94,16 +94,17 @@ export default function Dashboard() {
                   <Plus className="h-4 w-4" />
                   Account
                 </div>
-                {((page === "account" || page === "manage-teams") && isLoggedIn) && (
-                  <div
-                    className={`flex items-center gap-3 rounded-lg pl-8 text-xs text-muted-foreground transition-all hover:text-primary cursor-pointer 
+                {(page === "account" || page === "manage-teams") &&
+                  isLoggedIn && (
+                    <div
+                      className={`flex items-center gap-3 rounded-lg pl-8 text-xs text-muted-foreground transition-all hover:text-primary cursor-pointer 
                       ${page === "manage-teams" ? "text-primary" : ""}`}
-                    onClick={() => setPage("manage-teams")}
-                  >
-                    <Minus size={10} />
-                    Manage Teams
-                  </div>
-                )}
+                      onClick={() => setPage("manage-teams")}
+                    >
+                      <Minus size={10} />
+                      Manage Teams
+                    </div>
+                  )}
               </nav>
             </div>
           </div>
@@ -123,21 +124,21 @@ export default function Dashboard() {
                 </Button>
               </SheetTrigger>
               <SheetContent side="left" className="flex flex-col w-1/2">
-                <div className="flex flex-row gap-2 px-4 py-2">
-                  {!isLoggedIn && (
-                    <Button
-                      variant="outline"
-                      className="hover:border-primary"
-                      onClick={() => setPage("account")}
-                    >
-                      Sign In
-                    </Button>
-                  )}
-                  {isLoggedIn && (
-                    <TeamDropdown />
-                  )}
-                </div>
-                <nav className="grid gap-2 text-lg font-medium">
+                <SheetTrigger asChild>
+                  <div className="flex flex-row gap-2 px-4 py-2">
+                    {!isLoggedIn && (
+                      <Button
+                        variant="outline"
+                        className="hover:border-primary"
+                        onClick={() => setPage("account")}
+                      >
+                        Sign In
+                      </Button>
+                    )}
+                    {isLoggedIn && <TeamDropdown />}
+                  </div>
+                </SheetTrigger>
+                <nav className="grid gap-2 text-[0.9rem] font-medium">
                   <SheetTrigger asChild>
                     <div
                       className={`flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary cursor-pointer ${
@@ -190,7 +191,7 @@ export default function Dashboard() {
                       Account
                     </div>
                   </SheetTrigger>
-                  {(isLoggedIn) && (
+                  {isLoggedIn && (
                     <SheetTrigger asChild>
                       <div
                         className={`flex items-center gap-3 rounded-lg pl-8 text-sm text-muted-foreground transition-all hover:text-primary cursor-pointer ${
@@ -239,18 +240,18 @@ export default function Dashboard() {
                     Sign In
                   </Button>
                 )}
-                {isLoggedIn && (
-                  <TeamDropdown />
-                )}
+                {isLoggedIn && <TeamDropdown />}
               </div>
             </div>
           </header>
           <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
             {loading && <SkeletonCard />}
-            {!loading && page === "home" && <Home onPageChange={() => setPage("home")} />}
+            {!loading && page === "home" && (
+              <Home onPageChange={() => setPage("home")} />
+            )}
             {!loading && page === "your-team" && <YourTeam />}
             {!loading && page === "lineup-generation" && <LineupGeneration />}
-            {!loading && page === "account" && (<Account />)}
+            {!loading && page === "account" && <Account />}
             {!loading && page === "manage-teams" && <ManageTeams />}
           </main>
         </div>
