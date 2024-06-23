@@ -11,6 +11,8 @@ interface TeamsContextType {
   handleManageTeamsClick: () => void;
   fetchTeams: () => void;
   addTeam: (league_id: string, team_name: string, year: string, espn_s2?: string, swid?: string, ) => void;
+  editTeam: (team_id: number, league_id: string, team_name: string, year: string, espn_s2?: string, swid?: string) => void;
+  deleteTeam: (team_id: number) => void;
 }
 
 interface TeamInfo {
@@ -34,6 +36,8 @@ const TeamsContext = createContext<TeamsContextType>({
   handleManageTeamsClick: () => {},
   fetchTeams: () => {},
   addTeam: (league_id: string, team_name: string, year: string, espn_s2?: string, swid?: string, ) => {},
+  editTeam: (team_id: number, league_id: string, team_name: string, year: string, espn_s2?: string, swid?: string) => {},
+  deleteTeam: (team_id: number) => {},
 });
 
 interface leagueInfoRequest {
@@ -90,7 +94,7 @@ export const TeamsProvider = ({ children }: { children: React.ReactNode }) => {
         body: JSON.stringify({ leagueInfo }),
       });
       if (!response.ok) {
-        throw new Error("Failed to login.");
+        throw new Error("Failed to add team.");
       }
       const data = await response.json();
 
@@ -103,6 +107,63 @@ export const TeamsProvider = ({ children }: { children: React.ReactNode }) => {
         // Team already exists under user
 
         toast.error("You have already added this team to your account.");
+      }
+
+    } catch (error) {
+      toast.error("Internal server error. Please try again later.");
+    }
+  }
+
+  const editTeam = async (team_id: number, league_id: string, team_name: string, year: string, espn_s2?: string, swid?: string) => {
+    const token = localStorage.getItem("token");
+    const leagueInfo: leagueInfoRequest = { league_id: parseInt(league_id), espn_s2: espn_s2, swid: swid, team_name: team_name, year: parseInt(year) };
+    try {
+      // API call to edit team
+      const response = await fetch("/api/data/teams", {
+        method: "PUT",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ team_id, leagueInfo }),
+      });
+      if (!response.ok) {
+        throw new Error("Failed to edit team.");
+      }
+      const data = await response.json();
+
+      if (data.success) {
+        // Edit team successful
+        toast.success("Team edited successfully.");
+        fetchTeams();
+      }
+
+    } catch (error) {
+      toast.error("Internal server error. Please try again later.");
+    }
+  }
+
+  const deleteTeam = async (team_id: number) => {
+    const token = localStorage.getItem("token");
+    try {
+      // API call to delete team
+      const response = await fetch("/api/data/teams", {
+        method: "DELETE",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ team_id }),
+      });
+      if (!response.ok) {
+        throw new Error("Failed to delete team.");
+      }
+      const data = await response.json();
+
+      if (data.success) {
+        // Delete team successful
+        toast.success("Team deleted successfully.");
+        fetchTeams();
       }
 
     } catch (error) {
@@ -128,7 +189,7 @@ export const TeamsProvider = ({ children }: { children: React.ReactNode }) => {
   }, [selectedTeam]);
 
   return (
-    <TeamsContext.Provider value={{ selectedTeam, setSelectedTeam, teams, setTeams, handleManageTeamsClick, fetchTeams, addTeam }}>
+    <TeamsContext.Provider value={{ selectedTeam, setSelectedTeam, teams, setTeams, handleManageTeamsClick, fetchTeams, addTeam, editTeam, deleteTeam }}>
       {children}
     </TeamsContext.Provider>
   );

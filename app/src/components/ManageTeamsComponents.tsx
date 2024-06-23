@@ -67,6 +67,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useState } from "react";
 import { useTeams } from "@/app/context/TeamsContext";
+import { DialogClose } from "@radix-ui/react-dialog";
 
 // type ManageTeamsProps = {
 //   manageTeamsState: any;
@@ -177,6 +178,19 @@ export function TeamDropdown() {
 //   );
 // }
 
+interface TeamInfo {
+  team_name: string,
+  league_id: number,
+  year: number,
+  espn_s2?: string,
+  swid?: string,
+}
+
+interface Team {
+  team_id: number,
+  team_info: TeamInfo
+};
+
 export function ManageTeamsTable() {
   const { teams } = useTeams();
 
@@ -202,7 +216,7 @@ export function ManageTeamsTable() {
             <TableCell>{team.team_info.league_id}</TableCell>
             <TableCell className="text-right">{team.team_info.year}</TableCell>
             <TableCell>
-              <EditTeamMenubar team_id={team.team_id} />
+              <ManageTeamMenubar team={team} />
             </TableCell>
           </TableRow>
         ))}
@@ -217,33 +231,21 @@ export function ManageTeamsTable() {
 }
 
 // This is part of the ManageTeamsTable component, no need to export
-function EditTeamMenubar({ team_id }: { team_id: number }) {
+function ManageTeamMenubar({ team }: { team: Team }) {
 
   return (
     <Menubar>
       <MenubarMenu>
-        <EditTeamForm />
-        <DeleteTeamConfirmation />
+        <EditTeamForm team_id={team.team_id} team_info={team.team_info} />
+        <DeleteTeamConfirmation team_id={team.team_id} />
       </MenubarMenu>
     </Menubar>
   );
 }
 
-function EditTeamForm() {
-  return (
-    <Dialog>
-      <DialogTrigger>
-        <Button variant="ghost" className="hover:bg-input ml-[-5px]">
-          <Pencil size={20} />
-        </Button>
-      </DialogTrigger>
-      
-      
-    </Dialog>
-  );
-}
+function DeleteTeamConfirmation({ team_id }: { team_id: number }) {
 
-function DeleteTeamConfirmation() {
+  const { deleteTeam } = useTeams();
 
   return (
     <Dialog>
@@ -260,10 +262,12 @@ function DeleteTeamConfirmation() {
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
-          <Button variant="outline" className="mr-2">
-            Cancel
-          </Button>
-          <Button variant="default">Delete</Button>
+          <DialogClose asChild>
+            <Button variant="outline" className="mr-2">
+              Cancel
+            </Button>
+          </DialogClose>
+          <Button onClick={() => deleteTeam(team_id)} variant="default">Delete</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -286,14 +290,6 @@ function AddTeamForm() {
     s2: z.string().optional(),
     swid: z.string().optional(),
   });
-
-  interface leagueInfoRequest {
-    league_id: number;
-    espn_s2?: string;
-    swid?: string;
-    team_name: string;
-    year: number;
-  }
 
   const form = useForm<z.infer<typeof leagueInfoSchema>>({
     resolver: zodResolver(leagueInfoSchema),
@@ -360,7 +356,7 @@ function AddTeamForm() {
                   <FormItem>
                     <FormLabel>
                       League ID
-                      <span style={{ color: "red" }}> *</span>
+                      
                     </FormLabel>
                     <FormControl>
                       <Input placeholder="ID" {...field} />
@@ -378,7 +374,7 @@ function AddTeamForm() {
                 return (
                   <FormItem>
                     <FormLabel>
-                      League Year<span style={{ color: "red" }}> *</span>
+                      League Year
                     </FormLabel>
                     <FormControl>
                       <Input placeholder="YYYY" {...field} />
@@ -396,7 +392,209 @@ function AddTeamForm() {
                 return (
                   <FormItem>
                     <FormLabel>
-                      Team Name<span style={{ color: "red" }}> *</span>
+                      Team Name
+                    </FormLabel>
+                    <FormControl>
+                      <Input placeholder="Name" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                );
+              }}
+            />
+
+            <hr></hr>
+            <DialogDescription>For private leagues.</DialogDescription>
+
+            <FormField
+              control={form.control}
+              name="s2"
+              render={({ field }) => {
+                return (
+                  <FormItem>
+                    <FormLabel>ESPN s2</FormLabel>
+                    <FormControl>
+                      <Input placeholder="s2" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                );
+              }}
+            />
+
+            <FormField
+              control={form.control}
+              name="swid"
+              render={({ field }) => {
+                return (
+                  <FormItem>
+                    <FormLabel>SWID</FormLabel>
+                    <FormControl>
+                      <Input placeholder="SWID" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                );
+              }}
+            />
+
+            <div className="flex justify-between pl-0 pr-0 mb-[-1rem]">
+              <Button
+                type="button"
+                className="size-sm bg-primary"
+                onClick={handleClearClick}
+              >
+                <Image
+                  src="/clear.png"
+                  alt="clear"
+                  width={30}
+                  height={30}
+                  fill-true
+                />
+              </Button>
+              <Button type="submit" className="size-sm bg-primary">
+                <Image
+                  src="/arrow.png"
+                  alt="submit"
+                  width={30}
+                  height={30}
+                  fill-true
+                />
+              </Button>
+            </div>
+            <div className="text-center justify-center items-center">
+              <Skeleton
+                className={` ${
+                  submitted
+                    ? "h-4 mt-5 w-full justify-center items-center"
+                    : "hidden"
+                }`}
+              ></Skeleton>
+            </div>
+          </form>
+        </Form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+
+function EditTeamForm({ team_id, team_info }: { team_id: number, team_info: TeamInfo }) {
+  const { editTeam } = useTeams();
+
+  const leagueInfoSchema = z.object({
+    leagueID: z
+      .string()
+      .min(1)
+      .regex(/^\d+$/, { message: "League ID must be a number" }),
+    leagueYear: z
+      .string()
+      .min(1)
+      .regex(/^\d+$/, { message: "League Year must be a number" }),
+    teamName: z.string().min(1),
+    s2: z.string().optional(),
+    swid: z.string().optional(),
+  });
+
+  const form = useForm<z.infer<typeof leagueInfoSchema>>({
+    resolver: zodResolver(leagueInfoSchema),
+    defaultValues: {
+      leagueID: `${team_info.league_id}`,
+      leagueYear: `${team_info.year}`,
+      teamName: team_info.team_name,
+      s2: team_info.espn_s2,
+      swid: team_info.swid,
+    },
+  });
+  const reset = form.reset;
+
+  const handleClearClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+    setSubmitted(false);
+    reset();
+  };
+
+  const [submitted, setSubmitted] = useState(false);
+
+  const handleSubmit = async (values: z.infer<typeof leagueInfoSchema>) => {
+    setSubmitted(true);
+
+    console.log(values);
+    const response = await editTeam(
+      team_id,
+      values.leagueID,
+      values.teamName,
+      values.leagueYear,
+      values.s2,
+      values.swid
+    );
+    setSubmitted(false);
+  };
+
+  return (
+    <Dialog>
+      <DialogTrigger>
+        <Button variant="ghost" className="hover:bg-input ml-[-5px]">
+          <Pencil size={20} />
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Edit Team</DialogTitle>
+          <DialogDescription>
+            Edit the information of your team.
+          </DialogDescription>
+        </DialogHeader>
+
+        <Form {...form}>
+          <form
+            onSubmit={form.handleSubmit(handleSubmit)}
+            className="flex flex-col gap-3"
+          >
+            <FormField
+              control={form.control}
+              name="leagueID"
+              render={({ field }) => {
+                return (
+                  <FormItem>
+                    <FormLabel>
+                      League ID
+                    </FormLabel>
+                    <FormControl>
+                      <Input placeholder={`${team_info.league_id}`} {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                );
+              }}
+            />
+
+            <FormField
+              control={form.control}
+              name="leagueYear"
+              render={({ field }) => {
+                return (
+                  <FormItem>
+                    <FormLabel>
+                      League Year
+                    </FormLabel>
+                    <FormControl>
+                      <Input placeholder="YYYY" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                );
+              }}
+            />
+
+            <FormField
+              control={form.control}
+              name="teamName"
+              render={({ field }) => {
+                return (
+                  <FormItem>
+                    <FormLabel>
+                      Team Name
                     </FormLabel>
                     <FormControl>
                       <Input placeholder="Name" {...field} />

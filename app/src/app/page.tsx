@@ -4,7 +4,6 @@ import { useAuth } from "@/app/context/AuthContext";
 
 import Head from "next/head";
 import Link from "next/link";
-import { useEffect, useState } from "react";
 import { Menu, Plus, User, Minus } from "lucide-react";
 import Image from "next/image";
 
@@ -23,7 +22,6 @@ import { Separator } from "@/components/ui/separator";
 
 import { Sansita_Swashed } from "next/font/google";
 import { TeamDropdown } from "@/components/ManageTeamsComponents";
-import { Skeleton } from "@/components/ui/skeleton";
 
 const sansita_swashed = Sansita_Swashed({
   weight: "600",
@@ -32,23 +30,6 @@ const sansita_swashed = Sansita_Swashed({
 
 export default function Dashboard() {
  const { page, setPage, isLoggedIn, loading } = useAuth();
-
-  // This is the state that is used by the ManageTeam component to keep track of the selected team and the teams and their effects
-  const [manageTeamsState, setManageTeamsState] = useState({
-    selectedTeam: "",
-    teams: [],
-    clickManageTeams: false,
-  });
-  useEffect(() => {
-    if (manageTeamsState.clickManageTeams) {
-      setPage("manage-teams");
-      setManageTeamsState({
-        ...manageTeamsState,
-        clickManageTeams: false,
-      });
-    }
-  }, [manageTeamsState.clickManageTeams]);
-
 
   return (
     <>
@@ -182,9 +163,9 @@ export default function Dashboard() {
                   <SheetTrigger asChild>
                     <div
                       className={`flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary cursor-pointer ${
-                        page === "streaming-optimization" ? "text-primary" : ""
+                        page === "lineup-generation" ? "text-primary" : ""
                       }`}
-                      onClick={() => setPage("streaming-optimization")}
+                      onClick={() => setPage("lineup-generation")}
                     >
                       <Plus className="h-4 w-4" />
                       Lineup Generation
@@ -197,6 +178,31 @@ export default function Dashboard() {
                     <Plus className="h-4 w-4" />
                     More Coming Soon
                   </Link>
+                  <Separator />
+                  <SheetTrigger asChild>
+                    <div
+                      className={`flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary cursor-pointer ${
+                        page === "account" ? "text-primary" : ""
+                      }`}
+                      onClick={() => setPage("account")}
+                    >
+                      <Plus className="h-4 w-4" />
+                      Account
+                    </div>
+                  </SheetTrigger>
+                  {(isLoggedIn) && (
+                    <SheetTrigger asChild>
+                      <div
+                        className={`flex items-center gap-3 rounded-lg pl-8 text-sm text-muted-foreground transition-all hover:text-primary cursor-pointer ${
+                          page === "manage-teams" ? "text-primary" : ""
+                        }`}
+                        onClick={() => setPage("manage-teams")}
+                      >
+                        <Minus size={10} />
+                        Manage Teams
+                      </div>
+                    </SheetTrigger>
+                  )}
                 </nav>
                 <div className="mt-auto flex">
                   <ModeToggle />
