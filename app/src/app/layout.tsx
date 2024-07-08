@@ -11,6 +11,7 @@ import { LineupProvider } from "./context/LineupContext";
 
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
+import Layout from "@/components/Layout";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -31,7 +32,8 @@ export default function RootLayout({
         <AuthProvider>
         <TeamsProvider>
         <LineupProvider>
-        <ThemeProvider attribute="class" defaultTheme="dark">{children}
+        <ThemeProvider attribute="class" defaultTheme="dark">
+          <Layout children={children} />
           <Toaster richColors/>
         </ThemeProvider>
         </LineupProvider>

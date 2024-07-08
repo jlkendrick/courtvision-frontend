@@ -4,7 +4,6 @@ import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import StopzForm from "@/components/StopzForm";
 import LineupDisplay from "@/components/LineupDisplay";
-import { useEffect } from "react";
 
 function SkeletonCard() {
   return (

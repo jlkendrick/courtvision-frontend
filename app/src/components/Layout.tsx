@@ -1,0 +1,210 @@
+"use client";
+
+import { useAuth } from "@/app/context/AuthContext";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation"
+
+import Head from "next/head";
+import { Menu, Plus, User, Minus } from "lucide-react";
+import Image from "next/image";
+
+import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+
+import { ModeToggle } from "@/components/ui/toggle-mode";
+import { Separator } from "@/components/ui/separator";
+import { SkeletonCard } from "@/components/ui/skeleton-card";
+
+import { Sansita_Swashed } from "next/font/google";
+import { TeamDropdown } from "@/components/ManageTeamsComponents";
+
+const sansita_swashed = Sansita_Swashed({
+  weight: "600",
+  subsets: ["latin-ext"],
+});
+import { FC } from 'react';
+
+const Layout: FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { isLoggedIn, loading } = useAuth();
+  const pathname = usePathname();
+
+  return (
+    <>
+      <Head>
+        <title>Court Visionaries - Dashboard</title>
+        <meta name="description" content="Court Visionaries provides advanced tools to help you win your fantasy basketball league." />
+        <meta name="keywords" content="fantasy basketball, fantasy sports, lineup optimization, fantasy streaming, fantasy dashboard" />
+        <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+      </Head>
+
+      <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[200px_1fr]">
+        <div className="hidden border-r bg-muted/40 md:block">
+          <div className="flex h-full max-h-screen flex-col gap-2 items-center">
+            <div className="flex h-14 items-center border-b px-8 md:h-[120px] lg:h-[120px]">
+              <Image src="/logo.png" alt="Logo" width={100} height={100} />
+            </div>
+            <div className="flex-1">
+              <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
+                <Link href="/">
+                  <div className={`flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary ${pathname === '/' ? 'text-primary' : ''}`}>
+                    <Plus className="h-4 w-4" />
+                    Home
+                  </div>
+                </Link>
+                <Link href="/teams">
+                  <div className={`flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary ${pathname === '/teams' ? 'text-primary' : ''}`}>
+                    <Plus className="h-4 w-4" />
+                    Your Teams
+                  </div>
+                </Link>
+                <Link href="/lineup-generation">
+                  <div className={`flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary ${pathname === '/lineup-generation' ? 'text-primary' : ''}`}>
+                    <Plus className="h-4 w-4" />
+                    Lineup Generation
+                  </div>
+                </Link>
+                <div className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary cursor-pointer">
+                  <Plus className="h-4 w-4" />
+                  More Coming Soon
+                </div>
+                <Separator className="my-2" />
+                <Link href="/account">
+                  <div className={`flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary ${pathname === '/account' ? 'text-primary' : ''}`}>
+                    <Plus className="h-4 w-4" />
+                    Account
+                  </div>
+                </Link>
+                {(pathname === '/account' || pathname === '/manage-teams') && isLoggedIn && (
+                  <Link href="/manage-teams">
+                    <div className={`flex items-center gap-3 rounded-lg pl-8 text-xs text-muted-foreground transition-all hover:text-primary ${pathname === '/manage-teams' ? 'text-primary' : ''}`}>
+                      <Minus size={10} />
+                      Manage Teams
+                    </div>
+                  </Link>
+                )}
+              </nav>
+            </div>
+          </div>
+        </div>
+        <div className="flex flex-col">
+          <header className="flex h-14 items-center border-b bg-muted/40 px-4 md:h-[120px] lg:h-[120px] lg:px-6">
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="outline" size="icon" className="shrink-0 md:hidden">
+                  <Menu className="h-5 w-5" />
+                  <span className="sr-only">Toggle navigation menu</span>
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left" className="flex flex-col w-1/2">
+                <SheetTrigger asChild>
+                  <div className="flex flex-row gap-2 px-4 py-2">
+                    {!isLoggedIn && (
+                      <Link href="/account">
+                        <div className="hover:border-primary">
+                          <Button variant="outline">
+                            Sign In
+                          </Button>
+                        </div>
+                      </Link>
+                    )}
+                    {isLoggedIn && <TeamDropdown />}
+                  </div>
+                </SheetTrigger>
+                <nav className="grid gap-2 text-[0.9rem] font-medium">
+                  <SheetTrigger asChild>
+                    <Link href="/">
+                      <div className={`flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary ${pathname === '/' ? 'text-primary' : ''}`}>
+                        <Plus className="h-4 w-4" />
+                        Home
+                      </div>
+                    </Link>
+                  </SheetTrigger>
+                  <SheetTrigger asChild>
+                    <Link href="/teams">
+                      <div className={`flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary ${pathname === '/teams' ? 'text-primary' : ''}`}>
+                        <Plus className="h-4 w-4" />
+                        Your Teams
+                      </div>
+                    </Link>
+                  </SheetTrigger>
+                  <SheetTrigger asChild>
+                    <Link href="/lineup-generation">
+                      <div className={`flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary ${pathname === '/lineup-generation' ? 'text-primary' : ''}`}>
+                        <Plus className="h-4 w-4" />
+                        Lineup Generation
+                      </div>
+                    </Link>
+                  </SheetTrigger>
+                  <Link href="#">
+                    <div className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all">
+                      <Plus className="h-4 w-4" />
+                      More Coming Soon
+                    </div>
+                  </Link>
+                  <Separator />
+                  <SheetTrigger asChild>
+                    <Link href="/account">
+                      <div className={`flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary ${pathname === '/account' ? 'text-primary' : ''}`}>
+                        <Plus className="h-4 w-4" />
+                        Account
+                      </div>
+                    </Link>
+                  </SheetTrigger>
+                  {isLoggedIn && (
+                    <SheetTrigger asChild>
+                      <Link href="/manage-teams">
+                        <div className={`flex items-center gap-3 rounded-lg pl-8 text-sm text-muted-foreground transition-all hover:text-primary ${pathname === '/manage-teams' ? 'text-primary' : ''}`}>
+                          <Minus size={10} />
+                          Manage Teams
+                        </div>
+                      </Link>
+                    </SheetTrigger>
+                  )}
+                </nav>
+                <div className="mt-auto flex">
+                  <ModeToggle />
+                </div>
+              </SheetContent>
+            </Sheet>
+
+            <div className="flex w-full items-center">
+              <div className={`text-4xl ml-[-2%] md:text-5xl lg:text-6xl lg:ml-[7%] w-full text-center font-bold pb-3 ${sansita_swashed.className}`}>
+                Court Visionaries
+              </div>
+              <div className="px-2 flex-col gap-1 hidden md:flex">
+                <div className="flex gap-1 justify-center">
+                  <Link href="/account">
+                    <div className="hover:border-primary">
+                      <Button variant="outline" size="icon">
+                        <User className="h-5 w-5" />
+                      </Button>
+                    </div>
+                  </Link>
+                  <ModeToggle />
+                </div>
+                <Separator />
+                {!isLoggedIn && (
+                  <Link href="/account">
+                    <div className="hover:border-primary">
+                      <Button variant="outline">
+                        Sign In
+                      </Button>
+                    </div>
+                  </Link>
+                )}
+                {isLoggedIn && <TeamDropdown />}
+              </div>
+            </div>
+          </header>
+          <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
+            {loading && <SkeletonCard />}
+            {!loading && children}
+          </main>
+        </div>
+      </div>
+    </>
+  );
+};
+
+export default Layout;
