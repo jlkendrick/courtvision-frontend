@@ -35,14 +35,15 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     return NextResponse.json({ error: "No authorization token" }, { status: 400 });
   }
 
-  const { leagueInfo } = await request.json();
+  const body = await request.json();
+  console.log("Body: ", body);
   const response = await fetch(`${DATABSE_API_ENDPOPINT}/teams/add`, {
     method: "POST",
     headers: {
       "Authorization": `Bearer ${token}`,
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ league_info: leagueInfo }),
+    body: JSON.stringify(body),
   });
   if (!response.ok) {
     throw new Error("Failed to create team in api layer.");
@@ -61,14 +62,14 @@ export async function DELETE(request: NextRequest): Promise<NextResponse> {
     return NextResponse.json({ error: "No authorization token" }, { status: 400 });
   }
 
-  const { team_id } = await request.json();
-  const response = await fetch(`${DATABSE_API_ENDPOPINT}/teams/delete`, {
+  const body = await request.json();
+  const response = await fetch(`${DATABSE_API_ENDPOPINT}/teams/remove`, {
     method: "DELETE",
     headers: {
       "Authorization": `Bearer ${token}`,
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ team_id: team_id }),
+    body: JSON.stringify(body),
   });
   if (!response.ok) {
     throw new Error("Failed to delete team in api layer.");
@@ -87,14 +88,14 @@ export async function PUT(request: NextRequest): Promise<NextResponse> {
     return NextResponse.json({ error: "No authorization token" }, { status: 400 });
   }
 
-  const { team_id, leagueInfo } = await request.json();
+  const body = await request.json();
   const response = await fetch(`${DATABSE_API_ENDPOPINT}/teams/update`, {
     method: "PUT",
     headers: {
       "Authorization": `Bearer ${token}`,
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ team_id: team_id, team_info: leagueInfo }),
+    body: JSON.stringify(body),
   });
   if (!response.ok) {
     throw new Error("Failed to update team in api layer.");

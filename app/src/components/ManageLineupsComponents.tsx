@@ -1,3 +1,4 @@
+"use client";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -194,7 +195,7 @@ interface Team {
   team_info: TeamInfo
 };
 
-export function ManageTeamsTable() {
+export function ManageLineupsTable() {
   const { teams } = useTeams();
 
   return (
@@ -202,7 +203,7 @@ export function ManageTeamsTable() {
       <TableCaption>Add, delete, or edit teams.</TableCaption>
       <TableHeader>
         <TableRow>
-          <TableHead>Team Name</TableHead>
+          <TableHead>Timestamp</TableHead>
           <TableHead>League Name</TableHead>
           <TableHead>League ID</TableHead>
           <TableHead className="text-right w-[50px]">Year</TableHead>

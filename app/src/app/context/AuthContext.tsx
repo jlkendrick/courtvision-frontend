@@ -45,6 +45,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       console.log("Token found");
       setIsLoggedIn(true);
       setToken(token);
+      setLoading(false);
 
       setAuthEmail(decoded.email);
     } else {

@@ -16,8 +16,8 @@ import Layout from "@/components/Layout";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Court Visionaries",
-  description: "Advanced tools to help you win your fantasy basketball league",
+  title: "Court Vision",
+  description: "Advanced tools to help you win your fantasy basketball league.",
 };
 
 export default function RootLayout({

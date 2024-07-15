@@ -4,40 +4,46 @@ import { useTeams } from "@/app/context/TeamsContext";
 import { toast } from "sonner";
 
 interface LineupContextType {
-  genes: Gene[];
-  setGenes: (genes: Gene[]) => void;
+  lineup: Lineup;
+  setLineup: (lineup: Lineup) => void;
   isLoading: boolean;
   setIsLoading: (isLoading: boolean) => void;
   generateLineup: (threshold: string, week: string) => void;
 }
 
 const LineupContext = createContext<LineupContextType>({
-  genes: [],
-  setGenes: (genes: Gene[]) => {},
+  lineup: {
+    Genes: [],
+    Improvement: 0,
+    Timestamp: "",
+  },
+  setLineup: (lineup: Lineup) => {},
   isLoading: false,
   setIsLoading: (isLoading: boolean) => {},
   generateLineup: (threshold: string, week: string) => {},
 });
 
-interface Player {
-  name: string;
-  avg_points: number;
-  team: string;
-  valid_positions: string[];
-  injured: boolean;
+export interface SlimPlayer {
+  Name: string;
+  AvgPoints: number;
+  Team: string;
 }
 
-interface Gene {
-  Roster: Record<string, Player>;
-  NewPlayers: Record<string, Player>;
+export interface SlimGene {
   Day: number;
-  Acquisitions: number;
-  DroppedPlayers: Player[];
-  Bench: Player[];
+  Additions: SlimPlayer[];
+  Removals: SlimPlayer[];
+  Roster: Record<string, SlimPlayer>;
+}
+
+export interface Lineup {
+  Genes: SlimGene[];
+  Improvement: number;
+  Timestamp: string;
 }
 
 export const LineupProvider = ({ children }: { children: React.ReactNode }) => {
-  const [genes, setGenes] = useState<Gene[]>([]);
+  const [lineup, setLineup] = useState<Lineup>({Genes: [], Improvement: 0, Timestamp: ""});
   const [isLoading, setIsLoading] = useState(false);
 
   const { selectedTeam } = useTeams();
@@ -46,19 +52,22 @@ export const LineupProvider = ({ children }: { children: React.ReactNode }) => {
     setIsLoading(true);
 
     try {
+      const token = localStorage.getItem("token");
+
       // API call to add team
       const response = await fetch("/api/data/lineups", {
         method: "POST",
         headers: {
+          "Authorization": `Bearer ${token}`,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ selectedTeam, threshold, week }),
+        body: JSON.stringify({ selected_team: selectedTeam, threshold: threshold, week: week }),
       });
       if (!response.ok) {
         throw new Error("Failed to generate lineup.");
       }
       const data = await response.json();
-      setGenes(data);
+      setLineup(data);
 
     } catch (error) {
       toast.error("Internal server error. Please try again later.");
@@ -67,7 +76,7 @@ export const LineupProvider = ({ children }: { children: React.ReactNode }) => {
     setIsLoading(false);
   };
 
-  return <LineupContext.Provider value={{ genes, setGenes, isLoading, setIsLoading, generateLineup }}>{children}</LineupContext.Provider>;
+  return <LineupContext.Provider value={{ lineup, setLineup, isLoading, setIsLoading, generateLineup }}>{children}</LineupContext.Provider>;
 };
 
 export const useLineup = () => useContext(LineupContext);

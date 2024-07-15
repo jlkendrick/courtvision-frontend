@@ -16,11 +16,12 @@ import { ModeToggle } from "@/components/ui/toggle-mode";
 import { Separator } from "@/components/ui/separator";
 import { SkeletonCard } from "@/components/ui/skeleton-card";
 
-import { Sansita_Swashed } from "next/font/google";
+import { Roboto } from "next/font/google";
 import { TeamDropdown } from "@/components/ManageTeamsComponents";
 
-const sansita_swashed = Sansita_Swashed({
-  weight: "600",
+const font = Roboto ({
+  weight: "900",
+  style: "italic",
   subsets: ["latin-ext"],
 });
 import { FC } from 'react';
@@ -32,8 +33,8 @@ const Layout: FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
     <>
       <Head>
-        <title>Court Visionaries - Dashboard</title>
-        <meta name="description" content="Court Visionaries provides advanced tools to help you win your fantasy basketball league." />
+        <title>Court Vision</title>
+        <meta name="description" content="Court Vision provides advanced tools to help you win your fantasy basketball league." />
         <meta name="keywords" content="fantasy basketball, fantasy sports, lineup optimization, fantasy streaming, fantasy dashboard" />
         <link rel="icon" type="image/x-icon" href="/favicon.ico" />
       </Head>
@@ -52,24 +53,32 @@ const Layout: FC<{ children: React.ReactNode }> = ({ children }) => {
                     Home
                   </div>
                 </Link>
-                <Link href="/teams">
+                <Link prefetch href="/teams">
                   <div className={`flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary ${pathname === '/teams' ? 'text-primary' : ''}`}>
                     <Plus className="h-4 w-4" />
                     Your Teams
                   </div>
                 </Link>
-                <Link href="/lineup-generation">
+                <Link prefetch href="/lineup-generation">
                   <div className={`flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary ${pathname === '/lineup-generation' ? 'text-primary' : ''}`}>
                     <Plus className="h-4 w-4" />
                     Lineup Generation
                   </div>
                 </Link>
+                {(pathname === '/lineup-generation' || pathname === '/manage-lineups') && isLoggedIn && (
+                  <Link href="/manage-lineups">
+                    <div className={`flex items-center gap-3 rounded-lg pl-8 text-xs text-muted-foreground transition-all hover:text-primary ${pathname === '/manage-lineups' ? 'text-primary' : ''}`}>
+                      <Minus size={10} />
+                      Manage Lineups
+                    </div>
+                  </Link>
+                )}
                 <div className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary cursor-pointer">
                   <Plus className="h-4 w-4" />
                   More Coming Soon
                 </div>
                 <Separator className="my-2" />
-                <Link href="/account">
+                <Link prefetch href="/account">
                   <div className={`flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary ${pathname === '/account' ? 'text-primary' : ''}`}>
                     <Plus className="h-4 w-4" />
                     Account
@@ -169,8 +178,8 @@ const Layout: FC<{ children: React.ReactNode }> = ({ children }) => {
             </Sheet>
 
             <div className="flex w-full items-center">
-              <div className={`text-4xl ml-[-2%] md:text-5xl lg:text-6xl lg:ml-[7%] w-full text-center font-bold pb-3 ${sansita_swashed.className}`}>
-                Court Visionaries
+              <div className={`text-4xl ml-[-2%] mt-[2%] md:text-5xl lg:text-6xl lg:ml-[7%] w-full text-center font-bold pb-3 ${font.className}`}>
+                <Title />
               </div>
               <div className="px-2 flex-col gap-1 hidden md:flex">
                 <div className="flex gap-1 justify-center">
@@ -208,3 +217,11 @@ const Layout: FC<{ children: React.ReactNode }> = ({ children }) => {
 };
 
 export default Layout;
+
+const Title = () => {
+  const styles: React.CSSProperties = {
+    backgroundImage: 'linear-gradient(178deg, rgb(214, 97, 158) 0%, rgb(254, 97, 158) 50%, transparent 54%, transparent 100%)'
+  };
+
+  return <>Court Vision</>;
+}

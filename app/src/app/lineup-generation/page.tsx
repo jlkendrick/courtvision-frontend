@@ -17,55 +17,8 @@ function SkeletonCard() {
   );
 }
 
-interface TeamInfo {
-  team_name: string;
-  league_id: number;
-  year: number;
-  espn_s2?: string;
-  swid?: string;
-}
-
-interface stopzRequest {
-  team_info: TeamInfo;
-  threshold: number;
-  week: string;
-}
-
-interface Player {
-  name: string;
-  avg_points: number;
-  team: string;
-  valid_positions: string[];
-  injured: boolean;
-}
-
-interface Gene {
-  Roster: Record<string, Player>;
-  NewPlayers: Record<string, Player>;
-  Day: number;
-  Acquisitions: number;
-  DroppedPlayers: Player[];
-  Bench: Player[];
-}
-
-async function callStopzServer(request: stopzRequest) {
-  const response = await fetch(
-    "https://stopz-server-2wfwsao3zq-uc.a.run.app/optimize/",
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(request),
-    }
-  );
-
-  const genes: Gene[] = await response.json();
-  return genes;
-}
-
 export default function LineupGeneration() {
-  const { genes, isLoading } = useLineup();
+  const { lineup, isLoading } = useLineup();
 
   return (
     <>
@@ -89,7 +42,7 @@ export default function LineupGeneration() {
               </>
             ) : (
               <>
-                <LineupDisplay data={genes} />
+                <LineupDisplay lineup={lineup} />
               </>
             )}
           </div>

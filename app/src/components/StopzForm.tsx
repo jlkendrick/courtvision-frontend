@@ -28,6 +28,8 @@ import {
   TooltipTrigger,
 } from "./ui/tooltip";
 import Image from "next/image";
+import { useTeams } from "@/app/context/TeamsContext";
+import { toast } from "sonner";
 
 const stopzInput = z.object({
   threshold: z
@@ -38,6 +40,7 @@ const stopzInput = z.object({
 
 export default function StopzForm() {
   const { generateLineup } = useLineup();
+  const { selectedTeam } = useTeams();
 
   const form = useForm<z.infer<typeof stopzInput>>({
     resolver: zodResolver(stopzInput),
@@ -56,6 +59,10 @@ export default function StopzForm() {
   };
 
   const handleSubmit = (data: z.infer<typeof stopzInput>) => {
+    if (selectedTeam == -1) {
+      toast.error("Please select a team first.");
+      return;
+    }
     generateLineup(data.threshold, data.week);
   };
 
@@ -63,7 +70,6 @@ export default function StopzForm() {
     <div className="w-full pl-4 pr-4">
       <Card>
         <CardHeader>
-          <CardTitle>Lineup Generation</CardTitle>
           <CardDescription>
             Get the optimal streaming schedule for your fantasy basketball team.
           </CardDescription>

@@ -91,7 +91,7 @@ export const TeamsProvider = ({ children }: { children: React.ReactNode }) => {
           "Authorization": `Bearer ${token}`,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ leagueInfo }),
+        body: JSON.stringify({ league_info: leagueInfo }),
       });
       if (!response.ok) {
         throw new Error("Failed to add team.");
@@ -107,6 +107,9 @@ export const TeamsProvider = ({ children }: { children: React.ReactNode }) => {
         // Team already exists under user
 
         toast.error("You have already added this team to your account.");
+      } else if (!data.team_id) {
+        // Team not added
+        toast.error("Invalid league information.");
       }
 
     } catch (error) {
@@ -119,13 +122,14 @@ export const TeamsProvider = ({ children }: { children: React.ReactNode }) => {
     const leagueInfo: leagueInfoRequest = { league_id: parseInt(league_id), espn_s2: espn_s2, swid: swid, team_name: team_name, year: parseInt(year) };
     try {
       // API call to edit team
+      console.log("Editing team with team_id: ", team_id, " and leagueInfo: ", leagueInfo);
       const response = await fetch("/api/data/teams", {
         method: "PUT",
         headers: {
           "Authorization": `Bearer ${token}`,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ team_id, leagueInfo }),
+        body: JSON.stringify({ team_id: team_id, league_info: leagueInfo }),
       });
       if (!response.ok) {
         throw new Error("Failed to edit team.");
@@ -136,6 +140,9 @@ export const TeamsProvider = ({ children }: { children: React.ReactNode }) => {
         // Edit team successful
         toast.success("Team edited successfully.");
         fetchTeams();
+      } else {
+        // Edit team failed
+        toast.error("Edited team information invalid.");
       }
 
     } catch (error) {
@@ -153,7 +160,7 @@ export const TeamsProvider = ({ children }: { children: React.ReactNode }) => {
           "Authorization": `Bearer ${token}`,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ team_id }),
+        body: JSON.stringify({ team_id: team_id }),
       });
       if (!response.ok) {
         throw new Error("Failed to delete team.");
@@ -181,6 +188,8 @@ export const TeamsProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     if (teams.length > 0) {
       setSelectedTeam(teams[0].team_id);
+    } else {
+      setSelectedTeam(-1);
     }
   }, [teams]);
 
