@@ -9,11 +9,12 @@ interface LineupContextType {
   isLoading: boolean;
   setIsLoading: (isLoading: boolean) => void;
   generateLineup: (threshold: string, week: string) => void;
+  saveLineup: () => void;
 }
 
 const LineupContext = createContext<LineupContextType>({
   lineup: {
-    Genes: [],
+    Lineup: [],
     Improvement: 0,
     Timestamp: "",
   },
@@ -21,6 +22,7 @@ const LineupContext = createContext<LineupContextType>({
   isLoading: false,
   setIsLoading: (isLoading: boolean) => {},
   generateLineup: (threshold: string, week: string) => {},
+  saveLineup: () => {},
 });
 
 export interface SlimPlayer {
@@ -37,17 +39,18 @@ export interface SlimGene {
 }
 
 export interface Lineup {
-  Genes: SlimGene[];
+  Lineup: SlimGene[];
   Improvement: number;
   Timestamp: string;
 }
 
 export const LineupProvider = ({ children }: { children: React.ReactNode }) => {
-  const [lineup, setLineup] = useState<Lineup>({Genes: [], Improvement: 0, Timestamp: ""});
+  const [lineup, setLineup] = useState<Lineup>({Lineup: [], Improvement: 0, Timestamp: ""});
   const [isLoading, setIsLoading] = useState(false);
 
   const { selectedTeam } = useTeams();
 
+  // ---------------------------------- Generate Lineup ----------------------------------
   const generateLineup = async (threshold: string, week: string) => {
     setIsLoading(true);
 
@@ -64,10 +67,13 @@ export const LineupProvider = ({ children }: { children: React.ReactNode }) => {
         body: JSON.stringify({ selected_team: selectedTeam, threshold: threshold, week: week }),
       });
       if (!response.ok) {
-        throw new Error("Failed to generate lineup.");
+        toast.error("Failed to generate lineup.");
+        return;
       }
       const data = await response.json();
+      console.log(data);
       setLineup(data);
+      console.log(lineup);
 
     } catch (error) {
       toast.error("Internal server error. Please try again later.");
@@ -76,7 +82,34 @@ export const LineupProvider = ({ children }: { children: React.ReactNode }) => {
     setIsLoading(false);
   };
 
-  return <LineupContext.Provider value={{ lineup, setLineup, isLoading, setIsLoading, generateLineup }}>{children}</LineupContext.Provider>;
+  // ---------------------------------- Save Lineup ----------------------------------
+  const saveLineup = async () => {
+    try {
+      const token = localStorage.getItem("token");
+
+      // API call to add team
+      const response = await fetch("/api/data/lineups", {
+        method: "PUT",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ selected_team: selectedTeam, lineup: lineup }),
+      });
+      if (!response.ok) {
+        toast.error("Failed to save lineup.");
+        return;
+      }
+      const data = await response.json();
+      console.log(data);
+      toast.success("Lineup saved successfully.");
+
+    } catch (error) {
+      toast.error("Internal server error. Please try again later.");
+    }
+  }
+
+  return <LineupContext.Provider value={{ lineup, setLineup, isLoading, setIsLoading, generateLineup, saveLineup }}>{children}</LineupContext.Provider>;
 };
 
 export const useLineup = () => useContext(LineupContext);

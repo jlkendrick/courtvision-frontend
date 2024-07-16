@@ -57,6 +57,7 @@ export const TeamsProvider = ({ children }: { children: React.ReactNode }) => {
     setPage("manage-teams");
   }
 
+  // ---------------------------------- Fetch Teams ----------------------------------
   const fetchTeams = async () => {
     const token = localStorage.getItem("token");
     try {
@@ -79,6 +80,7 @@ export const TeamsProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
+  // ---------------------------------- Add Team --------------------------------
   const addTeam = async (league_id: string,  team_name: string, year: string, espn_s2?: string, swid?: string) => {
     console.log("Adding team");
     const token = localStorage.getItem("token");
@@ -117,6 +119,7 @@ export const TeamsProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }
 
+  // ---------------------------------- Edit Team --------------------------------
   const editTeam = async (team_id: number, league_id: string, team_name: string, year: string, espn_s2?: string, swid?: string) => {
     const token = localStorage.getItem("token");
     const leagueInfo: leagueInfoRequest = { league_id: parseInt(league_id), espn_s2: espn_s2, swid: swid, team_name: team_name, year: parseInt(year) };
@@ -150,6 +153,7 @@ export const TeamsProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }
 
+  // ---------------------------------- Delete Team --------------------------------
   const deleteTeam = async (team_id: number) => {
     const token = localStorage.getItem("token");
     try {
@@ -178,6 +182,7 @@ export const TeamsProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }
 
+  
   useEffect(() => {
     if (isLoggedIn) {
       setLoading(true);

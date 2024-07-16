@@ -90,7 +90,7 @@ export default function StopzForm() {
                     <FormItem>
                       <FormLabel>
                         Threshold
-                        <TooltipProvider>
+                        {/* <TooltipProvider>
                           <Tooltip>
                             <TooltipTrigger>
                               <div className="h-4 w-5 rounded-full border ml-1 text-md">?</div>
@@ -102,11 +102,11 @@ export default function StopzForm() {
                               </p>
                             </TooltipContent>
                           </Tooltip>
-                        </TooltipProvider>
+                        </TooltipProvider> */}
                         <span style={{ color: "red" }}> *</span>
                       </FormLabel>
                       <FormControl>
-                        <Input placeholder="Threshold" {...field} />
+                        <Input placeholder='"I am ok dropping anybody who averages less than {threshold} points"' {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -122,7 +122,7 @@ export default function StopzForm() {
                     <FormItem>
                       <FormLabel>
                         Matchup Week
-                        <TooltipProvider>
+                        {/* <TooltipProvider>
                           <Tooltip>
                             <TooltipTrigger>
                               <div className="h-4 w-5 rounded-full border ml-1 text-md">?</div>
@@ -134,11 +134,11 @@ export default function StopzForm() {
                               </p>
                             </TooltipContent>
                           </Tooltip>
-                        </TooltipProvider>
+                        </TooltipProvider> */}
                         <span style={{ color: "red" }}> *</span>
                       </FormLabel>
                       <FormControl>
-                        <Input placeholder="Week #" {...field} />
+                        <Input placeholder="Week to generate a lineup for" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
