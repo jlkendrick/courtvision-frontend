@@ -94,7 +94,7 @@ export const LineupProvider = ({ children }: { children: React.ReactNode }) => {
           "Authorization": `Bearer ${token}`,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ selected_team: selectedTeam, lineup: lineup }),
+        body: JSON.stringify({ selected_team: selectedTeam, lineup_info: lineup }),
       });
       if (!response.ok) {
         toast.error("Failed to save lineup.");
@@ -102,7 +102,13 @@ export const LineupProvider = ({ children }: { children: React.ReactNode }) => {
       }
       const data = await response.json();
       console.log(data);
-      toast.success("Lineup saved successfully.");
+      if (data.success) {
+        toast.success("Lineup saved successfully.");
+      } else if (data.already_exists) {
+        toast.error("This lineup has already been saved.");
+      } else {
+        toast.error("Failed to save lineup.");
+      }
 
     } catch (error) {
       toast.error("Internal server error. Please try again later.");

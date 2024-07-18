@@ -19,7 +19,12 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { Save } from "lucide-react";
 
 export default function LineupDisplay({ lineup }: { lineup: Lineup }) {
@@ -39,22 +44,27 @@ export default function LineupDisplay({ lineup }: { lineup: Lineup }) {
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger>
-                  <div className="h-5 w-5 rounded-full border ml-2 text-sm text-white">?</div>
+                  <div className="h-5 w-5 rounded-full border ml-2 text-sm text-foreground">
+                    ?
+                  </div>
                 </TooltipTrigger>
                 <TooltipContent className="text-center">
                   <p>
-                    How many more points you can expect to score with this lineup compared <br />
+                    How many more points you can expect to score with this
+                    lineup compared <br />
                     to your current lineup with no acquisitions made.
                   </p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
-
-            <Button onClick={saveLineup} variant="outline" className="ml-auto text-white flex items-center">
+            <Button
+              onClick={saveLineup}
+              variant="outline"
+              className="ml-auto text-foreground flex items-center"
+            >
               <Save size={24} />
               <span>Save Lineup</span>
             </Button>
-
           </h1>
           <Carousel className="w-full max-w-xl mt-3">
             <CarouselContent>
@@ -66,16 +76,21 @@ export default function LineupDisplay({ lineup }: { lineup: Lineup }) {
             </CarouselContent>
             <CarouselPrevious />
             <CarouselNext />
-            <div>
+          </Carousel>
+          <div>
             <p className="text-gray-500 text-sm ml-[22px]">
-              * Players marked with a + are new acquisitions to your team.<br />
-              * Players marked with a - in red are players removed from your team.<br />
-              * Players marked with a - in grey are players not changed.
-              <br />
               * Results will vary across generations so feel free to try again.
+              <br />
+              <br />
+              * Players not playing can go in blank spots, or left on the bench.
+              <br />
+              * Players marked with a + are new acquisitions to your team.
+              <br />
+              * Players marked with a - in red are players removed from your
+              team.
+              <br />* Players marked with a - in grey are players not changed.
             </p>
           </div>
-          </Carousel>
         </div>
       )}
     </div>
@@ -228,12 +243,6 @@ function AnotherLineupCard({ gene }: { gene: SlimGene }) {
                 </>
               );
             })}
-            <TableRow>
-              <TableCell className="font-medium">INV001</TableCell>
-              <TableCell>Paid</TableCell>
-              <TableCell>Credit Card</TableCell>
-              <TableCell className="text-right">$250.00</TableCell>
-            </TableRow>
           </TableBody>
         </Table>
       </CardContent>
