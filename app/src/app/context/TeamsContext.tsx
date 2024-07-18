@@ -49,7 +49,7 @@ interface leagueInfoRequest {
 }
 
 export const TeamsProvider = ({ children }: { children: React.ReactNode }) => {
-  const [selectedTeam, setSelectedTeam] = useState(0);
+  const [selectedTeam, setSelectedTeam] = useState(-1);
   const [teams, setTeams] = useState<Team[]>([]);
   const { isLoggedIn, setLoading, setPage } = useAuth();
 
@@ -61,7 +61,6 @@ export const TeamsProvider = ({ children }: { children: React.ReactNode }) => {
   const fetchTeams = async () => {
     const token = localStorage.getItem("token");
     try {
-      console.log("Making request to fetch teams with headers: ", token)
       const response = await fetch("/api/data/teams", {
         method: "GET",
         headers: {

@@ -1,28 +1,37 @@
 "use client";
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { useTeams } from "@/app/context/TeamsContext";
 import { toast } from "sonner";
 
 interface LineupContextType {
   lineup: Lineup;
   setLineup: (lineup: Lineup) => void;
+  savedLineups: Lineup[];
+  setSavedLineups: (lineups: Lineup[]) => void;
   isLoading: boolean;
   setIsLoading: (isLoading: boolean) => void;
   generateLineup: (threshold: string, week: string) => void;
   saveLineup: () => void;
+  deleteLineup: (lineupId: number) => void;
 }
 
 const LineupContext = createContext<LineupContextType>({
   lineup: {
+    Id: 0,
     Lineup: [],
     Improvement: 0,
     Timestamp: "",
+    Week: "",
+    Threshold: 0,
   },
   setLineup: (lineup: Lineup) => {},
+  savedLineups: [],
+  setSavedLineups: (lineups: Lineup[]) => {},
   isLoading: false,
   setIsLoading: (isLoading: boolean) => {},
   generateLineup: (threshold: string, week: string) => {},
   saveLineup: () => {},
+  deleteLineup: (lineupId: number) => {},
 });
 
 export interface SlimPlayer {
@@ -39,13 +48,17 @@ export interface SlimGene {
 }
 
 export interface Lineup {
+  Id: number;
   Lineup: SlimGene[];
   Improvement: number;
   Timestamp: string;
+  Week: string;
+  Threshold: number;
 }
 
 export const LineupProvider = ({ children }: { children: React.ReactNode }) => {
-  const [lineup, setLineup] = useState<Lineup>({Lineup: [], Improvement: 0, Timestamp: ""});
+  const [lineup, setLineup] = useState<Lineup>({Id: 0, Lineup: [], Improvement: 0, Timestamp: "", Week: "", Threshold: 0});
+  const [savedLineups, setSavedLineups] = useState<Lineup[]>([{Id: 0, Lineup: [], Improvement: 0, Timestamp: "", Week: "", Threshold: 0}]);
   const [isLoading, setIsLoading] = useState(false);
 
   const { selectedTeam } = useTeams();
@@ -71,9 +84,8 @@ export const LineupProvider = ({ children }: { children: React.ReactNode }) => {
         return;
       }
       const data = await response.json();
-      console.log(data);
+      console.log("Generated Lineup:", data);
       setLineup(data);
-      console.log(lineup);
 
     } catch (error) {
       toast.error("Internal server error. Please try again later.");
@@ -115,7 +127,47 @@ export const LineupProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }
 
-  return <LineupContext.Provider value={{ lineup, setLineup, isLoading, setIsLoading, generateLineup, saveLineup }}>{children}</LineupContext.Provider>;
+  // ---------------------------------- Fetch Saved Lineups ----------------------------------
+  const fetchSavedLineups = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      
+      // API call to add team
+      console.log("Fetching saved lineups for team: ", selectedTeam);
+      const params = new URLSearchParams({ selected_team: selectedTeam.toString() });
+      const response = await fetch("/api/data/lineups?" + params.toString(), {
+        method: "GET",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+      if (!response.ok) {
+        toast.error("Failed to fetch saved lineups.");
+        return;
+      }
+      const data = await response.json();
+      console.log("Saved Lineups:", data);
+      setSavedLineups(data.lineups);
+
+    } catch (error) {
+      console.log("HHFKSDHFKSJHF")
+      toast.error("Internal server error. Please try again later.");
+    }
+  }
+
+  // ---------------------------------- Delete a Saved Lineup ----------------------------------
+  const deleteLineup = async (lineupId: number) => {
+  }
+
+  // When the selected team changes, re-fetch the saved lineups under that team
+  useEffect(() => {
+    if (selectedTeam != -1) {
+      fetchSavedLineups();
+    }
+  }, [selectedTeam]);
+
+  return <LineupContext.Provider value={{ lineup, setLineup, savedLineups, setSavedLineups, isLoading, setIsLoading, generateLineup, saveLineup, deleteLineup }}>{children}</LineupContext.Provider>;
 };
 
 export const useLineup = () => useContext(LineupContext);

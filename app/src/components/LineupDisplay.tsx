@@ -169,7 +169,7 @@ function LineupCard({ gene }: { gene: SlimGene }) {
   );
 }
 
-function AnotherLineupCard({ gene }: { gene: SlimGene }) {
+export function AnotherLineupCard({ gene }: { gene: SlimGene }) {
   const orderToDisplay = [
     "PG",
     "SG",

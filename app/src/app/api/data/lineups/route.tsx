@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { DATABSE_API_ENDPOPINT } from "@/endpoints";
 
-// API route to GET all a user's teams --------------------------------------------
+// API route to GET all a user's lineups for a certain team --------------------------------------------
 export async function GET(request: NextRequest): Promise<NextResponse> {
-  console.log("GET request to /api/data/teams");
+  console.log("GET request to /api/data/lineups");
   const token = request.headers.get("Authorization")?.split(" ")[1];
 
   if (!token) {
@@ -11,8 +11,11 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     return NextResponse.json({ error: "No authorization token" }, { status: 400 });
   }
 
-  const response = await fetch(`${DATABSE_API_ENDPOPINT}/lineups/generate`, {
-    method: "POST",
+  const { searchParams } = new URL(request.url);
+  const selected_team = searchParams.get("selected_team");
+  const params = new URLSearchParams({ selected_team: selected_team ?? "" });
+  const response = await fetch(`${DATABSE_API_ENDPOPINT}/lineups?` + params.toString(), {
+    method: "GET",
     headers: {
       "Authorization": `Bearer ${token}`,
       "Content-Type": "application/json",
