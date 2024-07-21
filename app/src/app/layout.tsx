@@ -33,7 +33,9 @@ export default function RootLayout({
         <TeamsProvider>
         <LineupProvider>
         <ThemeProvider attribute="class" defaultTheme="dark">
-          <Layout children={children} />
+          <Layout>
+            {children}
+          </Layout>
           <Toaster richColors/>
         </ThemeProvider>
         </LineupProvider>

@@ -261,7 +261,7 @@ export function AnotherLineupCard({ gene }: { gene: SlimGene }) {
           </TableHeader>
           <TableBody>
             {gene.Removals.map((player: SlimPlayer, index: number) => (
-              <TableRow>
+              <TableRow key={index}>
                 <TableCell>{player.Name}</TableCell>
                 <TableCell>{player.Team}</TableCell>
                 <TableCell>{player.AvgPoints}</TableCell>
