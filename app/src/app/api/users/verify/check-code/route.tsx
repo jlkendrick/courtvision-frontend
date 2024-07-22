@@ -17,5 +17,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 		return NextResponse.json({ error: "Failed to validate code in api layer." }, { status: 400 });
 	}
   const data = await response.json();
+  if (!data.success) {
+    return NextResponse.json({ error: "Email not found." }, { status: 400 });
+  }
   return NextResponse.json(data);
 }

@@ -9,16 +9,19 @@ import { useAuth } from "@/app/context/AuthContext";
 import { Button } from "@/components/ui/button";
 
 export default function Account() {
-  const { isLoggedIn, authEmail, login, logout, sendVerificationEmail } = useAuth();
+  const { setEmail, setPassword, isLoggedIn, authEmail, login, logout, sendVerificationEmail } = useAuth();
   const router = useRouter();
 
   const handleFormSubmit = async (typeSumbit: string, email: string, password: string) => {
     
+    setEmail(email);
+    setPassword(password);
+
     // If we are creating an account, we must send an email to verify the account
     if (typeSumbit === "CREATE") {
       
       // Redirect to verify email page and send the verification email
-      const success = await sendVerificationEmail(email);
+      const success = await sendVerificationEmail(email, password);
       if (!success) {
         return;
       }

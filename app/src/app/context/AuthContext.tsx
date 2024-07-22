@@ -4,6 +4,10 @@ import { toast } from "sonner";
 import { jwtDecode } from "jwt-decode";
 
 const AuthContext = createContext({
+  email : "",
+  setEmail: (email: string) => {},
+  password: "",
+  setPassword: (password: string) => {},
   token: "",
   isLoggedIn: false,
   setIsLoggedIn: (isLoggedIn: boolean) => {},
@@ -15,7 +19,8 @@ const AuthContext = createContext({
   setPage: (page: string) => {},
   login: (email: string, password: string, typeSumbit: string) => {},
   logout: () => {},
-  sendVerificationEmail: async (email: string) => false,
+  sendVerificationEmail: async (email: string, password?: string) => false,
+  checkCode: async (email: string, code: string) => false,
 });
 
 interface JwtPaylaod {
@@ -25,6 +30,8 @@ interface JwtPaylaod {
 }
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+  const [email , setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(true);
   const [token, setToken] = useState<string>("");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -132,7 +139,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setIsLoggedIn(false);
   };
 
-  async function sendVerificationEmail(email: string): Promise<boolean> {
+  async function sendVerificationEmail(email: string, password_query?: string): Promise<boolean> {
     try {
     
       // API call to send verification email
@@ -141,12 +148,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ email: email }),
+        body: JSON.stringify({ email: email, password: password_query ? password_query : password }),
       });
       if (!response.ok) {
         throw new Error("Failed to send verification email.");
       }
       const data = await response.json();
+      if (data.success && data.already_in_use) {
+        // Email already in use
+        toast.error("You must wait before generating a new code.");
+        return false;
+      }
       if (data.success) {
 
         // Email sent successfully
@@ -173,9 +185,43 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
+  async function checkCode(email: string, code: string): Promise<boolean> {
+    try {
+      // API call to check code
+      const response = await fetch("/api/users/verify/check-code", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email: email, code: code }),
+      });
+      if (!response.ok) {
+        throw new Error("Failed to check code.");
+      }
+      const data = await response.json();
+      if (data.valid) {
+        // Code is correct
+        toast.success("Code is correct.");
+        return true;
+      } else {
+        // Code is incorrect
+        toast.error("Code is incorrect or expired.");
+        return false;
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error("Internal server error. Please try again later.");
+      return false;
+    }
+  }
+
   return (
     <AuthContext.Provider
       value={{
+        email,
+        setEmail,
+        password,
+        setPassword,
         token,
         isLoggedIn,
         setIsLoggedIn,
@@ -188,6 +234,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         login,
         logout,
         sendVerificationEmail,
+        checkCode,
       }}
     >
       {children}

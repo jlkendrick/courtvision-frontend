@@ -3,7 +3,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -22,6 +21,7 @@ import {
 } from "@/components/ui/input-otp";
 
 import { useSearchParams } from "next/navigation";
+import { useAuth } from "@/app/context/AuthContext";
 
 const FormSchema = z.object({
   pin: z.string().min(6, {
@@ -30,8 +30,9 @@ const FormSchema = z.object({
 });
 
 export default function VerifyEmail() {
+  const { email, sendVerificationEmail, checkCode } = useAuth();
   const searchParams = useSearchParams();
-  const email = searchParams.get("email");
+  const email_param = searchParams.get("email");
 
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
@@ -42,6 +43,13 @@ export default function VerifyEmail() {
 
   function onSubmit(data: z.infer<typeof FormSchema>) {
     
+  }
+
+  function handleResendEmail() {
+    // This is checking if the user got here from the account page, blocking people who may have just typed in the URL, potentially maliciously
+    if (email !== "" && email_param === email) {
+      sendVerificationEmail(email_param!!);
+    }
   }
 
   return (
@@ -83,12 +91,17 @@ export default function VerifyEmail() {
                     </FormControl>
                     <FormDescription>
                       Please enter the code sent to
-                      <span className="font-semibold"> {email}</span>
+                      <span className="font-semibold"> {email_param}</span>
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
               />
+              <div className="flex justify-center">
+                <a className="text-blue-500 cursor-pointer underline text-xs hover:no-underline" onClick={handleResendEmail}>
+                  Resend Email
+                </a>
+              </div>
 							<div className="flex justify-center">
               	<Button variant="default">Submit</Button>
 							</div>
