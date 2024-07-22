@@ -21,12 +21,6 @@ import {
   CardTitle,
 } from "./ui/card";
 import { Button } from "./ui/button";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "./ui/tooltip";
 import Image from "next/image";
 import { useTeams } from "@/app/context/TeamsContext";
 import { toast } from "sonner";

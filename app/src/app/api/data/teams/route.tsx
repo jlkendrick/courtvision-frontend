@@ -19,7 +19,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     },
   });
   if (!response.ok) {
-    throw new Error("Failed to fetch teams in api layer.");
+    return NextResponse.json({ error: "Failed to get teams in api layer." }, { status: 400 });
   }
   const data = await response.json();
   return NextResponse.json(data);
@@ -46,7 +46,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     body: JSON.stringify(body),
   });
   if (!response.ok) {
-    throw new Error("Failed to create team in api layer.");
+    return NextResponse.json({ error: "Failed to add team in api layer." }, { status: 400 });
   }
   const data = await response.json();
   return NextResponse.json(data);
@@ -72,7 +72,7 @@ export async function DELETE(request: NextRequest): Promise<NextResponse> {
     body: JSON.stringify(body),
   });
   if (!response.ok) {
-    throw new Error("Failed to delete team in api layer.");
+    return NextResponse.json({ error: "Failed to remove team in api layer." }, { status: 400 });
   }
   const data = await response.json();
   return NextResponse.json(data);
@@ -98,7 +98,7 @@ export async function PUT(request: NextRequest): Promise<NextResponse> {
     body: JSON.stringify(body),
   });
   if (!response.ok) {
-    throw new Error("Failed to update team in api layer.");
+    return NextResponse.json({ error: "Failed to update team in api layer." }, { status: 400 });
   }
   const data = await response.json();
   return NextResponse.json(data);

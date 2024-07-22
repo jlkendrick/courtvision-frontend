@@ -151,13 +151,42 @@ export const LineupProvider = ({ children }: { children: React.ReactNode }) => {
       setSavedLineups(data.lineups);
 
     } catch (error) {
-      console.log("HHFKSDHFKSJHF")
       toast.error("Internal server error. Please try again later.");
     }
   }
 
   // ---------------------------------- Delete a Saved Lineup ----------------------------------
   const deleteLineup = async (lineupId: number) => {
+
+    try {
+      const token = localStorage.getItem("token");
+
+      // API call to add team
+      const params = new URLSearchParams({ lineup_id: lineupId.toString() });
+      const response = await fetch("/api/data/lineups?" + params.toString(), {
+        method: "DELETE",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ lineup_id: lineupId }),
+      });
+      if (!response.ok) {
+        toast.error("Failed to delete lineup.");
+        return;
+      }
+      const data = await response.json();
+      console.log(data);
+      if (data.success) {
+        toast.success("Lineup deleted successfully.");
+        fetchSavedLineups();
+      } else {
+        toast.error("Failed to delete lineup.");
+      }
+
+    } catch (error) {
+      toast.error("Internal server error. Please try again");
+    }
   }
 
   // When the selected team changes, re-fetch the saved lineups under that team

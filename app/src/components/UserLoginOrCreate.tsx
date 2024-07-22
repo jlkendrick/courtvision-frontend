@@ -1,5 +1,5 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -8,23 +8,76 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { z } from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  Form,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+  FormControl,
+} from "@/components/ui/form";
+
+// Define Zod schemas
+const loginSchema = z.object({
+  email: z.string().email({ message: "Invalid email address" }),
+  password: z
+    .string()
+    .min(6, { message: "Password must be at least 6 characters" }),
+});
+
+const createSchema = z
+  .object({
+    email: z.string().email({ message: "Invalid email address" }),
+    password: z
+      .string()
+      .min(6, { message: "Password must be at least 6 characters" }),
+    confirmPassword: z
+      .string()
+      .min(6, { message: "Password must be at least 6 characters" }),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ["confirmPassword"],
+  });
 
 export default function UserLoginOrCreate({
-  setEmail,
-  setPassword,
-	setConfirmPassword,
+  handleFormSubmit
 }: {
-  setEmail: (email: string) => void;
-  setPassword: (password: string) => void;
-	setConfirmPassword: (confirmPassword: string) => void;
+  handleFormSubmit: (typeSubmit: string, email: string, password: string) => void;
 }) {
-
   const handleTabChange = () => {
-		setEmail("");
-		setPassword("");
-		setConfirmPassword("");
-	}
+    // Clear form data
+    loginForm.reset();
+    createForm.reset();
+  };
+
+  const loginForm = useForm<z.infer<typeof loginSchema>>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
+
+  const createForm = useForm<z.infer<typeof createSchema>>({
+    resolver: zodResolver(createSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+      confirmPassword: "",
+    },
+  });
+
+  const handleLoginSubmit = (data: z.infer<typeof loginSchema>) => {
+    handleFormSubmit("LOGIN", data.email, data.password);
+  };
+
+  const handleCreateSubmit = (data: z.infer<typeof createSchema>) => {
+    handleFormSubmit("CREATE", data.email, data.password);
+  };
 
   return (
     <div className="flex justify-center mt-5">
@@ -35,6 +88,7 @@ export default function UserLoginOrCreate({
             <TabsTrigger value="create">Create</TabsTrigger>
           </TabsList>
         </div>
+
         <TabsContent value="login">
           <div className="flex justify-center">
             <Card className="w-full max-w-md">
@@ -45,26 +99,60 @@ export default function UserLoginOrCreate({
                 </CardDescription>
               </CardHeader>
               <CardContent className="grid gap-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="m@example.com"
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="password">Password</Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    placeholder="************"
-										onChange={(e) => setPassword(e.target.value)}
-                    required
-                  />
-                </div>
+                <Form {...loginForm}>
+                  <form
+                    className="flex flex-col gap-3"
+                    onSubmit={loginForm.handleSubmit(handleLoginSubmit)}
+                  >
+                    <div className="grid gap-2">
+                      <FormField
+                        control={loginForm.control}
+                        name="email"
+                        render={({ field }) => {
+                          return (
+                            <FormItem>
+                              <FormLabel>
+                                Email
+                                <span style={{ color: "red" }}> *</span>
+                              </FormLabel>
+                              <FormControl>
+                                <Input placeholder="m@example.com" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          );
+                        }}
+                      />
+                    </div>
+
+                    <div className="grid gap-2">
+                      <FormField
+                        control={loginForm.control}
+                        name="password"
+                        render={({ field }) => {
+                          return (
+                            <FormItem>
+                              <FormLabel>
+                                Password
+                                <span style={{ color: "red" }}> *</span>
+                              </FormLabel>
+                              <FormControl>
+                                <Input
+                                  type="password"
+                                  placeholder="************"
+                                  {...field}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          );
+                        }}
+                      />
+                    </div>
+
+                    <Button type="submit">Submit</Button>
+                  </form>
+                </Form>
               </CardContent>
             </Card>
           </div>
@@ -79,36 +167,87 @@ export default function UserLoginOrCreate({
                 </CardDescription>
               </CardHeader>
               <CardContent className="grid gap-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="m@example.com"
-										onChange={(e) => setEmail(e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="password">Password</Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    placeholder="************"
-										onChange={(e) => setPassword(e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="confirm-password">Confirm Password</Label>
-                  <Input
-                    id="confirm-password"
-                    type="password"
-                    placeholder="************"
-										onChange={(e) => setConfirmPassword(e.target.value)}
-                    required
-                  />
-                </div>
+                <Form {...createForm}>
+                  <form
+                    className="flex flex-col gap-3"
+                    onSubmit={createForm.handleSubmit(handleCreateSubmit)}
+                  >
+                    <div className="grid gap-2">
+                        <FormField
+                          control={createForm.control}
+                          name="email"
+                          render={({ field }) => {
+                            return (
+                              <FormItem>
+                                <FormLabel>
+                                  Email
+                                  <span style={{ color: "red" }}> *</span>
+                                </FormLabel>
+                                <FormControl>
+                                  <Input
+                                    placeholder="m@example.com"
+                                    {...field}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            );
+                          }}
+                        />
+                      
+                    </div>
+                    <div className="grid gap-2">
+                      <FormField
+                        control={createForm.control}
+                        name="password"
+                        render={({ field }) => {
+                          return (
+                            <FormItem>
+                              <FormLabel>
+                                Password
+                                <span style={{ color: "red" }}> *</span>
+                              </FormLabel>
+                              <FormControl>
+                                <Input
+                                  type="password"
+                                  placeholder="************"
+                                  {...field}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          );
+                        }}
+                      />
+                    </div>
+
+                    <div className="grid gap-2">
+                      <FormField
+                        control={createForm.control}
+                        name="confirmPassword"
+                        render={({ field }) => {
+                          return (
+                            <FormItem>
+                              <FormLabel>
+                                Confirm Password
+                                <span style={{ color: "red" }}> *</span>
+                              </FormLabel>
+                              <FormControl>
+                                <Input
+                                  type="password"
+                                  placeholder="************"
+                                  {...field}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          );
+                        }}
+                      />
+                    </div>
+                    <Button type="submit">Submit</Button>
+                  </form>
+                </Form>
               </CardContent>
             </Card>
           </div>

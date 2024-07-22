@@ -11,6 +11,9 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     },
     body: JSON.stringify({ email, password }),
   });
+  if (!response.ok) {
+    return NextResponse.json({ error: "Failed to create user in api layer." }, { status: 400 });
+  }
   const data = await response.json();
   return NextResponse.json(data);
 }

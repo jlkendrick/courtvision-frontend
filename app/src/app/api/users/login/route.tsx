@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
 		body: JSON.stringify({ email, password })
 	})
 	if (!response.ok) {
-		throw new Error("Failed to create account in api layer.");
+		return NextResponse.json({ error: "Failed to login user in api layer." }, { status: 400 });
 	}
 	const data = await response.json();
 	return NextResponse.json(data);

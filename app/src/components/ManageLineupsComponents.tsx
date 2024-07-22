@@ -2,27 +2,26 @@
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
-  DialogContent,
-  DialogTrigger,
+  DialogClose,
   DialogTitle,
-  DialogHeader,
   DialogDescription,
   DialogFooter,
+  DialogHeader,
+  DialogContent,
+  DialogTrigger,
 } from "@/components/ui/dialog";
 import {
   Table,
   TableBody,
   TableCaption,
   TableCell,
-  TableFooter,
   TableHead,
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
 import { Eye, Trash2 } from "lucide-react";
-import { DialogClose } from "@radix-ui/react-dialog";
 import { Lineup, SlimGene, useLineup } from "@/app/context/LineupContext";
-import LineupDisplay, { AnotherLineupCard } from "@/components/LineupDisplay";
+import { AnotherLineupCard } from "@/components/LineupDisplay";
 import {
   Carousel,
   CarouselContent,
@@ -68,9 +67,7 @@ export function ManageLineupsTable() {
                 </TableCell>
                 <TableCell className="text-center">
                   <div className="inline-block">
-                  <Button variant="ghost" onClick={() => deleteLineup(savedLineup.Id)}>
-                    <Trash2 size={20} />
-                  </Button>
+                    <DeleteLineupConfirmation team_id={savedLineup.Id} />
                   </div>
                 </TableCell>
               </TableRow>
@@ -115,7 +112,33 @@ function ViewLineupButton({ lineup }: { lineup: Lineup }) {
   );
 }
 
-// function LineupDialogView({ lineup }: { lineup: Lineup }) {
-//   return
-//   );
-// }
+
+function DeleteLineupConfirmation({ team_id }: { team_id: number }) {
+  const { deleteLineup } = useLineup();
+
+  return (
+    <Dialog>
+      <DialogTrigger>
+        <Button variant="ghost" className="hover:bg-input mr-[-5px]">
+          <Trash2 size={20} />
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Delete Lineup</DialogTitle>
+          <DialogDescription>
+            Are you sure you want to delete this lineup?
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter>
+          <DialogClose asChild>
+            <Button variant="outline" className="mr-2">
+              Cancel
+            </Button>
+          </DialogClose>
+          <Button onClick={() => deleteLineup(team_id)} variant="default">Delete</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}

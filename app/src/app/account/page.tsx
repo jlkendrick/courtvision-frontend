@@ -1,5 +1,7 @@
 "use client";
-import { useState } from "react";
+import React from "react";
+
+import { useRouter } from "next/navigation";
 
 import UAuthForm from "@/components/UserLoginOrCreate";
 import { useAuth } from "@/app/context/AuthContext";
@@ -7,15 +9,25 @@ import { useAuth } from "@/app/context/AuthContext";
 import { Button } from "@/components/ui/button";
 
 export default function Account() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const { isLoggedIn, authEmail, login, logout } = useAuth();
+  const { isLoggedIn, authEmail, login, logout, sendVerificationEmail } = useAuth();
+  const router = useRouter();
 
-  const handleFormSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleFormSubmit = async (typeSumbit: string, email: string, password: string) => {
+    
+    // If we are creating an account, we must send an email to verify the account
+    if (typeSumbit === "CREATE") {
+      
+      // Redirect to verify email page and send the verification email
+      const success = await sendVerificationEmail(email);
+      if (!success) {
+        return;
+      }
 
-    login(email, password, confirmPassword);
+      router.push("/account/verify-email?email=" + email);
+    } else {
+      // If we are logging in, we must call the login function
+      login(email, password, "LOGIN");
+    }
   };
 
   return (
@@ -29,18 +41,8 @@ export default function Account() {
             <div className="flex flex-col items-center gap-1">
               <div className="flex-col items-center">
                 <UAuthForm
-                  setEmail={setEmail}
-                  setPassword={setPassword}
-                  setConfirmPassword={setConfirmPassword}
+                  handleFormSubmit={handleFormSubmit}
                 />
-                <div className="flex mt-2 justify-center">
-                  <Button
-                    className="w-full max-w-md"
-                    onClick={handleFormSubmit}
-                  >
-                    Submit
-                  </Button>
-                </div>
               </div>
             </div>
           </div>
