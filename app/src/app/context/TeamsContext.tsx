@@ -2,6 +2,7 @@
 import React, { createContext, useContext, useState, useEffect, Dispatch, SetStateAction } from "react";
 import { toast } from "sonner";
 import { useAuth } from "@/app/context/AuthContext";
+import { usePathname } from "next/navigation";
 
 interface TeamsContextType {
   selectedTeam: number;
@@ -181,7 +182,7 @@ export const TeamsProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }
 
-  
+  // Fetch teams on login
   useEffect(() => {
     if (isLoggedIn) {
       setLoading(true);
@@ -189,6 +190,7 @@ export const TeamsProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }, [isLoggedIn]);
 
+  // Set selected team to first team in list
   useEffect(() => {
     if (teams.length > 0) {
       setSelectedTeam(teams[0].team_id);
@@ -197,9 +199,18 @@ export const TeamsProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }, [teams]);
 
+  // Log selected team
   useEffect(() => {
     console.log("Selected team: ", selectedTeam);
   }, [selectedTeam]);
+
+  // Fetch team information when selected team changes and user is on your-teams page
+  const pathname = usePathname();
+  useEffect(() => {
+    if (pathname === "/your-teams" && selectedTeam !== -1) {
+      console.log("Fetching team information for team: ", selectedTeam);
+    }
+  }, [selectedTeam, pathname]);
 
   return (
     <TeamsContext.Provider value={{ selectedTeam, setSelectedTeam, teams, setTeams, handleManageTeamsClick, fetchTeams, addTeam, editTeam, deleteTeam }}>

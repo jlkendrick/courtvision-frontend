@@ -54,7 +54,7 @@ const items = [
     header: <Skeleton />,
     className: "md:col-span-3 justify-end border-gray-300",
     icon: <></>,
-    page: "/teams",
+    page: "/your-teams",
   },
   {
     title: "Lineup Generation",

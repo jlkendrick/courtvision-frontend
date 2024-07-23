@@ -199,9 +199,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         throw new Error("Failed to check code.");
       }
       const data = await response.json();
-      if (data.valid) {
-        // Code is correct
-        toast.success("Code is correct.");
+      if (data.already_exists) {
+        // Code is correct but the account already exists... somehow
+        toast.success("Account already exists.");
+        return false;
+      } else if (data.valid) {
+        // Code is correct and account is created
+        toast.success("Email verified!");
+        const { access_token } = data;
+        localStorage.setItem("token", access_token);
+        const decoded = jwtDecode<JwtPaylaod>(access_token);
+        setAuthEmail(decoded.email);
+
+        setIsLoggedIn(true);
         return true;
       } else {
         // Code is incorrect

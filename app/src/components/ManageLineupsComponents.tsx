@@ -48,7 +48,7 @@ export function ManageLineupsTable() {
         </TableRow>
       </TableHeader>
       <TableBody>
-        {savedLineups.length != 0 ? (
+        {savedLineups ? (
           <>
             {savedLineups.map((savedLineup) => (
               <TableRow key={savedLineup.Id}>
@@ -75,7 +75,7 @@ export function ManageLineupsTable() {
           </>
         ) : (
           <TableRow>
-            <TableCell colSpan={5}>
+            <TableCell colSpan={6}>
               <p className="text-center text-gray-400">No lineups found.</p>
             </TableCell>
           </TableRow>

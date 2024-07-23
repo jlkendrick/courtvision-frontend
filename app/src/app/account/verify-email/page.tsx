@@ -22,6 +22,7 @@ import {
 
 import { useSearchParams } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
+import { useRouter } from "next/navigation";
 
 const FormSchema = z.object({
   pin: z.string().min(6, {
@@ -33,6 +34,7 @@ export default function VerifyEmail() {
   const { email, sendVerificationEmail, checkCode } = useAuth();
   const searchParams = useSearchParams();
   const email_param = searchParams.get("email");
+  const router = useRouter();
 
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
@@ -41,8 +43,12 @@ export default function VerifyEmail() {
     },
   });
 
-  function onSubmit(data: z.infer<typeof FormSchema>) {
-    
+  async function onSubmit(data: z.infer<typeof FormSchema>) {
+    const success = await checkCode(email_param!!, data.pin);
+    if (success) {
+      // Redirect to the account page
+      router.push("/account");
+    }
   }
 
   function handleResendEmail() {
