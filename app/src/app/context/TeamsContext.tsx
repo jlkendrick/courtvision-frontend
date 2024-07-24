@@ -2,18 +2,19 @@
 import React, { createContext, useContext, useState, useEffect, Dispatch, SetStateAction } from "react";
 import { toast } from "sonner";
 import { useAuth } from "@/app/context/AuthContext";
-import { usePathname } from "next/navigation";
 
 interface TeamsContextType {
-  selectedTeam: number;
+  selectedTeam: number | null;
   setSelectedTeam: (team_id: number) => void;
   teams: Team[];
   setTeams: Dispatch<SetStateAction<Team[]>>;
+  rosterInfo: RosterPlayer[];
   handleManageTeamsClick: () => void;
   fetchTeams: () => void;
   addTeam: (league_id: string, team_name: string, year: string, espn_s2?: string, swid?: string, ) => void;
   editTeam: (team_id: number, league_id: string, team_name: string, year: string, espn_s2?: string, swid?: string) => void;
   deleteTeam: (team_id: number) => void;
+  getLineupInfo: () => void;
 }
 
 interface TeamInfo {
@@ -29,16 +30,26 @@ interface Team {
   team_info: TeamInfo
 };
 
+export interface RosterPlayer {
+  name: string,
+  avg_points: number,
+  team: string,
+  valid_positions: string[],
+  injured: boolean,
+}
+
 const TeamsContext = createContext<TeamsContextType>({
   selectedTeam: 0,
   setSelectedTeam: (team_id: number) => {},
   teams: [],
   setTeams: () => {},
+  rosterInfo: [],
   handleManageTeamsClick: () => {},
   fetchTeams: () => {},
   addTeam: (league_id: string, team_name: string, year: string, espn_s2?: string, swid?: string, ) => {},
   editTeam: (team_id: number, league_id: string, team_name: string, year: string, espn_s2?: string, swid?: string) => {},
   deleteTeam: (team_id: number) => {},
+  getLineupInfo: () => {},
 });
 
 interface leagueInfoRequest {
@@ -50,9 +61,11 @@ interface leagueInfoRequest {
 }
 
 export const TeamsProvider = ({ children }: { children: React.ReactNode }) => {
-  const [selectedTeam, setSelectedTeam] = useState(-1);
+  const [selectedTeam, setSelectedTeam] = useState<number | null>(null);
   const [teams, setTeams] = useState<Team[]>([]);
-  const { isLoggedIn, setLoading, setPage } = useAuth();
+  const [rosterInfo, setRosterInfo] = useState<RosterPlayer[]>([]);
+
+  const { isLoggedIn, logout, setLoading, setPage } = useAuth();
 
   const handleManageTeamsClick = () => {
     setPage("manage-teams");
@@ -69,13 +82,14 @@ export const TeamsProvider = ({ children }: { children: React.ReactNode }) => {
           "Content-Type": "application/json",
         },
       });
-      if (!response.ok) {
-        throw new Error("Failed to fetch teams.");
+      if (response.status === 401) {
+        toast.error("Invalid or expired token. Please log in again.");
+        logout();
       }
       const data = await response.json();
       setTeams(data.teams);
     } catch (error) {
-      console.log(error)
+      
       toast.error("Internal server error. Please try again later.");
     }
   };
@@ -182,6 +196,38 @@ export const TeamsProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }
 
+  // -------------------------------- Get Lineup Info ------------------------------
+  const getLineupInfo = async () => {
+    setLoading(true);
+    const token = localStorage.getItem("token");
+
+    try {
+
+      const params = new URLSearchParams({ team_id: selectedTeam!!.toString() });
+      const response = await fetch("/api/data/view-team?" + params.toString(), {
+        method: "GET",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+      if (!response.ok) {
+        throw new Error("Failed to fetch lineup info.");
+      }
+      const data = await response.json();
+
+      console.log(data);
+      setRosterInfo(data);
+      setLoading(false);
+
+    } catch (error) {
+      toast.error("Internal server error. Please try again later.");
+      setLoading(false);
+    }
+  }
+
+  // ---------------------------------- Use Effects --------------------------------
+
   // Fetch teams on login
   useEffect(() => {
     if (isLoggedIn) {
@@ -194,26 +240,11 @@ export const TeamsProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     if (teams.length > 0) {
       setSelectedTeam(teams[0].team_id);
-    } else {
-      setSelectedTeam(-1);
     }
   }, [teams]);
 
-  // Log selected team
-  useEffect(() => {
-    console.log("Selected team: ", selectedTeam);
-  }, [selectedTeam]);
-
-  // Fetch team information when selected team changes and user is on your-teams page
-  const pathname = usePathname();
-  useEffect(() => {
-    if (pathname === "/your-teams" && selectedTeam !== -1) {
-      console.log("Fetching team information for team: ", selectedTeam);
-    }
-  }, [selectedTeam, pathname]);
-
   return (
-    <TeamsContext.Provider value={{ selectedTeam, setSelectedTeam, teams, setTeams, handleManageTeamsClick, fetchTeams, addTeam, editTeam, deleteTeam }}>
+    <TeamsContext.Provider value={{ selectedTeam, setSelectedTeam, teams, setTeams, rosterInfo, handleManageTeamsClick, fetchTeams, addTeam, editTeam, deleteTeam, getLineupInfo }}>
       {children}
     </TeamsContext.Provider>
   );

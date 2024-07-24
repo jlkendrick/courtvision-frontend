@@ -18,7 +18,9 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       "Content-Type": "application/json",
     },
   });
-  if (!response.ok) {
+  if (response.status === 401) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  } else if (!response.ok) {
     return NextResponse.json({ error: "Failed to get teams in api layer." }, { status: 400 });
   }
   const data = await response.json();

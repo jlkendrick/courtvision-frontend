@@ -134,7 +134,7 @@ export const LineupProvider = ({ children }: { children: React.ReactNode }) => {
       
       // API call to add team
       console.log("Fetching saved lineups for team: ", selectedTeam);
-      const params = new URLSearchParams({ selected_team: selectedTeam.toString() });
+      const params = new URLSearchParams({ selected_team: selectedTeam!!.toString() });
       const response = await fetch("/api/data/lineups?" + params.toString(), {
         method: "GET",
         headers: {
@@ -191,7 +191,7 @@ export const LineupProvider = ({ children }: { children: React.ReactNode }) => {
 
   // When the selected team changes, re-fetch the saved lineups under that team
   useEffect(() => {
-    if (selectedTeam != -1) {
+    if (selectedTeam) {
       fetchSavedLineups();
     }
   }, [selectedTeam]);

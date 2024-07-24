@@ -54,7 +54,7 @@ const Layout: FC<{ children: React.ReactNode }> = ({ children }) => {
                   </div>
                 </Link>
                 <Link prefetch href="/your-teams">
-                  <div className={`flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary ${pathname === '/teams' ? 'text-primary' : ''}`}>
+                  <div className={`flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary ${pathname === '/your-teams' ? 'text-primary' : ''}`}>
                     <Plus className="h-4 w-4" />
                     Your Teams
                   </div>
@@ -145,6 +145,16 @@ const Layout: FC<{ children: React.ReactNode }> = ({ children }) => {
                       </div>
                     </Link>
                   </SheetTrigger>
+                  {isLoggedIn && (
+                    <SheetTrigger asChild>
+                      <Link href="/manage-lineups">
+                        <div className={`flex items-center gap-3 rounded-lg pl-8 text-sm text-muted-foreground transition-all hover:text-primary ${pathname === '/manage-lineups' ? 'text-primary' : ''}`}>
+                          <Minus size={10} />
+                          Manage Lineups
+                        </div>
+                      </Link>
+                    </SheetTrigger>
+                  )}
                   <Link href="#">
                     <div className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all">
                       <Plus className="h-4 w-4" />

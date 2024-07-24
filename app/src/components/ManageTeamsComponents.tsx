@@ -71,24 +71,11 @@ import { DialogClose } from "@radix-ui/react-dialog";
 import { toast } from "sonner";
 import Link from "next/link";
 
-// type ManageTeamsProps = {
-//   manageTeamsState: any;
-//   setManageTeamsState: React.Dispatch<
-//     React.SetStateAction<{
-//       selectedTeam: string;
-//       teams: never[];
-//       clickManageTeams: boolean;
-//     }>
-//   >;
-// };
 
 export function TeamDropdown() {
 
   const { teams, setSelectedTeam, handleManageTeamsClick } = useTeams();
 
-  // if (teams.length === 0) {
-  //   return <Skeleton className="w-[190px] h-[30px]" />;
-  // }
 
   return (
     <>

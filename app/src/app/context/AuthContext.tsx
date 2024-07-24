@@ -41,6 +41,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     const token = localStorage.getItem("token");
 
+    // Check if the user is logged in
     if (token) {
       const decoded = jwtDecode<JwtPaylaod>(token);
       const exp = decoded.exp;
