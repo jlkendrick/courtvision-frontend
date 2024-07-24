@@ -21,7 +21,7 @@ export default function Teams() {
       <div className="flex items-center">
         <h1 className="text-lg font-semibold md:text-2xl">Your Teams</h1>
       </div>
-      <div className="flex flex-1 justify-center rounded-lg border border-dashed shadow-sm">
+      <div className="flex flex-1 justify-center rounded-lg border border-primary border-dashed shadow-sm">
         <div className="flex flex-col items-center gap-1 text-center">
           {isLoggedIn ? (
             <>
@@ -35,7 +35,10 @@ export default function Teams() {
                     View Team
                   </Button>
                   {rosterInfo.length > 0 ? (
+                    <>
                     <RosterDisplay roster={rosterInfo} />
+                    <p className="py-10 text-sm text-gray-500">More in-depth analysis coming soon!</p>
+                    </>
                   ) : (
                     ""
                   )}
@@ -52,7 +55,7 @@ export default function Teams() {
               )}
             </>
           ) : (
-            <div className="flex flex-col items-center gap-1">
+            <div className="flex flex-col items-center gap-1 mt-5">
               <p className="text-sm text-gray-500">You are not logged in.</p>
               <p className="text-sm text-gray-500">
                 Please login to view your teams.

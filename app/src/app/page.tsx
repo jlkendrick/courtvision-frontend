@@ -29,7 +29,7 @@ export default function Home() {
     <div className="flex items-center">
       <h1 className="text-lg font-semibold md:text-2xl">Home</h1>
     </div>
-    <div className="flex flex-1 justify-center rounded-lg border border-dashed shadow-sm">
+    <div className="flex flex-1 justify-center rounded-lg border border-primary border-dashed shadow-sm">
       <div className="flex flex-col items-center gap-1 text-center">
         <FeaturesSectionDemo />
       </div>
@@ -44,12 +44,12 @@ function FeaturesSectionDemo() {
     {
       title: "Advanced tools",
       description:
-        "Bringing you insights to help you win your league.",
+        "Bringing you insights to help you win your ESPN Points league.",
       icon: <IconChessKnight />,
       page: "/",
     },
     {
-      title: "Analyze your teams",
+      title: "Analyze Your Teams",
       description:
         "Get a broad snapshot of your teams.",
       icon: <IconChartPie />,
@@ -72,7 +72,7 @@ function FeaturesSectionDemo() {
       title: "More Coming Soon",
       description: "As a solo developer, I am working hard to bring you more features.",
       icon: <IconClockHour4 />,
-      page: "/",
+      page: "/new-features",
     },
   ];
 

@@ -40,7 +40,7 @@ export default function Account() {
           <div className="flex items-center">
             <h1 className="text-lg font-semibold md:text-2xl">Your Account</h1>
           </div>
-          <div className="flex flex-1 items-start justify-center rounded-lg border border-dashed shadow-sm">
+          <div className="flex flex-1 items-start justify-center rounded-lg border border-primary border-dashed shadow-sm">
             <div className="flex flex-col items-center gap-1">
               <div className="flex-col items-center">
                 <UAuthForm
@@ -55,10 +55,10 @@ export default function Account() {
         <div className="flex items-center">
           <h1 className="text-lg font-semibold md:text-2xl">Your Account</h1>
         </div>
-        <div className="flex flex-1 items-start justify-center rounded-lg border border-dashed shadow-sm">
+        <div className="flex flex-1 items-start justify-center rounded-lg border border-primary border-dashed shadow-sm">
           <div className="flex flex-col items-center gap-1">
             <div className="flex-col items-center">
-              <div className="flex flex-col gap-1">
+              <div className="flex flex-col gap-1 mt-5">
                 <h3 className="text-2xl font-bold tracking-tight">
                   Welcome, {authEmail}!
                 </h3>

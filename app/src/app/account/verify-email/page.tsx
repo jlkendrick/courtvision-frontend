@@ -63,7 +63,7 @@ export default function VerifyEmail() {
       <div className="flex items-center">
         <h1 className="text-lg font-semibold md:text-2xl">Verify Your Email</h1>
       </div>
-      <div className="flex flex-1 justify-center rounded-lg border border-dashed shadow-sm">
+      <div className="flex flex-1 justify-center rounded-lg border border-primary border-dashed shadow-sm">
         <div className="flex flex-col items-center gap-1 mt-[20%]">
           <Form {...form}>
             <form
