@@ -80,8 +80,8 @@ export const LineupProvider = ({ children }: { children: React.ReactNode }) => {
         body: JSON.stringify({ selected_team: selectedTeam, threshold: threshold, week: week }),
       });
       if (!response.ok) {
-        toast.error("Failed to generate lineup.");
-        return;
+        setIsLoading(false);
+        throw new Error("Failed to generate lineup.");
       }
       const data = await response.json();
       console.log("Generated Lineup:", data);
