@@ -79,6 +79,8 @@ export default function LineupDisplay({ lineup }: { lineup: Lineup }) {
           </Carousel>
           <div>
             <p className="text-gray-500 text-sm ml-[22px]">
+              * Please be patient, after periods of inactivity the server may need to wake up.
+              <br />
               * Results will vary across generations so feel free to try again.
               <br />
               <br />

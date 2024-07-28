@@ -53,7 +53,7 @@ import {
 } from "@/components/ui/menubar";
 import Image from "next/image";
 import { Input } from "@/components/ui/input";
-import { Trash2, Pencil } from "lucide-react";
+import { Trash2, Pencil, Check } from "lucide-react";
 import {
   Form,
   FormField,
@@ -74,7 +74,7 @@ import Link from "next/link";
 
 export function TeamDropdown() {
 
-  const { teams, setSelectedTeam, handleManageTeamsClick } = useTeams();
+  const { teams, selectedTeam, setSelectedTeam, handleManageTeamsClick } = useTeams();
 
 
   return (
@@ -108,9 +108,12 @@ export function TeamDropdown() {
                   heading="Teams"
                 >
                   {teams.map((team) => (
-                    <SelectItem key={team.team_id} onClick={() => setSelectedTeam(team.team_id)} value={team.team_info.team_name}>
+                    <CommandItem key={team.team_id} onSelect={() => setSelectedTeam(team.team_id)} value={team.team_info.team_name}>
                       {team.team_info.team_name}
-                    </SelectItem>
+                      {selectedTeam === team.team_id && (
+                        <Check size={20} className="ml-2" />
+                      )}
+                    </CommandItem>
                   ))}
                 </CommandGroup>
               </CommandList>
