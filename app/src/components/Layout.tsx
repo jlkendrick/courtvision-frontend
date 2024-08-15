@@ -97,6 +97,16 @@ const Layout: FC<{ children: React.ReactNode }> = ({ children }) => {
                       </div>
                     </Link>
                   )}
+                <Link prefetch href="/rankings">
+                  <div
+                    className={`flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary ${
+                      pathname === "/rankings" ? "text-primary" : ""
+                    }`}
+                  >
+                    <Plus className="h-4 w-4" />
+                    Rankings
+                  </div>
+                </Link>
                 <Link prefetch href="/new-features">
                   <div
                     className={`flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary ${
@@ -300,10 +310,6 @@ const Layout: FC<{ children: React.ReactNode }> = ({ children }) => {
 export default Layout;
 
 const Title = () => {
-  const styles: React.CSSProperties = {
-    backgroundImage:
-      "linear-gradient(178deg, rgb(214, 97, 158) 0%, rgb(254, 97, 158) 50%, transparent 54%, transparent 100%)",
-  };
 
   return <>Court Vision</>;
 };

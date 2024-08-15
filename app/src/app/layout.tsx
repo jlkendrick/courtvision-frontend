@@ -8,6 +8,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { AuthProvider } from "./context/AuthContext";
 import { TeamsProvider } from "./context/TeamsContext";
 import { LineupProvider } from "./context/LineupContext";
+import { RankingsProvider } from "./context/RankingsContext";
 
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
@@ -32,12 +33,14 @@ export default function RootLayout({
         <AuthProvider>
         <TeamsProvider>
         <LineupProvider>
+        <RankingsProvider>
         <ThemeProvider attribute="class" defaultTheme="dark">
           <Layout>
             {children}
           </Layout>
           <Toaster richColors/>
         </ThemeProvider>
+        </RankingsProvider>
         </LineupProvider>
         </TeamsProvider>
         </AuthProvider>
