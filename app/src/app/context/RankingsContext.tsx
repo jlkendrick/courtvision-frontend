@@ -28,7 +28,7 @@ export const RankingsProvider = ({
 
   useEffect(() => {
     if (pathname === "/rankings") {
-      fetch(`/rankings/${selectedType}.json`)
+      fetch(`/rankings-data/${selectedType}.json`)
         .then((res) => res.json())
         .then((data) => {
           setRankings(data);

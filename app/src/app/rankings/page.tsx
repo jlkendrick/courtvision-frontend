@@ -19,6 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import React, { useRef, useEffect, useState } from 'react';
 
 export default function Rankings() {
   return (

@@ -97,6 +97,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         toast.error("Internal server error. Please try again later.");
       }
     } else if (typeSubmit === "LOGIN") {
+      setLoading(true);
       // Login to account
       try {
         // API call to login
@@ -130,6 +131,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         console.log(error);
         toast.error("Internal server error. Please try again later.");
       }
+      setLoading(false);
     } else {
       console.log("WHAT THE HELL");
     }
