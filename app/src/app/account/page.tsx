@@ -7,21 +7,12 @@ import UAuthForm from "@/components/UserLoginOrCreate";
 import { useAuth } from "@/app/context/AuthContext";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
-  ChevronLeft,
-  ChevronRight,
-} from "lucide-react";
-import {
   Card,
   CardContent,
   CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-} from "@/components/ui/pagination";
 import { Separator } from "@/components/ui/separator";
 
 import { Button } from "@/components/ui/button";
@@ -110,9 +101,9 @@ export default function Account() {
                         <ul className="grid gap-3">
                           <li className="flex items-center justify-between">
                             <span className="text-muted-foreground">
-                              Subtotal
+                              ********
                             </span>
-                            <span>$299.00</span>
+                            <span></span>
                           </li>
                         </ul>
                       </div>
@@ -123,35 +114,11 @@ export default function Account() {
                           Logout
                         </Button>
                       </div>
-                      <div className="flex flex-row">
+                      {/* <div className="flex flex-row">
                         <Button variant="destructive" className="max-w-lg" onClick={() => logout()}>
                           Delete Account
                         </Button>
-                      </div>
-                      <Pagination className="ml-auto mr-0 w-auto">
-                        <PaginationContent>
-                          <PaginationItem>
-                            <Button
-                              size="icon"
-                              variant="outline"
-                              className="h-6 w-6"
-                            >
-                              <ChevronLeft className="h-3.5 w-3.5" />
-                              <span className="sr-only">Previous Order</span>
-                            </Button>
-                          </PaginationItem>
-                          <PaginationItem>
-                            <Button
-                              size="icon"
-                              variant="outline"
-                              className="h-6 w-6"
-                            >
-                              <ChevronRight className="h-3.5 w-3.5" />
-                              <span className="sr-only">Next Order</span>
-                            </Button>
-                          </PaginationItem>
-                        </PaginationContent>
-                      </Pagination>
+                      </div> */}
                     </CardFooter>
                   </Card>
                 </div>

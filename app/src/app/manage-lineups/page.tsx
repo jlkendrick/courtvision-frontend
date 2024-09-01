@@ -8,7 +8,7 @@ export default function ManageLineups() {
       </div>
       <div className="flex-1 rounded-lg border border-primary border-dashed shadow-sm">
         <div className="flex flex-col gap-1">
-          <div className="w-full">
+          <div>
             <ManageLineupsTable />
           </div>
         </div>

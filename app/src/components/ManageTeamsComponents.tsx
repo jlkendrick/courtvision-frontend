@@ -71,11 +71,9 @@ import { DialogClose } from "@radix-ui/react-dialog";
 import { toast } from "sonner";
 import Link from "next/link";
 
-
 export function TeamDropdown() {
-
-  const { teams, selectedTeam, setSelectedTeam, handleManageTeamsClick } = useTeams();
-
+  const { teams, selectedTeam, setSelectedTeam, handleManageTeamsClick } =
+    useTeams();
 
   return (
     <>
@@ -108,7 +106,11 @@ export function TeamDropdown() {
                   heading="Teams"
                 >
                   {teams.map((team) => (
-                    <CommandItem key={team.team_id} onSelect={() => setSelectedTeam(team.team_id)} value={team.team_info.team_name}>
+                    <CommandItem
+                      key={team.team_id}
+                      onSelect={() => setSelectedTeam(team.team_id)}
+                      value={team.team_info.team_name}
+                    >
                       {team.team_info.team_name}
                       {selectedTeam === team.team_id && (
                         <Check size={20} className="ml-2" />
@@ -172,17 +174,17 @@ export function TeamDropdown() {
 // }
 
 interface TeamInfo {
-  team_name: string,
-  league_id: number,
-  year: number,
-  espn_s2?: string,
-  swid?: string,
+  team_name: string;
+  league_id: number;
+  year: number;
+  espn_s2?: string;
+  swid?: string;
 }
 
 interface Team {
-  team_id: number,
-  team_info: TeamInfo
-};
+  team_id: number;
+  team_info: TeamInfo;
+}
 
 export function ManageTeamsTable() {
   const { teams } = useTeams();
@@ -208,8 +210,12 @@ export function ManageTeamsTable() {
             <TableCell>{"N/A"}</TableCell>
             <TableCell>{team.team_info.league_id}</TableCell>
             <TableCell className="text-right">{team.team_info.year}</TableCell>
-            <TableCell>
-              <ManageTeamMenubar team={team} />
+            <TableCell className="flex flex-col gap-1 justify-center sm:flex-row sm:items-center">
+                <EditTeamForm
+                  team_id={team.team_id}
+                  team_info={team.team_info}
+                />
+                <DeleteTeamConfirmation team_id={team.team_id} />
             </TableCell>
           </TableRow>
         ))}
@@ -223,18 +229,17 @@ export function ManageTeamsTable() {
   );
 }
 
-// This is part of the ManageTeamsTable component, no need to export
-function ManageTeamMenubar({ team }: { team: Team }) {
-
-  return (
-    <Menubar>
-      <MenubarMenu>
-        <EditTeamForm team_id={team.team_id} team_info={team.team_info} />
-        <DeleteTeamConfirmation team_id={team.team_id} />
-      </MenubarMenu>
-    </Menubar>
-  );
-}
+// // This is part of the ManageTeamsTable component, no need to export
+// function ManageTeamMenubar({ team }: { team: Team }) {
+//   return (
+//     <Menubar>
+//       <MenubarMenu className="">
+//         <EditTeamForm team_id={team.team_id} team_info={team.team_info} />
+//         <DeleteTeamConfirmation team_id={team.team_id} />
+//       </MenubarMenu>
+//     </Menubar>
+//   );
+// }
 
 function DeleteTeamConfirmation({ team_id }: { team_id: number }) {
   const { deleteTeam } = useTeams();
@@ -242,7 +247,7 @@ function DeleteTeamConfirmation({ team_id }: { team_id: number }) {
   return (
     <Dialog>
       <DialogTrigger>
-        <Button variant="ghost" className="hover:bg-input mr-[-5px]">
+        <Button variant="outline" className="hover:bg-input">
           <Trash2 size={20} />
         </Button>
       </DialogTrigger>
@@ -259,7 +264,9 @@ function DeleteTeamConfirmation({ team_id }: { team_id: number }) {
               Cancel
             </Button>
           </DialogClose>
-          <Button onClick={() => deleteTeam(team_id)} variant="default">Delete</Button>
+          <Button onClick={() => deleteTeam(team_id)} variant="default">
+            Delete
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -472,8 +479,13 @@ function AddTeamForm() {
   );
 }
 
-
-function EditTeamForm({ team_id, team_info }: { team_id: number, team_info: TeamInfo }) {
+function EditTeamForm({
+  team_id,
+  team_info,
+}: {
+  team_id: number;
+  team_info: TeamInfo;
+}) {
   const { editTeam } = useTeams();
 
   const leagueInfoSchema = z.object({
@@ -540,7 +552,7 @@ function EditTeamForm({ team_id, team_info }: { team_id: number, team_info: Team
   return (
     <Dialog>
       <DialogTrigger>
-        <Button variant="ghost" className="hover:bg-input ml-[-5px]">
+        <Button variant="outline" className="hover:bg-input ml-[-5px]">
           <Pencil size={20} />
         </Button>
       </DialogTrigger>
@@ -563,11 +575,12 @@ function EditTeamForm({ team_id, team_info }: { team_id: number, team_info: Team
               render={({ field }) => {
                 return (
                   <FormItem>
-                    <FormLabel>
-                      League ID
-                    </FormLabel>
+                    <FormLabel>League ID</FormLabel>
                     <FormControl>
-                      <Input placeholder={`${team_info.league_id}`} {...field} />
+                      <Input
+                        placeholder={`${team_info.league_id}`}
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -581,9 +594,7 @@ function EditTeamForm({ team_id, team_info }: { team_id: number, team_info: Team
               render={({ field }) => {
                 return (
                   <FormItem>
-                    <FormLabel>
-                      League Year
-                    </FormLabel>
+                    <FormLabel>League Year</FormLabel>
                     <FormControl>
                       <Input placeholder="YYYY" {...field} />
                     </FormControl>
@@ -599,9 +610,7 @@ function EditTeamForm({ team_id, team_info }: { team_id: number, team_info: Team
               render={({ field }) => {
                 return (
                   <FormItem>
-                    <FormLabel>
-                      Team Name
-                    </FormLabel>
+                    <FormLabel>Team Name</FormLabel>
                     <FormControl>
                       <Input placeholder="Name" {...field} />
                     </FormControl>

@@ -199,11 +199,11 @@ export function AnotherLineupCard({ gene }: { gene: SlimGene }) {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[75px]">Position</TableHead>
-              <TableHead>Name</TableHead>
-              <TableHead className="w-[75px]">Team</TableHead>
-              <TableHead className="w-[75px]">Avg Points</TableHead>
-              <TableHead className="text-right w-[15px]">Action</TableHead>
+              <TableHead className="w-[10px]">Position</TableHead>
+              <TableHead className="w-[20px]">Name</TableHead>
+              <TableHead className="w-[10px]">Team</TableHead>
+              <TableHead className="w-[10px]">Avg Points</TableHead>
+              <TableHead className="text-right w-[1px]">Action</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>

@@ -35,16 +35,16 @@ export function ManageLineupsTable() {
   const { savedLineups, deleteLineup } = useLineup();
 
   return (
-    <Table className="w-full">
+    <Table className="max-w-[100%]">
       <TableCaption>View and delete your saved lineups for the selected teams.</TableCaption>
       <TableHeader>
         <TableRow>
-          <TableHead className="text-left w-[20%]">Timestamp</TableHead>
-          <TableHead className="text-center w-[10%]">Improvement</TableHead>
-          <TableHead className="text-center w-[10%]">Week</TableHead>
-          <TableHead className="text-center w-[10%]">Threshold</TableHead>
-          <TableHead className="text-center w-[10%]">View</TableHead>
-          <TableHead className="text-center w-[10%]">Delete</TableHead>
+          <TableHead className="text-left w-[20vw]">Timestamp</TableHead>
+          <TableHead className="text-center w-[10vw]">Improvement</TableHead>
+          <TableHead className="text-center w-[10vw]">Week</TableHead>
+          <TableHead className="text-center w-[10vw]">Threshold</TableHead>
+          <TableHead className="text-center w-[8vw]">View</TableHead>
+          <TableHead className="text-center w-[8vw]">Delete</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -94,8 +94,8 @@ function ViewLineupButton({ lineup }: { lineup: Lineup }) {
         </Button>
       </DialogTrigger>
       <DialogContent>
-        <ScrollArea className="w-full h-[80vh]">
-        <Carousel className="ml-3 w-[75%] max-w-xl mt-3">
+        <ScrollArea className="h-[80vh]">
+        <Carousel className="w-[75%] max-w-[13.7%] mt-3">
           <CarouselContent>
             {lineup.Lineup.map((gene: SlimGene, index: number) => (
               <CarouselItem key={index}>
