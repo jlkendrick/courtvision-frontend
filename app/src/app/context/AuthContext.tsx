@@ -21,6 +21,7 @@ const AuthContext = createContext({
   logout: () => {},
   sendVerificationEmail: async (email: string, password?: string) => false,
   checkCode: async (email: string, code: string) => false,
+  deleteAccount: async (password: string) => false,
 });
 
 interface JwtPaylaod {
@@ -228,6 +229,39 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }
 
+  async function deleteAccount(password: string): Promise<boolean> {
+    try {
+      // API call to delete account
+      const token = localStorage.getItem("token");
+      const response = await fetch("/api/users/delete", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ password: password }),
+      });
+      if (!response.ok) {
+        throw new Error("Failed to delete account.");
+      }
+      const data = await response.json();
+      if (data.success) {
+        // Account deleted successfully
+        toast.success("Account deleted successfully.");
+        logout();
+        return true;
+      } else {
+        // Account not deleted
+        toast.error("Failed to delete account.");
+        return false;
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error("Internal server error. Please try again later.");
+      return false;
+    }
+  }
+
   return (
     <AuthContext.Provider
       value={{
@@ -248,6 +282,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         logout,
         sendVerificationEmail,
         checkCode,
+        deleteAccount,
       }}
     >
       {children}

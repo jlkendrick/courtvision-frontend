@@ -9,26 +9,14 @@ import { Skeleton } from "@/components/ui/skeleton";
 import {
   ChevronLeft,
   ChevronRight,
-  Copy,
-  CreditCard,
-  MoreVertical,
-  Truck,
 } from "lucide-react";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import {
   Pagination,
   PaginationContent,
