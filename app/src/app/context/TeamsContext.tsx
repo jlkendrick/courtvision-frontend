@@ -233,6 +233,8 @@ export const TeamsProvider = ({ children }: { children: React.ReactNode }) => {
     if (isLoggedIn) {
       setLoading(true);
       fetchTeams().then(() => setLoading(false));
+      // Set again to make sure
+      setLoading(false);
     }
   }, [isLoggedIn]);
 
