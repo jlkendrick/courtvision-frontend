@@ -12,13 +12,14 @@ interface TeamsContextType {
   handleManageTeamsClick: () => void;
   fetchTeams: () => void;
   addTeam: (league_id: string, team_name: string, year: string, espn_s2?: string, swid?: string, ) => void;
-  editTeam: (team_id: number, league_id: string, team_name: string, year: string, espn_s2?: string, swid?: string) => void;
+  editTeam: (team_id: number, league_id: string, team_name: string, year: string, league_name?: string, espn_s2?: string, swid?: string) => void;
   deleteTeam: (team_id: number) => void;
   getLineupInfo: () => void;
 }
 
 interface TeamInfo {
   team_name: string,
+  league_name: string,
   league_id: number,
   year: number,
   espn_s2?: string,
@@ -57,6 +58,7 @@ interface leagueInfoRequest {
   espn_s2?: string;
   swid?: string;
   team_name: string;
+  league_name?: string;
   year: number;
 }
 
@@ -95,10 +97,10 @@ export const TeamsProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   // ---------------------------------- Add Team --------------------------------
-  const addTeam = async (league_id: string,  team_name: string, year: string, espn_s2?: string, swid?: string) => {
+  const addTeam = async (league_id: string,  team_name: string, year: string, league_name?: string, espn_s2?: string, swid?: string) => {
     console.log("Adding team");
     const token = localStorage.getItem("token");
-    const leagueInfo: leagueInfoRequest = { league_id: parseInt(league_id), espn_s2: espn_s2, swid: swid, team_name: team_name, year: parseInt(year) };
+    const leagueInfo: leagueInfoRequest = { league_id: parseInt(league_id), espn_s2: espn_s2, swid: swid, team_name: team_name, league_name: league_name, year: parseInt(year) };
     try {
       // API call to add team
       const response = await fetch("/api/data/teams", {
@@ -134,9 +136,9 @@ export const TeamsProvider = ({ children }: { children: React.ReactNode }) => {
   }
 
   // ---------------------------------- Edit Team --------------------------------
-  const editTeam = async (team_id: number, league_id: string, team_name: string, year: string, espn_s2?: string, swid?: string) => {
+  const editTeam = async (team_id: number, league_id: string, team_name: string, year: string, league_name?: string, espn_s2?: string, swid?: string) => {
     const token = localStorage.getItem("token");
-    const leagueInfo: leagueInfoRequest = { league_id: parseInt(league_id), espn_s2: espn_s2, swid: swid, team_name: team_name, year: parseInt(year) };
+    const leagueInfo: leagueInfoRequest = { league_id: parseInt(league_id), espn_s2: espn_s2, swid: swid, league_name: league_name, team_name: team_name, year: parseInt(year) };
     try {
       // API call to edit team
       console.log("Editing team with team_id: ", team_id, " and leagueInfo: ", leagueInfo);

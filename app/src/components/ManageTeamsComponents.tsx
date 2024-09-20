@@ -175,6 +175,7 @@ export function TeamDropdown() {
 
 interface TeamInfo {
   team_name: string;
+  league_name: string;
   league_id: number;
   year: number;
   espn_s2?: string;
@@ -207,7 +208,7 @@ export function ManageTeamsTable() {
             <TableCell className="font-medium">
               {team.team_info.team_name}
             </TableCell>
-            <TableCell>{"N/A"}</TableCell>
+            <TableCell>{team.team_info.league_name}</TableCell>
             <TableCell>{team.team_info.league_id}</TableCell>
             <TableCell className="text-right">{team.team_info.year}</TableCell>
             <TableCell className="flex flex-col gap-1 justify-center sm:flex-row sm:items-center">
@@ -498,6 +499,7 @@ function EditTeamForm({
       .min(1)
       .regex(/^\d+$/, { message: "League Year must be a number" }),
     teamName: z.string().min(1),
+    leagueName: z.string().optional(),
     s2: z.string().optional(),
     swid: z.string().optional(),
   });
@@ -508,6 +510,7 @@ function EditTeamForm({
       leagueID: `${team_info.league_id}`,
       leagueYear: `${team_info.year}`,
       teamName: team_info.team_name,
+      leagueName: team_info.league_name,
       s2: team_info.espn_s2,
       swid: team_info.swid,
     },
@@ -528,6 +531,7 @@ function EditTeamForm({
       values.leagueID === `${team_info.league_id}` &&
       values.leagueYear === `${team_info.year}` &&
       values.teamName === team_info.team_name &&
+      values.leagueName === team_info.league_name &&
       values.s2 === team_info.espn_s2 &&
       values.swid === team_info.swid
     ) {
@@ -538,11 +542,12 @@ function EditTeamForm({
     setSubmitted(true);
 
     console.log(values);
-    const response = await editTeam(
+    editTeam(
       team_id,
       values.leagueID,
       values.teamName,
       values.leagueYear,
+      values.leagueName,
       values.s2,
       values.swid
     );
@@ -613,6 +618,22 @@ function EditTeamForm({
                     <FormLabel>Team Name</FormLabel>
                     <FormControl>
                       <Input placeholder="Name" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                );
+              }}
+            />
+
+            <FormField
+              control={form.control}
+              name="leagueName"
+              render={({ field }) => {
+                return (
+                  <FormItem>
+                    <FormLabel>League Name</FormLabel>
+                    <FormControl>
+                      <Input placeholder="League Name" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
