@@ -11,7 +11,7 @@ interface TeamsContextType {
   rosterInfo: RosterPlayer[];
   handleManageTeamsClick: () => void;
   fetchTeams: () => void;
-  addTeam: (league_id: string, team_name: string, year: string, espn_s2?: string, swid?: string, ) => void;
+  addTeam: (league_id: string, team_name: string, year: string, league_name?: string, espn_s2?: string, swid?: string, ) => void;
   editTeam: (team_id: number, league_id: string, team_name: string, year: string, league_name?: string, espn_s2?: string, swid?: string) => void;
   deleteTeam: (team_id: number) => void;
   getLineupInfo: () => void;
@@ -101,6 +101,7 @@ export const TeamsProvider = ({ children }: { children: React.ReactNode }) => {
     console.log("Adding team");
     const token = localStorage.getItem("token");
     const leagueInfo: leagueInfoRequest = { league_id: parseInt(league_id), espn_s2: espn_s2, swid: swid, team_name: team_name, league_name: league_name, year: parseInt(year) };
+    console.log(leagueInfo);
     try {
       // API call to add team
       const response = await fetch("/api/data/teams", {

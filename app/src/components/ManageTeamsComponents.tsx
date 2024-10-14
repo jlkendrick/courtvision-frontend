@@ -287,6 +287,7 @@ function AddTeamForm() {
       .min(1)
       .regex(/^\d+$/, { message: "League Year must be a number" }),
     teamName: z.string().min(1),
+    leagueName: z.string().optional(),
     s2: z.string().optional(),
     swid: z.string().optional(),
   });
@@ -319,6 +320,7 @@ function AddTeamForm() {
       values.leagueID,
       values.teamName,
       values.leagueYear,
+      values.leagueName,
       values.s2,
       values.swid
     );

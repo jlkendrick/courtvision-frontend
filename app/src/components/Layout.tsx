@@ -117,7 +117,7 @@ const Layout: FC<{ children: React.ReactNode }> = ({ children }) => {
                     More Coming Soon
                   </div>
                 </Link>
-                <Separator className="my-2" />
+                <Separator />
                 <Link prefetch href="/account">
                   <div
                     className={`flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary ${
