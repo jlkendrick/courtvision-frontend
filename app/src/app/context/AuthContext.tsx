@@ -33,7 +33,7 @@ interface JwtPaylaod {
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [email , setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [token, setToken] = useState<string>("");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [authEmail, setAuthEmail] = useState("");

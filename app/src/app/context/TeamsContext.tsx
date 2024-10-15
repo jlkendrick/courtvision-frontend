@@ -233,11 +233,9 @@ export const TeamsProvider = ({ children }: { children: React.ReactNode }) => {
 
   // Fetch teams on login
   useEffect(() => {
+    setLoading(false);
     if (isLoggedIn) {
-      setLoading(true);
-      fetchTeams().then(() => setLoading(false));
-      // Set again to make sure
-      setLoading(false);
+      fetchTeams();
     }
   }, [isLoggedIn]);
 

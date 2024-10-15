@@ -65,15 +65,28 @@ import {
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTeams } from "@/app/context/TeamsContext";
 import { DialogClose } from "@radix-ui/react-dialog";
 import { toast } from "sonner";
 import Link from "next/link";
 
+
 export function TeamDropdown() {
   const { teams, selectedTeam, setSelectedTeam, handleManageTeamsClick } =
     useTeams();
+  const handleSelectedTeam = (team_id: number) => {
+    const team = teams.find((team) => team.team_id === team_id);
+    if (team) {
+      setSelectedTeamName(team.team_info.team_name);
+    }
+  }
+  const [selectedTeamName, setSelectedTeamName] = useState(teams.length >= 1 ? handleSelectedTeam(0) : "Select Team");
+  
+  // useEffect so that placeholder updates when selectedTeam changes
+  useEffect(() => {
+    handleSelectedTeam(selectedTeam || 0);
+  }, [selectedTeam]);
 
   return (
     <>
@@ -81,7 +94,7 @@ export function TeamDropdown() {
         <SelectTrigger className="w-[190px] text-xs hover:border-primary">
           <SelectValue
             placeholder={`${
-              teams.length ? teams[0].team_info.team_name : "Select Team"
+              selectedTeamName 
             }`}
           />
         </SelectTrigger>
@@ -108,7 +121,7 @@ export function TeamDropdown() {
                   {teams.map((team) => (
                     <CommandItem
                       key={team.team_id}
-                      onSelect={() => setSelectedTeam(team.team_id)}
+                      onSelect={() => { setSelectedTeam(team.team_id); handleSelectedTeam(team.team_id); }}
                       value={team.team_info.team_name}
                     >
                       {team.team_info.team_name}
