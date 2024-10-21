@@ -121,7 +121,7 @@ export function TeamDropdown() {
                   {teams.map((team) => (
                     <CommandItem
                       key={team.team_id}
-                      onSelect={() => { setSelectedTeam(team.team_id); handleSelectedTeam(team.team_id); }}
+                      onSelect={() => setSelectedTeam(team.team_id)}
                       value={team.team_info.team_name}
                     >
                       {team.team_info.team_name}
