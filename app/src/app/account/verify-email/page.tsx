@@ -23,14 +23,14 @@ import {
 import { useSearchParams } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
 import { useRouter } from "next/navigation";
+import { Suspense } from "react";
 
 const FormSchema = z.object({
   pin: z.string().min(6, {
     message: "Your one-time password must be 6 characters.",
   }),
 });
-
-export default function VerifyEmail() {
+function VerifyEmailComponent() {
   const { email, sendVerificationEmail, checkCode } = useAuth();
   const searchParams = useSearchParams();
   const email_param = searchParams.get("email");
@@ -52,7 +52,6 @@ export default function VerifyEmail() {
   }
 
   function handleResendEmail() {
-    // This is checking if the user got here from the account page, blocking people who may have just typed in the URL, potentially maliciously
     if (email !== "" && email_param === email) {
       sendVerificationEmail(email_param!!);
     }
@@ -64,7 +63,7 @@ export default function VerifyEmail() {
         <h1 className="text-lg font-semibold md:text-2xl">Verify Your Email</h1>
       </div>
       <div className="flex flex-1 justify-center rounded-lg border border-primary border-dashed shadow-sm">
-        <div className="flex flex-col items-center gap-1 mt-[20%]">
+        <div className="flex flex-col items-center gap-1 mt-[10%]">
           <Form {...form}>
             <form
               onSubmit={form.handleSubmit(onSubmit)}
@@ -104,17 +103,29 @@ export default function VerifyEmail() {
                 )}
               />
               <div className="flex justify-center">
-                <a className="text-blue-500 cursor-pointer underline text-xs hover:no-underline" onClick={handleResendEmail}>
+                <a
+                  className="text-blue-500 cursor-pointer underline text-xs hover:no-underline"
+                  onClick={handleResendEmail}
+                >
                   Resend Email
                 </a>
               </div>
-							<div className="flex justify-center">
-              	<Button variant="default">Submit</Button>
-							</div>
+              <div className="flex justify-center">
+                <Button variant="default">Submit</Button>
+              </div>
             </form>
           </Form>
         </div>
       </div>
     </>
+  );
+}
+
+// Wrap the component with Suspense
+export default function VerifyEmail() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <VerifyEmailComponent />
+    </Suspense>
   );
 }
