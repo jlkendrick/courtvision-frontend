@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { DATABSE_API_ENDPOPINT } from "@/endpoints";
+import { DATABSE_API_ENDPOPINT, DATA_API_ENDPOINT, LOCAL_BACKEND_ENDPOINT } from "@/endpoints";
 import path from 'path';
 import fs from 'fs';
 
@@ -16,7 +16,6 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
   if (token !== CRON_TOKEN) {
     console.log("Invalid token");
-    console.log("Token: ", token);
     return NextResponse.json({ error: "Invalid token" }, { status: 400 });
   }
 
@@ -36,10 +35,32 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   return NextResponse.json({ message: "Successfully started ETL process, check frontend or public route to see updated data." });
 }
 
+
+// API route to GET the updated FPTS data from the backend server  --------------------------------------------
+export async function GET(request: NextRequest): Promise<NextResponse> {
+  console.log("GET request to /api/data/etl/update-fpts");
+  
+  const response = await fetch(`${DATA_API_ENDPOINT}/etl/get_fpts_data`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  if (!response.ok) {
+    console.log("Error getting updated FPTS data");
+    return NextResponse.json({ error: "Error occurred getting updated FPTS data." }, { status: 400 });
+  }
+
+  const data = await response.json();
+  return NextResponse.json(data);
+}
+
+
 // API route to listen for the response from the backend server for when it is done with the ETL process  --------------------------------------------
 export async function PUT(request: NextRequest): Promise<NextResponse> {
   console.log("PUT request to /api/data/etl/update-fpts");
-  const CRON_TOKEN = process.env.CRON_TOKEN;
+  const CRON_TOKEN = "c5bd89c4f876d5797401c02df81b71d90d40330014656b13735dee316c2b3241";
   const token = request.headers.get("Authorization")?.split(" ")[1].trim();
 
   if (!token) {
