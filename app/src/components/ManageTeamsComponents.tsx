@@ -502,7 +502,7 @@ function EditTeamForm({
   team_id: number;
   team_info: TeamInfo;
 }) {
-  const { editTeam } = useTeams();
+  const { addTeam, editTeam } = useTeams();
 
   const leagueInfoSchema = z.object({
     leagueID: z
@@ -557,6 +557,8 @@ function EditTeamForm({
     setSubmitted(true);
 
     console.log(values);
+    
+    // Edit team
     editTeam(
       team_id,
       values.leagueID,
