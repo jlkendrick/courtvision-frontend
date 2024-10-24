@@ -16,10 +16,11 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
   if (token !== CRON_TOKEN) {
     console.log("Invalid token");
+    console.log("Token: ", token);
     return NextResponse.json({ error: "Invalid token" }, { status: 400 });
   }
 
-  const response = await fetch(`${DATABSE_API_ENDPOPINT}/etl/update-fpts`, {
+  const response = await fetch(`${DATABSE_API_ENDPOPINT}/etl/start-update-fpts`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -39,7 +40,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 export async function PUT(request: NextRequest): Promise<NextResponse> {
   console.log("PUT request to /api/data/etl/update-fpts");
   const CRON_TOKEN = process.env.CRON_TOKEN;
-  const token = request.headers.get("Authorization")?.split(" ")[1];
+  const token = request.headers.get("Authorization")?.split(" ")[1].trim();
 
   if (!token) {
     console.log("No authorization token");
@@ -55,7 +56,8 @@ export async function PUT(request: NextRequest): Promise<NextResponse> {
   const data = body.data;
   try {
     const filePath = path.resolve(process.cwd(), 'public/standings-data/fpts.json');
-    fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
+    const formattedData = typeof data === "string" ? JSON.stringify(JSON.parse(data), null, 2) : JSON.stringify(data, null, 2);
+    fs.writeFileSync(filePath, formattedData);
     console.log("Data successfully written to file");
     return NextResponse.json({ message: "Data successfully written to file." });
   } catch (error) {
