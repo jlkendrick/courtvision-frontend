@@ -4,7 +4,7 @@ import * as fs from "fs";
 
 // API route to intiate the POST the new day's data to the database and retrieve that updated data  --------------------------------------------
 export async function POST(request: NextRequest): Promise<NextResponse> {
-  console.log("GET request to /api/data/update-fpts");
+  console.log("POST request to /api/data/etl/update-fpts");
   const CRON_TOKEN = process.env.CRON_TOKEN;
   const token = request.headers.get("Authorization")?.split(" ")[1];
 
@@ -23,6 +23,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     headers: {
       "Content-Type": "application/json",
     },
+    body: JSON.stringify({ cron_token: token }),
   });
   if (!response.ok) {
     return NextResponse.json({ error: "Error occurred updating fpts in database." }, { status: 400 });
