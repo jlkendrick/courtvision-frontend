@@ -1,3 +1,4 @@
+export const PROD_BACKEND_ENDPOINT = "https://cv-backend-443549036710.us-central1.run.app";
 export const DATABSE_API_ENDPOPINT = "https://cv-backend-443549036710.us-central1.run.app/db";
 export const LOCAL_BACKEND_ENDPOINT = "http://127.0.0.1:8000";
 export const LINEUP_GENERATION_API_ENDPOINT = "TBD";

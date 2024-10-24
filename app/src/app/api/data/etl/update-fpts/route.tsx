@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { DATABSE_API_ENDPOPINT, DATA_API_ENDPOINT, LOCAL_BACKEND_ENDPOINT } from "@/endpoints";
+import { PROD_BACKEND_ENDPOINT, LOCAL_BACKEND_ENDPOINT } from "@/endpoints";
 import path from 'path';
 import fs from 'fs';
 
@@ -19,7 +19,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     return NextResponse.json({ error: "Invalid token" }, { status: 400 });
   }
 
-  const response = await fetch(`${DATABSE_API_ENDPOPINT}/etl/start-update-fpts`, {
+  const response = await fetch(`${PROD_BACKEND_ENDPOINT}/db/etl/start-update-fpts`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -40,7 +40,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 export async function GET(request: NextRequest): Promise<NextResponse> {
   console.log("GET request to /api/data/etl/update-fpts");
   
-  const response = await fetch(`${DATA_API_ENDPOINT}/etl/get_fpts_data`, {
+  const response = await fetch(`${PROD_BACKEND_ENDPOINT}/data/etl/get_fpts_data`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
