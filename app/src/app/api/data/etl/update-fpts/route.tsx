@@ -42,6 +42,19 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
   
   const { searchParams } = new URL(request.url);
   const cron_token = searchParams.get("cron_token");
+
+  if (!cron_token) {
+    console.log("No authorization token");
+    return NextResponse.json({ error: "No authorization token" }, { status: 400 });
+  }
+
+  const CRON_TOKEN = process.env.CRON_TOKEN;
+  if (cron_token !== CRON_TOKEN) {
+    console.log("Invalid token");
+    return NextResponse.json({ error: "Invalid token" }, { status: 400 });
+  }
+
+
   const params = new URLSearchParams({ cron_token: cron_token ?? "" });
   const response = await fetch(`${PROD_BACKEND_ENDPOINT}/db/etl/get_fpts_data?cron_token` + params.toString(), {
     method: "GET",
