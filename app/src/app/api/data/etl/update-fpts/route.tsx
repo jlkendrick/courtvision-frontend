@@ -56,7 +56,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
 
   const params = new URLSearchParams({ cron_token: cron_token ?? "" });
-  const response = await fetch(`${PROD_BACKEND_ENDPOINT}/db/etl/get_fpts_data?cron_token` + params.toString(), {
+  const response = await fetch(`${PROD_BACKEND_ENDPOINT}/db/etl/get_fpts_data?` + params.toString(), {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
