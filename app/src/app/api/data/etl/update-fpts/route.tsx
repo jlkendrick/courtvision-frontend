@@ -40,7 +40,10 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 export async function GET(request: NextRequest): Promise<NextResponse> {
   console.log("GET request to /api/data/etl/update-fpts");
   
-  const response = await fetch(`${PROD_BACKEND_ENDPOINT}/data/etl/get_fpts_data`, {
+  const { searchParams } = new URL(request.url);
+  const cron_token = searchParams.get("cron_token");
+  const params = new URLSearchParams({ cron_token: cron_token ?? "" });
+  const response = await fetch(`${PROD_BACKEND_ENDPOINT}/db/etl/get_fpts_data?cron_token` + params.toString(), {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
