@@ -73,32 +73,32 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 }
 
 
-// API route to listen for the response from the backend server for when it is done with the ETL process  --------------------------------------------
-export async function PUT(request: NextRequest): Promise<NextResponse> {
-  console.log("PUT request to /api/data/etl/update-fpts");
-  const CRON_TOKEN = "c5bd89c4f876d5797401c02df81b71d90d40330014656b13735dee316c2b3241";
-  const token = request.headers.get("Authorization")?.split(" ")[1].trim();
+// // API route to listen for the response from the backend server for when it is done with the ETL process  --------------------------------------------
+// export async function PUT(request: NextRequest): Promise<NextResponse> {
+//   console.log("PUT request to /api/data/etl/update-fpts");
+//   const CRON_TOKEN = "c5bd89c4f876d5797401c02df81b71d90d40330014656b13735dee316c2b3241";
+//   const token = request.headers.get("Authorization")?.split(" ")[1].trim();
 
-  if (!token) {
-    console.log("No authorization token");
-    return NextResponse.json({ error: "No authorization token" }, { status: 400 });
-  }
+//   if (!token) {
+//     console.log("No authorization token");
+//     return NextResponse.json({ error: "No authorization token" }, { status: 400 });
+//   }
 
-  if (token !== CRON_TOKEN) {
-    console.log("Invalid token");
-    return NextResponse.json({ error: "Invalid token" }, { status: 400 });
-  }
+//   if (token !== CRON_TOKEN) {
+//     console.log("Invalid token");
+//     return NextResponse.json({ error: "Invalid token" }, { status: 400 });
+//   }
 
-  const body = await request.json();
-  const data = body.data;
-  try {
-    const filePath = path.resolve(process.cwd(), 'public/standings-data/fpts.json');
-    const formattedData = typeof data === "string" ? JSON.stringify(JSON.parse(data), null, 2) : JSON.stringify(data, null, 2);
-    fs.writeFileSync(filePath, formattedData);
-    console.log("Data successfully written to file");
-    return NextResponse.json({ message: "Data successfully written to file." });
-  } catch (error) {
-    console.log("Error writing to file: ", error);
-    return NextResponse.json({ error: "Failed to write data to file." }, { status: 500 });
-  }
-}
+//   const body = await request.json();
+//   const data = body.data;
+//   try {
+//     const filePath = path.resolve(process.cwd(), 'public/standings-data/fpts.json');
+//     const formattedData = typeof data === "string" ? JSON.stringify(JSON.parse(data), null, 2) : JSON.stringify(data, null, 2);
+//     fs.writeFileSync(filePath, formattedData);
+//     console.log("Data successfully written to file");
+//     return NextResponse.json({ message: "Data successfully written to file." });
+//   } catch (error) {
+//     console.log("Error writing to file: ", error);
+//     return NextResponse.json({ error: "Failed to write data to file." }, { status: 500 });
+//   }
+// }
