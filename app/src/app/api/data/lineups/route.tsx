@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { DATABSE_API_ENDPOPINT } from "@/endpoints";
+import { DATABSE_API_ENDPOPINT, LOCAL_BACKEND_ENDPOINT, PROD_BACKEND_ENDPOINT } from "@/endpoints";
 
 // API route to GET all a user's lineups for a certain team --------------------------------------------
 export async function GET(request: NextRequest): Promise<NextResponse> {
@@ -39,7 +39,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   }
 
   const body = await request.json();
-  const response = await fetch(`${DATABSE_API_ENDPOPINT}/lineups/generate`, {
+  const response = await fetch(`${PROD_BACKEND_ENDPOINT}/db/lineups/generate`, {
     method: "POST",
     headers: {
       "Authorization": `Bearer ${token}`,
