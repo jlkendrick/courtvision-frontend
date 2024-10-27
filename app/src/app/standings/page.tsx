@@ -12,6 +12,19 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useStandings, StandingsPlayer } from "@/app/context/StandingsContext";
 import { TrendingUp, TrendingDown, Minus } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
+import { Skeleton } from "@/components/ui/skeleton";
+
+function SkeletonCard() {
+  return (
+    <div className="flex flex-col space-y-3">
+      <Skeleton className="h-40 w-[1000px]" />
+      <div className="space-y-2">
+        <Skeleton className="h-4 w-[250px]" />
+        <Skeleton className="h-4 w-[200px]" />
+      </div>
+    </div>
+  );
+}
 
 export default function Rankings() {
   return (
@@ -61,7 +74,7 @@ function StandingsDisplay() {
                   <TableCell>{Math.round(player.avg_fpts * 10) / 10}</TableCell>
                   <TableCell className="flex justify-center items-center space-x-1">
                     {player.rank_change}
-										<Separator orientation="vertical" />
+                    <Separator orientation="vertical" />
                     {player.rank_change > 0 ? (
                       <TrendingUp className="text-green-500" size={20} />
                     ) : player.rank_change < 0 ? (

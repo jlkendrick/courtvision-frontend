@@ -1,5 +1,5 @@
 "use client";
-import { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useState, useEffect, use } from "react";
 import { usePathname } from "next/navigation";
 import { toast } from "sonner";
 import { useRef } from "react";
@@ -7,6 +7,8 @@ import { useRef } from "react";
 const StandingsContext = createContext({
   standings: [] as StandingsPlayer[],
   setStandings: (standings: StandingsPlayer[]) => {},
+	loading: false,
+	setLoading: (loading: boolean) => {},
 });
 
 export interface StandingsPlayer {
@@ -23,17 +25,22 @@ export const StandingsProvider = ({
   children: React.ReactNode;
 }) => {
   const [standings, setStandings] = useState<StandingsPlayer[]>([]);
+	const [loading, setLoading] = useState(false);
 
   const pathname = usePathname();
-	const fetchedRef = useRef(false);
+  const fetchedRef = useRef(false);
 
-useEffect(() => {
-  if (pathname === "/standings" && standings.length === 0 && !fetchedRef.current) {
-    fetchStandings();
-    fetchedRef.current = true;
-  }
-}, [pathname, standings.length]);
-
+  useEffect(() => {
+    if (
+      pathname === "/standings" &&
+      standings.length === 0 &&
+      !fetchedRef.current
+    ) {
+      // setLoading(true);
+      fetchStandings();
+      fetchedRef.current = true;
+    }
+  }, [pathname, standings.length]);
 
   // ----------------------------------- Fetch the player fantasy points standings -----------------------------------
   const fetchStandings = async () => {
@@ -46,8 +53,8 @@ useEffect(() => {
       });
 
       if (!response.ok) {
-        console.log("Error getting player fantasy points standings");
-        toast.error("Error getting player fantasy points standings");
+        console.log("Error getting player fantasy points standings.");
+        toast.error("Error getting player fantasy points standings.");
         return;
       }
 
@@ -60,7 +67,7 @@ useEffect(() => {
   };
 
   return (
-    <StandingsContext.Provider value={{ standings, setStandings }}>
+    <StandingsContext.Provider value={{ standings, setStandings, loading, setLoading }}>
       {children}
     </StandingsContext.Provider>
   );
