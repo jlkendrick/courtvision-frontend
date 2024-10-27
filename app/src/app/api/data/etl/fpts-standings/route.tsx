@@ -1,11 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { PROD_BACKEND_ENDPOINT, LOCAL_BACKEND_ENDPOINT } from "@/endpoints";
-import path from 'path';
-import fs from 'fs';
 
 // API route to intiate the POST the new day's data to the database  --------------------------------------------
 export async function POST(request: NextRequest): Promise<NextResponse> {
-  console.log("POST request to /api/data/etl/update-fpts");
+  console.log("POST request to /api/data/etl/fpts-standings");
   const CRON_TOKEN = process.env.CRON_TOKEN;
   const token = request.headers.get("Authorization")?.split(" ")[1];
 
@@ -38,24 +36,24 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
 // API route to GET the updated FPTS data from the backend server  --------------------------------------------
 export async function GET(request: NextRequest): Promise<NextResponse> {
-  console.log("GET request to /api/data/etl/update-fpts");
+  console.log("GET request to /api/data/etl/fpts-standings");
   
-  const { searchParams } = new URL(request.url);
-  const cron_token = searchParams.get("cron_token");
+  // const { searchParams } = new URL(request.url);
+  // const cron_token = searchParams.get("cron_token");
 
-  if (!cron_token) {
-    console.log("No authorization token");
-    return NextResponse.json({ error: "No authorization token" }, { status: 400 });
-  }
+  // if (!cron_token) {
+  //   console.log("No authorization token");
+  //   return NextResponse.json({ error: "No authorization token" }, { status: 400 });
+  // }
 
   const CRON_TOKEN = process.env.CRON_TOKEN;
-  if (cron_token !== CRON_TOKEN) {
-    console.log("Invalid token");
-    return NextResponse.json({ error: "Invalid token" }, { status: 400 });
-  }
+  // if (cron_token !== CRON_TOKEN) {
+  //   console.log("Invalid token");
+  //   return NextResponse.json({ error: "Invalid token" }, { status: 400 });
+  // }
 
 
-  const params = new URLSearchParams({ cron_token: cron_token ?? "" });
+  const params = new URLSearchParams({ cron_token: CRON_TOKEN ?? "" });
   const response = await fetch(`${PROD_BACKEND_ENDPOINT}/db/etl/get_fpts_data?` + params.toString(), {
     method: "GET",
     headers: {
