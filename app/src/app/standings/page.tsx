@@ -10,23 +10,11 @@ import {
 } from "@/components/ui/table";
 import { Card, CardContent } from "@/components/ui/card";
 import { useStandings, StandingsPlayer } from "@/app/context/StandingsContext";
-import { TrendingUp, TrendingDown, Minus } from "lucide-react";
+import { TrendingUp, TrendingDown, Minus, ArrowUpDown } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
-import { Skeleton } from "@/components/ui/skeleton";
+import { useEffect, useState } from 'react';
 
-function SkeletonCard() {
-  return (
-    <div className="flex flex-col space-y-3">
-      <Skeleton className="h-40 w-[1000px]" />
-      <div className="space-y-2">
-        <Skeleton className="h-4 w-[250px]" />
-        <Skeleton className="h-4 w-[200px]" />
-      </div>
-    </div>
-  );
-}
-
-export default function Rankings() {
+export default function Standings() {
   return (
     <>
       <div className="flex items-center">
@@ -48,6 +36,45 @@ export default function Rankings() {
 
 function StandingsDisplay() {
   const { standings } = useStandings();
+  const [sortedStandings, setSortedStandings] = useState(standings);
+  const [sortConfig, setSortConfig] = useState({
+    key: 'total_fpts',
+    direction: 'desc'
+  });
+
+  // Make sure to update sortedStandings when standings changes
+  useEffect(() => {
+    setSortedStandings(standings);
+  }, [standings]);
+
+  const handleSort = (key: 'total_fpts' | 'avg_fpts') => {
+    let direction = 'desc';
+    
+    // If clicking the same column, toggle direction
+    if (sortConfig.key === key) {
+      direction = sortConfig.direction === 'desc' ? 'asc' : 'desc';
+    }
+
+    const sorted = [...sortedStandings].sort((a, b) => {
+      if (direction === 'desc') {
+        return b[key] - a[key];
+      }
+      return a[key] - b[key];
+    });
+
+    setSortedStandings(sorted);
+    setSortConfig({ key, direction });
+  };
+
+  const getSortIcon = (columnKey: string) => {
+    if (sortConfig.key !== columnKey) {
+      return <ArrowUpDown size={16} className="text-gray-400" />;
+    }
+    return <ArrowUpDown 
+      size={16} 
+      className={`text-primary ${sortConfig.direction === 'asc' ? 'rotate-180' : ''}`} 
+    />;
+  };
 
   return (
     <Card className="mt-5 w-full">
@@ -57,15 +84,31 @@ function StandingsDisplay() {
             <TableRow>
               <TableHead className="w-[50px]">Rank</TableHead>
               <TableHead className="w-[50%] text-center">Name</TableHead>
-              <TableHead className="text-center">Total FPTS/G</TableHead>
-              <TableHead className="text-center">Average FPTS/G</TableHead>
+              <TableHead 
+                className="text-center cursor-pointer hover:bg-muted"
+                onClick={() => handleSort('total_fpts')}
+              >
+                <div className="flex items-center justify-center gap-2">
+                  Total FPTS/G
+                  {getSortIcon('total_fpts')}
+                </div>
+              </TableHead>
+              <TableHead 
+                className="text-center cursor-pointer hover:bg-muted"
+                onClick={() => handleSort('avg_fpts')}
+              >
+                <div className="flex items-center justify-center gap-2">
+                  Average FPTS/G
+                  {getSortIcon('avg_fpts')}
+                </div>
+              </TableHead>
               <TableHead className="w-[100px] text-center">
                 Rank Change
               </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {standings.map((player: StandingsPlayer, index: number) => {
+            {sortedStandings.map((player: StandingsPlayer, index: number) => {
               return (
                 <TableRow className="text-center" key={index}>
                   <TableCell>{player.rank}</TableCell>

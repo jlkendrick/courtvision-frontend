@@ -1,5 +1,6 @@
 "use client";
-import { createContext, useContext, useState, useEffect, use } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
+import { useAuth } from "@/app/context/AuthContext";
 import { usePathname } from "next/navigation";
 import { toast } from "sonner";
 import { useRef } from "react";
@@ -7,8 +8,6 @@ import { useRef } from "react";
 const StandingsContext = createContext({
   standings: [] as StandingsPlayer[],
   setStandings: (standings: StandingsPlayer[]) => {},
-	loading: false,
-	setLoading: (loading: boolean) => {},
 });
 
 export interface StandingsPlayer {
@@ -25,7 +24,7 @@ export const StandingsProvider = ({
   children: React.ReactNode;
 }) => {
   const [standings, setStandings] = useState<StandingsPlayer[]>([]);
-	const [loading, setLoading] = useState(false);
+	const { setLoading } = useAuth();
 
   const pathname = usePathname();
   const fetchedRef = useRef(false);
@@ -36,7 +35,7 @@ export const StandingsProvider = ({
       standings.length === 0 &&
       !fetchedRef.current
     ) {
-      // setLoading(true);
+      setLoading(true);
       fetchStandings();
       fetchedRef.current = true;
     }
@@ -44,6 +43,7 @@ export const StandingsProvider = ({
 
   // ----------------------------------- Fetch the player fantasy points standings -----------------------------------
   const fetchStandings = async () => {
+    setLoading(true);
     try {
       const response = await fetch("/api/data/etl/fpts-standings", {
         method: "GET",
@@ -60,14 +60,16 @@ export const StandingsProvider = ({
 
       const data = await response.json();
       setStandings(data.data);
+      setLoading(false);
     } catch (error) {
       console.log("Internal server error. Please try again later.");
       toast.error("Internal server error. Please try again later.");
+      setLoading(false);
     }
   };
 
   return (
-    <StandingsContext.Provider value={{ standings, setStandings, loading, setLoading }}>
+    <StandingsContext.Provider value={{ standings, setStandings }}>
       {children}
     </StandingsContext.Provider>
   );
