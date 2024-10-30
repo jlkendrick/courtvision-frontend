@@ -89,7 +89,7 @@ function StandingsDisplay() {
                 onClick={() => handleSort('total_fpts')}
               >
                 <div className="flex items-center justify-center gap-2">
-                  Total FPTS/G
+                  Total FPTS
                   {getSortIcon('total_fpts')}
                 </div>
               </TableHead>
