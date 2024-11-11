@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { DATABSE_API_ENDPOPINT } from "@/endpoints";
+import { PROD_BACKEND_ENDPOINT, LOCAL_BACKEND_ENDPOINT } from "@/endpoints";
 
 // API route to create a new user account
 export async function POST(request: NextRequest) {
   const { email, password } = await request.json();
-	const response = await fetch (`${DATABSE_API_ENDPOPINT}/users/login`, {
+	const response = await fetch (`${PROD_BACKEND_ENDPOINT}/db/users/login`, {
 		method: "POST",
 		headers: {
 			"Content-Type": "application/json",
