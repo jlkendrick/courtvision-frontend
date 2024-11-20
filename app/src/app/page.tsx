@@ -11,13 +11,10 @@ import { User } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import {
-  IconAdjustmentsBolt,
+  IconChartArrowsVertical,
   IconCloud,
   IconClockHour4,
   IconTrendingUp,
-  IconHeart,
-  IconHelp,
-  IconRouteAltLeft,
   IconChartPie,
   IconChessKnight,
 } from "@tabler/icons-react";
@@ -61,6 +58,13 @@ function FeaturesSectionDemo() {
         "Optimize your streaming moves for the week.",
       icon: <IconTrendingUp />,
       page: "/lineup-generation",
+    },
+    {
+      title: "Standings",
+      description:
+        "View the rankings of all fantasy basketball players, updated daily.",
+      icon: <IconChartArrowsVertical />,
+      page: "/standings",
     },
     {
       title: "Account",
