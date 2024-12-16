@@ -1,10 +1,6 @@
 "use client";
 
 import React from "react";
-import { BentoGrid, BentoGridItem } from "@/components/ui/bento-grid";
-import { InfiniteMovingCards } from "@/components/ui/infinite-moving-cards";
-import { CanvasRevealEffect } from "@/components/ui/canvas-reveal-effect";
-import { AnimatePresence } from "framer-motion";
 import Link from "next/link";
 
 import { User } from "lucide-react";
@@ -12,7 +8,6 @@ import { User } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   IconChartArrowsVertical,
-  IconCloud,
   IconClockHour4,
   IconTrendingUp,
   IconChartPie,
