@@ -62,7 +62,7 @@ function PlayerStatChart({ player }: { player: StandingsPlayer }) {
   return (
     <Card className="border-none">
       <CardHeader>
-        <CardTitle>{player.player_name}'s Fantasy Scores</CardTitle>
+      <CardTitle>{player.player_name}&apos;s Fantasy Scores</CardTitle>
       </CardHeader>
       <CardContent>
         {playerStats[player.player_name] ? (
