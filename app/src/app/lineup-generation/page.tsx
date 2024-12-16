@@ -2,8 +2,8 @@
 import { useLineup } from "@/app/context/LineupContext";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
-import StopzForm from "@/components/StopzForm";
-import LineupDisplay from "@/components/LineupDisplay";
+import StopzForm from "@/components/lineup-components/StopzForm";
+import LineupDisplay from "@/components/lineup-components/LineupDisplay";
 
 function SkeletonCard() {
   return (

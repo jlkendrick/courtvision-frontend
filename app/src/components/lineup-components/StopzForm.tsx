@@ -3,7 +3,7 @@ import * as z from "zod";
 import { useLineup } from "@/app/context/LineupContext";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Input } from "./ui/input";
+import { Input } from "../ui/input";
 import {
   Form,
   FormControl,
@@ -11,7 +11,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "./ui/form";
+} from "../ui/form";
 import {
   Card,
   CardContent,
@@ -19,8 +19,8 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "./ui/card";
-import { Button } from "./ui/button";
+} from "../ui/card";
+import { Button } from "../ui/button";
 import Image from "next/image";
 import { useTeams } from "@/app/context/TeamsContext";
 import { toast } from "sonner";
@@ -100,7 +100,10 @@ export default function StopzForm() {
                         <span style={{ color: "red" }}> *</span>
                       </FormLabel>
                       <FormControl>
-                        <Input placeholder='"I am ok dropping anybody who averages less than {threshold} points"' {...field} />
+                        <Input
+                          placeholder='"I am ok dropping anybody who averages less than {threshold} points"'
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -132,7 +135,10 @@ export default function StopzForm() {
                         <span style={{ color: "red" }}> *</span>
                       </FormLabel>
                       <FormControl>
-                        <Input placeholder="Week to generate a lineup for" {...field} />
+                        <Input
+                          placeholder="Week to generate a lineup for"
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

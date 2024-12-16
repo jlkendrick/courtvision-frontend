@@ -66,20 +66,23 @@ export default function LineupDisplay({ lineup }: { lineup: Lineup }) {
               <span>Save Lineup</span>
             </Button>
           </h1>
-          <Carousel className="w-full max-w-xl mt-3">
-            <CarouselContent>
-              {lineup.Lineup.map((gene: SlimGene, index: number) => (
-                <CarouselItem key={index}>
-                  <AnotherLineupCard gene={gene} />
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-            <CarouselPrevious />
-            <CarouselNext />
-          </Carousel>
+          <div className="w-full overflow-x-auto mt-3">
+            <Carousel className="max-w-[1100px] mx-auto">
+              <CarouselContent className="max-w-[1100px]">
+                {lineup.Lineup.map((gene: SlimGene, index: number) => (
+                  <CarouselItem key={index}>
+                    <LineupCard gene={gene} />
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              <CarouselPrevious />
+              <CarouselNext />
+            </Carousel>
+          </div>
           <div>
             <p className="text-gray-500 text-sm ml-[22px]">
-              * Please be patient, after periods of inactivity the server may need to wake up.
+              * Please be patient, after periods of inactivity the server may
+              need to wake up.
               <br />
               * Results will vary across generations so feel free to try again.
               <br />
@@ -99,7 +102,7 @@ export default function LineupDisplay({ lineup }: { lineup: Lineup }) {
   );
 }
 
-function LineupCard({ gene }: { gene: SlimGene }) {
+export function LineupCard({ gene }: { gene: SlimGene }) {
   const orderToDisplay = [
     "PG",
     "SG",
@@ -118,91 +121,19 @@ function LineupCard({ gene }: { gene: SlimGene }) {
   };
 
   return (
-    <Card className="border">
-      <CardHeader className="text-center">
-        <h1 className="text-xl">Day {gene.Day + 1}</h1>
-      </CardHeader>
-      <CardContent className="flex justify-center">
-        <div className="flex flex-col gap-1">
-          {orderToDisplay.map((position: string, index: number) => {
-            const player = gene.Roster[position];
-            return (
-              <div className="flex justify-between" key={index}>
-                {player ? (
-                  <p>
-                    <span className="mr-2">{position}</span>
-                    <span className="mr-2">{player.Name}</span>
-                    <span className="mr-2">{player.Team}</span>
-                    <span className="mr-2">{player.AvgPoints}</span>
-                    <span
-                      className={`${
-                        isPlayerNew(player) ? "text-tertiary" : "hidden"
-                      }`}
-                    >
-                      +
-                    </span>
-                  </p>
-                ) : (
-                  <div className="flex items-center" key={`skeleton-${index}`}>
-                    <p className="inline-block mr-2">{position}</p>
-                    <Skeleton className="h-4 w-[250px]" />
-                  </div>
-                )}
-              </div>
-            );
-          })}
-          <div className="flex flex-col justify-between">
-            <div className="flex flex-col gap-1">
-              {gene.Removals.map((player: SlimPlayer, index: number) => (
-                <div className="flex justify-between" key={index}>
-                  <p>
-                    <span className="mr-2">{player.Name}</span>
-                    <span className="mr-2">{player.Team}</span>
-                    <span className="mr-2">{player.AvgPoints}</span>
-                    <span className="text-primary">-</span>
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
-
-export function AnotherLineupCard({ gene }: { gene: SlimGene }) {
-  const orderToDisplay = [
-    "PG",
-    "SG",
-    "SF",
-    "PF",
-    "C",
-    "G",
-    "F",
-    "UT1",
-    "UT2",
-    "UT3",
-  ];
-
-  const isPlayerNew = (player: SlimPlayer) => {
-    return gene.Additions.some((addition) => addition.Name === player.Name);
-  };
-
-  return (
-    <Card>
-      <CardHeader className="text-left my-[-16px]">
+    <Card className="border-none">
+      <CardHeader className="text-left my-[-10px]">
         <h1 className="text-xl font-bold">Day {gene.Day + 1}</h1>
         <h2 className="text-sm">Roster:</h2>
       </CardHeader>
-      <CardContent className="flex justify-center mb-[-20px]">
+      <CardContent className="flex max-w-[1000px] justify-center mb-[-20px]">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[10px]">Position</TableHead>
+              <TableHead className="w-[5px]">Position</TableHead>
               <TableHead className="w-[20px]">Name</TableHead>
-              <TableHead className="w-[10px]">Team</TableHead>
-              <TableHead className="w-[10px]">Avg Points</TableHead>
+              <TableHead className="w-[5px]">Team</TableHead>
+              <TableHead className="w-[5px]">Avg Points</TableHead>
               <TableHead className="text-right w-[1px]">Action</TableHead>
             </TableRow>
           </TableHeader>
@@ -278,3 +209,75 @@ export function AnotherLineupCard({ gene }: { gene: SlimGene }) {
     </Card>
   );
 }
+
+// function LineupCard({ gene }: { gene: SlimGene }) {
+//   const orderToDisplay = [
+//     "PG",
+//     "SG",
+//     "SF",
+//     "PF",
+//     "C",
+//     "G",
+//     "F",
+//     "UT1",
+//     "UT2",
+//     "UT3",
+//   ];
+
+//   const isPlayerNew = (player: SlimPlayer) => {
+//     return gene.Additions.some((addition) => addition.Name === player.Name);
+//   };
+
+//   return (
+//     <Card className="border">
+//       <CardHeader className="text-center">
+//         <h1 className="text-xl">Day {gene.Day + 1}</h1>
+//       </CardHeader>
+//       <CardContent className="flex justify-center">
+//         <div className="flex flex-col gap-1">
+//           {orderToDisplay.map((position: string, index: number) => {
+//             const player = gene.Roster[position];
+//             return (
+//               <div className="flex justify-between" key={index}>
+//                 {player ? (
+//                   <p>
+//                     <span className="mr-2">{position}</span>
+//                     <span className="mr-2">{player.Name}</span>
+//                     <span className="mr-2">{player.Team}</span>
+//                     <span className="mr-2">{player.AvgPoints}</span>
+//                     <span
+//                       className={`${
+//                         isPlayerNew(player) ? "text-tertiary" : "hidden"
+//                       }`}
+//                     >
+//                       +
+//                     </span>
+//                   </p>
+//                 ) : (
+//                   <div className="flex items-center" key={`skeleton-${index}`}>
+//                     <p className="inline-block mr-2">{position}</p>
+//                     <Skeleton className="h-4 w-[250px]" />
+//                   </div>
+//                 )}
+//               </div>
+//             );
+//           })}
+//           <div className="flex flex-col justify-between">
+//             <div className="flex flex-col gap-1">
+//               {gene.Removals.map((player: SlimPlayer, index: number) => (
+//                 <div className="flex justify-between" key={index}>
+//                   <p>
+//                     <span className="mr-2">{player.Name}</span>
+//                     <span className="mr-2">{player.Team}</span>
+//                     <span className="mr-2">{player.AvgPoints}</span>
+//                     <span className="text-primary">-</span>
+//                   </p>
+//                 </div>
+//               ))}
+//             </div>
+//           </div>
+//         </div>
+//       </CardContent>
+//     </Card>
+//   );
+// }

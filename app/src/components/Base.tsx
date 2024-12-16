@@ -17,7 +17,7 @@ import { Separator } from "@/components/ui/separator";
 import { SkeletonCard } from "@/components/ui/skeleton-card";
 
 import { Roboto } from "next/font/google";
-import { TeamDropdown } from "@/components/ManageTeamsComponents";
+import { TeamDropdown } from "@/components/teams-components/TeamDropdown";
 
 const font = Roboto({
   weight: "900",

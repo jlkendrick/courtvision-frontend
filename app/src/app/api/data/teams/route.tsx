@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { DATABSE_API_ENDPOPINT } from "@/endpoints";
+import { PROD_BACKEND_ENDPOINT } from "@/endpoints";
 
 // API route to GET all a user's teams
 export async function GET(request: NextRequest): Promise<NextResponse> {
@@ -11,7 +11,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     return NextResponse.json({ error: "No authorization token" }, { status: 400 });
   }
 
-  const response = await fetch(`${DATABSE_API_ENDPOPINT}/teams`, {
+  const response = await fetch(`${PROD_BACKEND_ENDPOINT}/db/teams`, {
     method: "GET",
     headers: {
       "Authorization": `Bearer ${token}`,
@@ -21,9 +21,15 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
   if (response.status === 401) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   } else if (!response.ok) {
+    console.log("Failed to get teams in api layer.");
     return NextResponse.json({ error: "Failed to get teams in api layer." }, { status: 400 });
   }
+
+  console.log("fjalsdifjalsidfj");
+  
+  
   const data = await response.json();
+  console.log(data);
   return NextResponse.json(data);
 }
 
@@ -39,7 +45,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
   const body = await request.json();
   console.log("Body: ", body);
-  const response = await fetch(`${DATABSE_API_ENDPOPINT}/teams/add`, {
+  const response = await fetch(`${PROD_BACKEND_ENDPOINT}/db/teams/add`, {
     method: "POST",
     headers: {
       "Authorization": `Bearer ${token}`,
@@ -65,7 +71,7 @@ export async function DELETE(request: NextRequest): Promise<NextResponse> {
   }
 
   const body = await request.json();
-  const response = await fetch(`${DATABSE_API_ENDPOPINT}/teams/remove`, {
+  const response = await fetch(`${PROD_BACKEND_ENDPOINT}/db/teams/remove`, {
     method: "DELETE",
     headers: {
       "Authorization": `Bearer ${token}`,
@@ -91,7 +97,7 @@ export async function PUT(request: NextRequest): Promise<NextResponse> {
   }
 
   const body = await request.json();
-  const response = await fetch(`${DATABSE_API_ENDPOPINT}/teams/update`, {
+  const response = await fetch(`${PROD_BACKEND_ENDPOINT}/db/teams/update`, {
     method: "PUT",
     headers: {
       "Authorization": `Bearer ${token}`,

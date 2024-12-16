@@ -3,7 +3,7 @@ import React from "react";
 
 import { useRouter } from "next/navigation";
 
-import UAuthForm from "@/components/UserLoginOrCreate";
+import UAuthForm from "@/components/auth-components/UserLoginOrCreate";
 import { useAuth } from "@/app/context/AuthContext";
 import { Skeleton } from "@/components/ui/skeleton";
 import {

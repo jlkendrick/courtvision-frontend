@@ -21,22 +21,24 @@ import {
 } from "@/components/ui/table";
 import { Eye, Trash2 } from "lucide-react";
 import { Lineup, SlimGene, useLineup } from "@/app/context/LineupContext";
-import { AnotherLineupCard } from "@/components/LineupDisplay";
+import { LineupCard } from "@/components/lineup-components/LineupDisplay";
 import {
   Carousel,
   CarouselContent,
   CarouselItem,
   CarouselPrevious,
   CarouselNext,
-} from "./ui/carousel";
+} from "../ui/carousel";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 export function ManageLineupsTable() {
-  const { savedLineups, deleteLineup } = useLineup();
+  const { savedLineups } = useLineup();
 
   return (
     <Table className="max-w-[100%]">
-      <TableCaption>View and delete your saved lineups for the selected teams.</TableCaption>
+      <TableCaption>
+        View and delete your saved lineups for the selected teams.
+      </TableCaption>
       <TableHeader>
         <TableRow>
           <TableHead className="text-left w-[20vw]">Timestamp</TableHead>
@@ -58,11 +60,15 @@ export function ManageLineupsTable() {
                 <TableCell className="text-center">
                   {savedLineup.Improvement}
                 </TableCell>
-                <TableCell className="text-center">{savedLineup.Week}</TableCell>
-                <TableCell className="text-center">{savedLineup.Threshold}</TableCell>
+                <TableCell className="text-center">
+                  {savedLineup.Week}
+                </TableCell>
+                <TableCell className="text-center">
+                  {savedLineup.Threshold}
+                </TableCell>
                 <TableCell className="text-center">
                   <div className="inline-block">
-                  <ViewLineupButton lineup={savedLineup} />
+                    <ViewLineupButton lineup={savedLineup} />
                   </div>
                 </TableCell>
                 <TableCell className="text-center">
@@ -95,23 +101,22 @@ function ViewLineupButton({ lineup }: { lineup: Lineup }) {
       </DialogTrigger>
       <DialogContent>
         <ScrollArea className="h-[80vh]">
-        <Carousel className="w-[75%] max-w-[13.7%] mt-3">
-          <CarouselContent>
-            {lineup.Lineup.map((gene: SlimGene, index: number) => (
-              <CarouselItem key={index}>
-                <AnotherLineupCard gene={gene} />
-              </CarouselItem>
-            ))}
-          </CarouselContent>
-          <CarouselPrevious />
-          <CarouselNext />
-        </Carousel>
+          <Carousel className="w-[75%] max-w-[13.7%] mt-3">
+            <CarouselContent>
+              {lineup.Lineup.map((gene: SlimGene, index: number) => (
+                <CarouselItem key={index}>
+                  <LineupCard gene={gene} />
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+            <CarouselPrevious />
+            <CarouselNext />
+          </Carousel>
         </ScrollArea>
       </DialogContent>
     </Dialog>
   );
 }
-
 
 function DeleteLineupConfirmation({ team_id }: { team_id: number }) {
   const { deleteLineup } = useLineup();
@@ -136,7 +141,9 @@ function DeleteLineupConfirmation({ team_id }: { team_id: number }) {
               Cancel
             </Button>
           </DialogClose>
-          <Button onClick={() => deleteLineup(team_id)} variant="default">Delete</Button>
+          <Button onClick={() => deleteLineup(team_id)} variant="default">
+            Delete
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

@@ -89,7 +89,7 @@ export const TeamsProvider = ({ children }: { children: React.ReactNode }) => {
         logout();
       }
       const data = await response.json();
-      setTeams(data.teams);
+      setTeams(data.teams || []);
     } catch (error) {
       
       toast.error("Internal server error. Please try again later.");
@@ -241,7 +241,7 @@ export const TeamsProvider = ({ children }: { children: React.ReactNode }) => {
 
   // Set selected team to first team in list
   useEffect(() => {
-    if (teams.length > 0) {
+    if (teams != null && teams.length > 0) {
       setSelectedTeam(teams[0].team_id);
     }
   }, [teams]);

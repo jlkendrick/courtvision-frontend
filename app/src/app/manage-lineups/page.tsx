@@ -1,4 +1,4 @@
-import { ManageLineupsTable } from '@/components/ManageLineupsComponents';
+import { ManageLineupsTable } from "@/components/lineup-components/ManageLineupsTable";
 
 export default function ManageLineups() {
   return (
@@ -16,4 +16,3 @@ export default function ManageLineups() {
     </>
   );
 }
-

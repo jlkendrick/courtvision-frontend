@@ -1,5 +1,5 @@
 "use client";
-import { ManageTeamsTable } from "@/components/ManageTeamsComponents";
+import { ManageTeamsTable } from "@/components/teams-components/ManageTeamsTable";
 
 export default function ManageTeams() {
   return (

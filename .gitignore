@@ -7,3 +7,4 @@ app/.next
 app/src/deprecated
 rankings/target
 app/endpoints.tsx
+app/.env.local

@@ -10,50 +10,17 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import {
-  Select,
-  SelectItem,
-  SelectTrigger,
-  SelectContent,
-  SelectGroup,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Command,
-  CommandItem,
-  CommandList,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandSeparator,
-} from "@/components/ui/command";
-import {
   Table,
   TableBody,
   TableCaption,
   TableCell,
-  TableFooter,
   TableHead,
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Menubar,
-  MenubarCheckboxItem,
-  MenubarContent,
-  MenubarItem,
-  MenubarMenu,
-  MenubarRadioGroup,
-  MenubarRadioItem,
-  MenubarSeparator,
-  MenubarShortcut,
-  MenubarSub,
-  MenubarSubContent,
-  MenubarSubTrigger,
-  MenubarTrigger,
-} from "@/components/ui/menubar";
 import Image from "next/image";
 import { Input } from "@/components/ui/input";
-import { Trash2, Pencil, Check } from "lucide-react";
+import { Trash2, Pencil } from "lucide-react";
 import {
   Form,
   FormField,
@@ -65,126 +32,11 @@ import {
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useTeams } from "@/app/context/TeamsContext";
 import { DialogClose } from "@radix-ui/react-dialog";
 import { toast } from "sonner";
-import Link from "next/link";
 
-
-export function TeamDropdown() {
-  const { teams, selectedTeam, setSelectedTeam, handleManageTeamsClick } =
-    useTeams();
-  const handleSelectedTeam = (team_id: number) => {
-    const team = teams.find((team) => team.team_id === team_id);
-    if (team) {
-      setSelectedTeamName(team.team_info.team_name);
-    }
-  }
-  const [selectedTeamName, setSelectedTeamName] = useState(teams.length >= 1 ? handleSelectedTeam(0) : "Select Team");
-  
-  // useEffect so that placeholder updates when selectedTeam changes
-  useEffect(() => {
-    handleSelectedTeam(selectedTeam || 0);
-  }, [selectedTeam]);
-
-  return (
-    <>
-      <Select>
-        <SelectTrigger className="w-[190px] text-xs hover:border-primary">
-          <SelectValue
-            placeholder={`${
-              selectedTeamName 
-            }`}
-          />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectGroup>
-            <Command className="w-[180px]">
-              <CommandList>
-                <CommandEmpty>No results found.</CommandEmpty>
-                <CommandGroup
-                  className="font-gray-400 font-medium"
-                  heading="Options"
-                >
-                  <Link href="/manage-teams">
-                    <CommandItem onSelect={handleManageTeamsClick}>
-                      Manage Teams
-                    </CommandItem>
-                  </Link>
-                </CommandGroup>
-                <CommandSeparator />
-                <CommandGroup
-                  className="font-gray-400 font-medium"
-                  heading="Teams"
-                >
-                  {teams.map((team) => (
-                    <CommandItem
-                      key={team.team_id}
-                      onSelect={() => setSelectedTeam(team.team_id)}
-                      value={team.team_info.team_name}
-                    >
-                      {team.team_info.team_name}
-                      {selectedTeam === team.team_id && (
-                        <Check size={20} className="ml-2" />
-                      )}
-                    </CommandItem>
-                  ))}
-                </CommandGroup>
-              </CommandList>
-            </Command>
-          </SelectGroup>
-        </SelectContent>
-      </Select>
-
-      {/* Manage Teams Drawer
-      {teamDropdownState.clickManageTeams && (
-        <ManageTeamsDrawer
-          clickManageTeams={teamDropdownState.clickManageTeams}
-          setClickManageTeams={setTeamDropdownState}
-        />
-      )} */}
-    </>
-  );
-}
-
-// function ManageTeamsDrawer({
-//   clickManageTeams,
-//   setClickManageTeams,
-// }: {
-//   clickManageTeams: boolean;
-//   setClickManageTeams: (teamDropdownState: any) => void;
-// }) {
-//   const handleManageTeamsClose: () => void = () => {
-//     setClickManageTeams(false);
-//   };
-
-//   const handleFormSubmit: (e: React.FormEvent) => void = (e) => {
-//     e.preventDefault();
-//     console.log("Form submitted");
-//   };
-
-//   return (
-//     <Drawer isOpen={clickManageTeams} onClose={handleManageTeamsClose}>
-//       <DrawerTrigger asChild>
-//         <Button variant="outline" className="mr-2 hover:border-primary">
-//           Sign In
-//         </Button>
-//       </DrawerTrigger>
-//       <DrawerContent>
-//         <form onSubmit={handleFormSubmit}>
-//           <ManageTeamsTable />
-//           <DrawerFooter>
-//             <Button type="submit">Save Changes</Button>
-//             <DrawerClose asChild>
-//               <Button variant="outline">Cancel</Button>
-//             </DrawerClose>
-//           </DrawerFooter>
-//         </form>
-//       </DrawerContent>
-//     </Drawer>
-//   );
-// }
 
 interface TeamInfo {
   team_name: string;
@@ -193,11 +45,6 @@ interface TeamInfo {
   year: number;
   espn_s2?: string;
   swid?: string;
-}
-
-interface Team {
-  team_id: number;
-  team_info: TeamInfo;
 }
 
 export function ManageTeamsTable() {
@@ -242,18 +89,6 @@ export function ManageTeamsTable() {
     </Table>
   );
 }
-
-// // This is part of the ManageTeamsTable component, no need to export
-// function ManageTeamMenubar({ team }: { team: Team }) {
-//   return (
-//     <Menubar>
-//       <MenubarMenu className="">
-//         <EditTeamForm team_id={team.team_id} team_info={team.team_info} />
-//         <DeleteTeamConfirmation team_id={team.team_id} />
-//       </MenubarMenu>
-//     </Menubar>
-//   );
-// }
 
 function DeleteTeamConfirmation({ team_id }: { team_id: number }) {
   const { deleteTeam } = useTeams();
@@ -502,7 +337,7 @@ function EditTeamForm({
   team_id: number;
   team_info: TeamInfo;
 }) {
-  const { addTeam, editTeam } = useTeams();
+  const { editTeam } = useTeams();
 
   const leagueInfoSchema = z.object({
     leagueID: z

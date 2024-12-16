@@ -13,7 +13,7 @@ import { StandingsProvider } from "./context/StandingsContext";
 
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
-import Layout from "@/components/Layout";
+import Layout from "@/components/Base";
 
 const inter = Inter({ subsets: ["latin"] });
 

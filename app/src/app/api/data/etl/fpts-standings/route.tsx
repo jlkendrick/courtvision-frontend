@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { PROD_BACKEND_ENDPOINT, LOCAL_BACKEND_ENDPOINT } from "@/endpoints";
+import { createClient } from "@supabase/supabase-js";
 
 // API route to intiate the POST the new day's data to the database  --------------------------------------------
 export async function POST(request: NextRequest): Promise<NextResponse> {
@@ -35,68 +36,23 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
 
 // API route to GET the updated FPTS data from the backend server  --------------------------------------------
-export async function GET(request: NextRequest): Promise<NextResponse> {
+export async function GET(): Promise<NextResponse> {
   console.log("GET request to /api/data/etl/fpts-standings");
-  
-  // const { searchParams } = new URL(request.url);
-  // const cron_token = searchParams.get("cron_token");
 
-  // if (!cron_token) {
-  //   console.log("No authorization token");
-  //   return NextResponse.json({ error: "No authorization token" }, { status: 400 });
-  // }
+  const supabaseUrl = process.env.SUPABASE_URL;
+  const supabaseKey = process.env.SUPABASE_KEY;
+  if (!supabaseKey || !supabaseUrl) {
+    console.log("Supabase credentials not defined");
+    return NextResponse.json({ error: "Supabase credentials not defined" }, { status: 400 });
+  }
+  const supabase = createClient(supabaseUrl, supabaseKey);
 
-  const CRON_TOKEN = process.env.CRON_TOKEN;
-  // if (cron_token !== CRON_TOKEN) {
-  //   console.log("Invalid token");
-  //   return NextResponse.json({ error: "Invalid token" }, { status: 400 });
-  // }
-
-
-  const params = new URLSearchParams({ cron_token: CRON_TOKEN ?? "" });
-  const response = await fetch(`${PROD_BACKEND_ENDPOINT}/db/etl/get_fpts_data?` + params.toString(), {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
-
-  if (!response.ok) {
+  let { data, error } = await supabase
+    .rpc('get_fpts_data')
+  if (error) {
     console.log("Error getting updated FPTS data");
     return NextResponse.json({ error: "Error occurred getting updated FPTS data." }, { status: 400 });
   }
 
-  const data = await response.json();
   return NextResponse.json(data);
 }
-
-
-// // API route to listen for the response from the backend server for when it is done with the ETL process  --------------------------------------------
-// export async function PUT(request: NextRequest): Promise<NextResponse> {
-//   console.log("PUT request to /api/data/etl/update-fpts");
-//   const CRON_TOKEN = "c5bd89c4f876d5797401c02df81b71d90d40330014656b13735dee316c2b3241";
-//   const token = request.headers.get("Authorization")?.split(" ")[1].trim();
-
-//   if (!token) {
-//     console.log("No authorization token");
-//     return NextResponse.json({ error: "No authorization token" }, { status: 400 });
-//   }
-
-//   if (token !== CRON_TOKEN) {
-//     console.log("Invalid token");
-//     return NextResponse.json({ error: "Invalid token" }, { status: 400 });
-//   }
-
-//   const body = await request.json();
-//   const data = body.data;
-//   try {
-//     const filePath = path.resolve(process.cwd(), 'public/standings-data/fpts.json');
-//     const formattedData = typeof data === "string" ? JSON.stringify(JSON.parse(data), null, 2) : JSON.stringify(data, null, 2);
-//     fs.writeFileSync(filePath, formattedData);
-//     console.log("Data successfully written to file");
-//     return NextResponse.json({ message: "Data successfully written to file." });
-//   } catch (error) {
-//     console.log("Error writing to file: ", error);
-//     return NextResponse.json({ error: "Failed to write data to file." }, { status: 500 });
-//   }
-// }
