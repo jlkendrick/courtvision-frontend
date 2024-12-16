@@ -21,19 +21,19 @@ export default function PlayerStatDisplay({
       {playerStats[player.player_name] ? (
         <div className="space-y-4">
           <div className="grid grid-cols-3 gap-4">
-            <div className="bg-secondary text-white p-4 rounded shadow">
+            <div className="bg-secondary p-4 rounded shadow">
               <h4 className="text-center text-xs">PTS/G</h4>
               <p className="text-center font-bold">
                 {playerStats[player.player_name].avg_stats.avg_points}
               </p>
             </div>
-            <div className="bg-secondary text-white p-4 rounded shadow">
+            <div className="bg-secondary p-4 rounded shadow">
               <h4 className="text-center text-xs">REB/G</h4>
               <p className="text-center font-bold">
                 {playerStats[player.player_name].avg_stats.avg_rebounds}
               </p>
             </div>
-            <div className="bg-secondary text-white p-4 rounded shadow">
+            <div className="bg-secondary p-4 rounded shadow">
               <h4 className="text-center text-xs">AST/G</h4>
               <p className="text-center font-bold">
                 {playerStats[player.player_name].avg_stats.avg_assists}
