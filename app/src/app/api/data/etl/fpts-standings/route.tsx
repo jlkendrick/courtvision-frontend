@@ -18,7 +18,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     return NextResponse.json({ error: "Invalid token" }, { status: 400 });
   }
 
-  const response = await fetch(`${PROD_BACKEND_ENDPOINT}/db/etl/start-update-fpts`, {
+  const response = await fetch(`${PROD_BACKEND_ENDPOINT}/data/etl/start-update-fpts`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

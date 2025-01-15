@@ -1,21 +1,23 @@
 import { NextRequest, NextResponse } from "next/server";
 import { DATABSE_API_ENDPOPINT } from "@/endpoints";
+import { createClient } from "@supabase/supabase-js";
 
 // API route to create a new user account
 export async function POST(request: NextRequest): Promise<NextResponse> {
   const { email, password } = await request.json();
-  const response = await fetch(`${DATABSE_API_ENDPOPINT}/users/create`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ email, password }),
-  });
-  if (!response.ok) {
-    return NextResponse.json({ error: "Failed to create user in api layer." }, { status: 400 });
+
+  const supabaseURL = process.env.SUPABASE_URL;
+  const supabaseKey = process.env.SUPABASE_KEY;
+  if (!supabaseURL || !supabaseKey) {
+    return NextResponse.json({ error: "Supabase credentials not defined." }, { status: 400 });
   }
-  const data = await response.json();
-  return NextResponse.json(data);
+  const supabase = createClient(supabaseURL, supabaseKey);
+  const { data, error } = await supabase.auth.admin.createUser({ email, password });
+  if (error) {
+    return NextResponse.json({ error: "Failed to create user in supabase." }, { status: 400 });
+  }
+
+  return NextResponse.json({ user_id: data.user.id, already_exists: false });
 }
 
 // Response format
