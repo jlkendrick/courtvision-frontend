@@ -23,13 +23,9 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
   } else if (!response.ok) {
     console.log("Failed to get teams in api layer.");
     return NextResponse.json({ error: "Failed to get teams in api layer." }, { status: 400 });
-  }
-
-  console.log("fjalsdifjalsidfj");
-  
+  }  
   
   const data = await response.json();
-  console.log(data);
   return NextResponse.json(data);
 }
 
