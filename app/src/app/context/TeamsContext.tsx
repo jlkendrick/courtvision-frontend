@@ -1,5 +1,5 @@
 "use client";
-import React, { createContext, useContext, useState, useEffect, Dispatch, SetStateAction } from "react";
+import React, { createContext, useContext, useState, useEffect, Dispatch, SetStateAction, useCallback } from "react";
 import { toast } from "sonner";
 import { useAuth } from "@/app/context/AuthContext";
 
@@ -14,7 +14,7 @@ interface TeamsContextType {
   addTeam: (league_id: string, team_name: string, year: string, league_name?: string, espn_s2?: string, swid?: string, ) => void;
   editTeam: (team_id: number, league_id: string, team_name: string, year: string, league_name?: string, espn_s2?: string, swid?: string) => void;
   deleteTeam: (team_id: number) => void;
-  getLineupInfo: () => void;
+  getLineupInfo: (team_id?: number) => void;
 }
 
 interface TeamInfo {
@@ -50,7 +50,7 @@ const TeamsContext = createContext<TeamsContextType>({
   addTeam: (league_id: string, team_name: string, year: string, espn_s2?: string, swid?: string, ) => {},
   editTeam: (team_id: number, league_id: string, team_name: string, year: string, espn_s2?: string, swid?: string) => {},
   deleteTeam: (team_id: number) => {},
-  getLineupInfo: () => {},
+  getLineupInfo: (team_id?: number) => {},
 });
 
 interface leagueInfoRequest {
@@ -200,13 +200,34 @@ export const TeamsProvider = ({ children }: { children: React.ReactNode }) => {
   }
 
   // -------------------------------- Get Lineup Info ------------------------------
-  const getLineupInfo = async () => {
+  const getLineupInfo = useCallback(async (team_id?: number) => {
     setLoading(true);
+
     const token = localStorage.getItem("token");
 
-    try {
+    if (!isLoggedIn) {
+      setLoading(false);
+      return;
+    }
 
-      const params = new URLSearchParams({ team_id: selectedTeam!!.toString() });
+    if (!team_id && !selectedTeam) {
+      setLoading(false);
+      return
+    }
+
+    // Make sure the team belongs to the user if team_id is provided
+    if (team_id) {
+      if (!teams.some(team => team.team_id === team_id)) {
+        setLoading(false);
+        return;
+      }
+    }
+
+    try {
+      if (!team_id) {
+        team_id = selectedTeam!!;
+      }
+      const params = new URLSearchParams({ team_id: team_id.toString() });
       const response = await fetch("/api/data/view-team?" + params.toString(), {
         method: "GET",
         headers: {
@@ -227,7 +248,7 @@ export const TeamsProvider = ({ children }: { children: React.ReactNode }) => {
       toast.error("Internal server error. Please try again later.");
       setLoading(false);
     }
-  }
+  }, [isLoggedIn, teams, selectedTeam]);
 
   // ---------------------------------- Use Effects --------------------------------
 

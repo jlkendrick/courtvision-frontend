@@ -1,21 +1,11 @@
 "use client";
 import { useAuth } from "@/app/context/AuthContext";
-import { useTeams, RosterPlayer } from "@/app/context/TeamsContext";
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { useTeams } from "@/app/context/TeamsContext";
+import Link from "next/link";
 
 export default function Teams() {
   const { isLoggedIn } = useAuth();
-  const { teams, rosterInfo, getLineupInfo } = useTeams();
+  const { teams } = useTeams();
 
   return (
     <>
@@ -28,13 +18,12 @@ export default function Teams() {
             <>
               <div className="flex flex-wrap justify-center items-center gap-6 relative z-10 py-10 max-w-7xl mx-auto">
                 {teams.map((team, index) => (
-                  <Team
-                    key={team.team_id}
-                    title={team.team_info.league_name ?? "No League Name"}
-                    description={team.team_info.team_name}
-                    icon={team.team_info.league_id}
-                    index={index}
-                  />
+                    <Team
+                      league_name={team.team_info.league_name ?? "No League Name"}
+                      team_name={team.team_info.team_name}
+                      league_id={team.team_info.league_id}
+                      team_id={team.team_id}
+                    />
                 ))}
               </div>
             </>
@@ -52,104 +41,42 @@ export default function Teams() {
   );
 }
 
-function RosterDisplay({ roster }: { roster: RosterPlayer[] }) {
-  roster.sort((a, b) => b.avg_points - a.avg_points);
-  var total_avg_points = 0;
-  var total_players = 0;
-
-  return (
-    <Card className="mt-5">
-      <CardContent className="flex justify-center mb-[-20px]">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-[50px]">Rank</TableHead>
-              <TableHead className="text-center">Name</TableHead>
-              <TableHead className="w-[75px]">Team</TableHead>
-              <TableHead className="w-[120px] text-center">
-                Avg Points
-              </TableHead>
-              <TableHead className="w-[120px] text-center">Positions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {roster.map((player: RosterPlayer, index: number) => {
-              total_avg_points += player.avg_points;
-              total_players += 1;
-              return (
-                <>
-                  <TableRow>
-                    <TableCell>{index + 1}</TableCell>
-                    <TableCell>{player.name}</TableCell>
-                    <TableCell>{player.team}</TableCell>
-                    <TableCell>{player.avg_points}</TableCell>
-                    <TableCell>
-                      {player.valid_positions
-                        .slice(0, player.valid_positions.length - 3)
-                        .join(", ")}
-                    </TableCell>
-                  </TableRow>
-                </>
-              );
-            })}
-          </TableBody>
-        </Table>
-      </CardContent>
-      <CardHeader className="text-left mb-[-25px]"></CardHeader>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead className="w-[200px]">Roster Average Points</TableHead>
-            <TableHead className="w-[40px]"></TableHead>
-            <TableHead className="w-[75px]"></TableHead>
-            <TableHead className="w-[120px] text-center">
-              {(total_avg_points / total_players).toFixed(2)}
-            </TableHead>
-            <TableHead className="w-[120px] text-center"></TableHead>
-          </TableRow>
-        </TableHeader>
-      </Table>
-    </Card>
-  );
-}
-
 const Team = ({
-  title,
-  description,
-  icon,
-  index,
+  league_name,
+  team_name,
+  league_id,
+  team_id,
 }: {
-  title: string;
-  description: string;
-  icon: React.ReactNode;
-  index: number;
+  league_name: string;
+  team_name: string;
+  league_id: React.ReactNode;
+  team_id: number;
 }) => {
   return (
-    <div
-      className={cn(
-        "m-1 flex flex-col rounded-lg border lg:border-r  py-10 relative group/feature dark:border-neutral-800",
-        (index === 0 || index === 4) && "lg:border-l dark:border-neutral-800",
-        index < 4 && "lg:border-b dark:border-neutral-800"
-      )}
-    >
-      {index < 4 && (
-        <div className="opacity-0 group-hover/feature:opacity-100 transition duration-200 absolute inset-0 h-full w-full bg-gradient-to-t from-neutral-100 dark:from-neutral-800 to-transparent pointer-events-none" />
-      )}
-      {index >= 4 && (
-        <div className="opacity-0 group-hover/feature:opacity-100 transition duration-200 absolute inset-0 h-full w-full bg-gradient-to-b from-neutral-100 dark:from-neutral-800 to-transparent pointer-events-none" />
-      )}
-      <div className="mb-4 relative z-10 px-10 text-neutral-600 dark:text-neutral-400">
-        {icon}
+    <div className="flex flex-col items-start p-6 m-2 rounded-lg border shadow-sm hover:shadow-md transition-shadow bg-white dark:bg-neutral-900 dark:border-neutral-800">
+      <div className="mb-2">
+        <h2 className="text-xl font-bold text-neutral-800 dark:text-neutral-100">
+          {team_name}
+        </h2>
       </div>
-      <div className="text-lg font-bold mb-2 relative z-10 px-10">
-        <div className="absolute left-0 inset-y-0 h-6 group-hover/feature:h-8 w-1 rounded-tr-full rounded-br-full bg-neutral-300 dark:bg-neutral-700 group-hover/feature:bg-primary transition-all duration-200 origin-center" />
-        <span className="group-hover/feature:translate-x-2 transition duration-200 inline-block text-neutral-800 dark:text-neutral-100">
-          {title}
-        </span>
+      <div className="mb-1">
+        <p className="text-sm text-neutral-600 dark:text-neutral-300">
+          <strong>League Name:</strong> {league_name}
+        </p>
       </div>
-      <p className="text-sm text-neutral-600 dark:text-neutral-300 max-w-xs relative z-10 px-10">
-        {description}
-      </p>
+      <div className="mb-4">
+        <p className="text-sm text-neutral-600 dark:text-neutral-300">
+          <strong>League ID:</strong> {league_id}
+        </p>
+      </div>
+      <div>
+        <Link
+          href={`/your-teams/${team_id}`}
+          className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-orange-700 transition-colors dark:bg-orange-500 dark:hover:bg-orange-600"
+        >
+          View Team
+        </Link>
+      </div>
     </div>
   );
 };
