@@ -19,6 +19,7 @@ export default function Teams() {
               <div className="flex flex-wrap justify-center items-center gap-6 relative z-10 py-10 max-w-7xl mx-auto">
                 {teams.map((team, index) => (
                     <Team
+                      key={index}
                       league_name={team.team_info.league_name ?? "No League Name"}
                       team_name={team.team_info.team_name}
                       league_id={team.team_info.league_id}
