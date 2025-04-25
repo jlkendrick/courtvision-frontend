@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import { Analytics } from '@vercel/analytics/react'
+import { Analytics } from "@vercel/analytics/react";
 
 import { Inter } from "next/font/google";
 
@@ -10,6 +10,7 @@ import { TeamsProvider } from "./context/TeamsContext";
 import { LineupProvider } from "./context/LineupContext";
 import { RankingsProvider } from "./context/RankingsContext";
 import { StandingsProvider } from "./context/StandingsContext";
+import { MaintenanceProvider } from "./context/MaintenanceContext";
 
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
@@ -29,30 +30,26 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-
-      <head>
-        
-      </head>
+      <head></head>
 
       <body className={inter.className}>
-        
-        <AuthProvider>
-        <TeamsProvider>
-        <LineupProvider>
-        <RankingsProvider>
-        <StandingsProvider>
-        <ThemeProvider attribute="class" defaultTheme="dark">
-          <Layout>
-            {children}
-          </Layout>
-          <Toaster richColors/>
-        </ThemeProvider>
-        </StandingsProvider>
-        </RankingsProvider>
-        </LineupProvider>
-        </TeamsProvider>
-        </AuthProvider>
-        
+        <MaintenanceProvider>
+          <AuthProvider>
+            <TeamsProvider>
+              <LineupProvider>
+                <RankingsProvider>
+                  <StandingsProvider>
+                    <ThemeProvider attribute="class" defaultTheme="dark">
+                      <Layout>{children}</Layout>
+                      <Toaster richColors />
+                    </ThemeProvider>
+                  </StandingsProvider>
+                </RankingsProvider>
+              </LineupProvider>
+            </TeamsProvider>
+          </AuthProvider>
+        </MaintenanceProvider>
+
         <Analytics />
       </body>
     </html>

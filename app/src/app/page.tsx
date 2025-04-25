@@ -2,9 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-
 import { User } from "lucide-react";
-
 import { cn } from "@/lib/utils";
 import {
   IconChartArrowsVertical,
@@ -12,21 +10,44 @@ import {
   IconTrendingUp,
   IconChartPie,
   IconChessKnight,
+  IconAlertTriangle,
 } from "@tabler/icons-react";
+import { useMaintenance } from "./context/MaintenanceContext";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function Home() {
+  const { isInMaintenance, maintenanceMessage } = useMaintenance();
 
   return (
     <>
-    <div className="flex items-center">
-      <h1 className="text-lg font-semibold md:text-2xl">Home</h1>
-    </div>
-    <div className="flex flex-1 justify-center rounded-lg border border-primary border-dashed shadow-sm">
-      <div className="flex flex-col items-center gap-1 text-center">
-        <HomeFeaturesDisplay />
+      <div className="flex items-center">
+        <h1 className="text-lg font-semibold md:text-2xl">Home</h1>
       </div>
-    </div>
-
+      <div className="flex flex-1 justify-center rounded-lg border border-primary border-dashed shadow-sm">
+        {isInMaintenance ? (
+          <div className="flex flex-col items-center justify-center p-8 text-center w-full">
+            <Card className="w-full max-w-3xl">
+              <CardHeader>
+                <CardTitle className="flex items-center justify-center gap-2">
+                  <IconAlertTriangle className="h-8 w-8 text-amber-500" />
+                  <span>Maintenance Mode</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-xl mb-6">{maintenanceMessage}</p>
+                <p className="text-muted-foreground">
+                  Thank you for using Court Vision. I am currently working on new features
+                  and improvements for the next fantasy basketball season. Stay tuned!
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        ) : (
+          <div className="flex flex-col items-center gap-1 text-center">
+            <HomeFeaturesDisplay />
+          </div>
+        )}
+      </div>
     </>
   );
 }
@@ -42,15 +63,13 @@ function HomeFeaturesDisplay() {
     },
     {
       title: "Analyze Your Teams",
-      description:
-        "Get a broad snapshot of your teams.",
+      description: "Get a broad snapshot of your teams.",
       icon: <IconChartPie />,
       page: "/your-teams",
     },
     {
       title: "Lineup Generation",
-      description:
-        "Optimize your streaming moves for the week.",
+      description: "Optimize your streaming moves for the week.",
       icon: <IconTrendingUp />,
       page: "/lineup-generation",
     },
@@ -69,7 +88,8 @@ function HomeFeaturesDisplay() {
     },
     {
       title: "More Coming Soon",
-      description: "As a solo developer, I am working hard to bring you more features.",
+      description:
+        "As a solo developer, I am working hard to bring you more features.",
       icon: <IconClockHour4 />,
       page: "/new-features",
     },
@@ -98,7 +118,6 @@ const Feature = ({
   index: number;
 }) => {
   return (
-    
     <div
       className={cn(
         "m-1 flex flex-col rounded-lg border lg:border-r  py-10 relative group/feature dark:border-neutral-800",
